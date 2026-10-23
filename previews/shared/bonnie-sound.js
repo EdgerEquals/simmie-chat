@@ -9,7 +9,13 @@
    Hook: <link rel="stylesheet" href=".../bonnie-sound.css"> + <script src=".../bonnie-sound.js" data-page="chat|dash|quiz"></script>
    data-default="off" (questionnaire): off until the first tap on the switch, remembered under its own key.
    data-slot="#id": put the switch row inside that element. Test hook: every played cue dispatches
-   'bonnie-sound:cue' on document with {kind} only (never any typed text). */
+   'bonnie-sound:cue' on document with {kind} only (never any typed text).
+   v4 (chat + dashboard previews, Danny 02:38 AWST): ONE KEY for the whole layer, C major / A minor (no sharps or flats):
+   every flavour's scale is a subset of C major (Lo-fi A minor pentatonic, Chiptune C major pentatonic, Ambient C major,
+   Pop C major, Nature C major pentatonic), and the pitched one-shots snap to that key (dial click, biplane buzz A2 -> G2,
+   lever boing, switch clack, bells). The questionnaire (data-page="quiz") keeps its v3 tuning untouched.
+   The eight starter sounds from the sound layer plan: simmie (Simmie chime), dad (Dad chime), send-whoosh, biplane-buzz,
+   askdad-bell, dial-click, lever-boing, switch-clack. Quieter at night (weather sweep >= +1.5 -> 0.6x). */
 (function () {
   'use strict';
   var PHI = 1.6180339887, G = 0.6180339887, SIMMIE = -1.5;
@@ -28,6 +34,8 @@
   }
 
   // ---------- flavours: waveform, scale, filter, envelope, bed ----------
+  var ONEKEY = PAGE !== 'quiz';
+  var KEY = { name: 'C major / A minor', pcs: [0, 2, 4, 5, 7, 9, 11], tonic: 261.63 };   // pitch classes relative to C
   var FLAV = {
     lofi:    { label: 'Lo-fi',    wave: 'triangle', root: 220.0, scale: [0, 3, 5, 7, 10],        filt: ['lowpass', 1400, 0.7],  env: [0.012, 0.28, 0.40], bed: 'pad',   bedWave: 'triangle', bedCut: 620,  crackle: true },
     chip:    { label: 'Chiptune', wave: 'square',   root: 440.0, scale: [0, 2, 4, 7, 9],         filt: ['lowpass', 4800, 1.0],  env: [0.002, 0.09, 0.07], bed: 'pulse', bedWave: 'square',   bedCut: 900 },
@@ -35,7 +43,19 @@
     pop:     { label: 'Pop',      wave: 'sawtooth', root: 329.6, scale: [0, 2, 4, 5, 7, 9, 11],  filt: ['lowpass', 2600, 2.0],  env: [0.006, 0.18, 0.22], bed: 'pad',   bedWave: 'sawtooth', bedCut: 700 },
     nature:  { label: 'Nature',   wave: 'sine',     root: 523.3, scale: [0, 2, 4, 7, 9],         filt: ['bandpass', 1800, 1.4], env: [0.006, 0.12, 0.26], bed: 'wind',  chirp: true }
   };
+  if (ONEKEY) {   // retune into the one key (roots: A3 / C5 / C4 / C4 / C5; every scale a subset of C major)
+    FLAV.chip.root = 523.25;    FLAV.chip.scale = [0, 2, 4, 7, 9];
+    FLAV.ambient.root = 261.63; FLAV.ambient.scale = [0, 2, 4, 5, 7, 9, 11];
+    FLAV.pop.root = 261.63;     FLAV.pop.scale = [0, 2, 4, 5, 7, 9, 11];
+  }
   var ORDER = ['lofi', 'chip', 'ambient', 'pop', 'nature'];
+  // nearest frequency in the one key (any octave)
+  function inKey(hz) {
+    var m = 12 * Math.log2(hz / KEY.tonic), best = 0, bd = 99;
+    for (var o = Math.floor(m / 12) - 1; o <= Math.floor(m / 12) + 1; o++) KEY.pcs.forEach(function (pc) { var n = o * 12 + pc, d = Math.abs(n - m); if (d < bd) { bd = d; best = n; } });
+    return KEY.tonic * Math.pow(2, best / 12);
+  }
+  function nightGain() { return ONEKEY && sweep() >= 1.5 ? 0.6 : 1; }
   var flavour = FLAV[store(K_FLAV)] ? store(K_FLAV) : 'lofi';
   var on = DEF_OFF ? store(K_ON) === '1' : store(K_ON) !== '0';   // chat/dash: default on, silent until the first tap; quiz: off until the switch
   var AC = window.AudioContext || window.webkitAudioContext;
@@ -65,7 +85,7 @@
   }
   tog.addEventListener('click', function () {
     on = !on; store(K_ON, on ? '1' : '0'); paintToggle();
-    if (on) { ensure(); if (ctx) { ctx.resume && ctx.resume(); master.gain.setTargetAtTime(1, ctx.currentTime, 0.05); startBed(); cue('press', 0.5); } }
+    if (on) { ensure(); if (ctx) { ctx.resume && ctx.resume(); master.gain.setTargetAtTime(nightGain(), ctx.currentTime, 0.05); startBed(); cue('press', 0.5); } }
     else if (ctx) { master.gain.setTargetAtTime(0, ctx.currentTime, 0.05); stopBed(); }
   });
 
@@ -74,7 +94,7 @@
     if (ctx || !AC || !on) return ctx;
     try {
       ctx = new AC();
-      master = ctx.createGain(); master.gain.value = 1;             // this layer's own on/off gain
+      master = ctx.createGain(); master.gain.value = nightGain();             // this layer's own on/off gain
       duck = ctx.createGain(); duck.gain.value = playing() ? 0.3 : 1; // ducks under the YouTube player
       var comp = ctx.createDynamicsCompressor();
       cueBus = ctx.createGain(); cueBus.gain.value = 0.5;
@@ -127,7 +147,8 @@
   // per-cue minimum gap: [phi exponent, simmie palette]
   var lastBy = {}, GAP = { simmie: [1, true], 'send-whoosh': [-1, false], 'biplane-buzz': [2, false], 'passcode-tick': [-5, false],
     unlock: [1, false], nope: [0, false], 'dial-click': [-4.5, false], approve: [-1.5, false], reject: [-1.5, false],
-    dad: [-1, false], new: [-1, false], askdad: [-2, true], 'askdad-close': [-2, true], urgent: [0, false], peak: [-2.5, false] };
+    dad: [-1, false], new: [-1, false], askdad: [-2, true], 'askdad-close': [-2, true], urgent: [0, false], peak: [-2.5, false],
+    'askdad-bell': [2, true], 'lever-boing': [-2, false], 'switch-clack': [-3, false] };
   function semi(n) { return FLAV[flavour].root * Math.pow(2, n / 12); }
   function inScale(n) { return FLAV[flavour].scale.indexOf(((n % 12) + 12) % 12) >= 0; }
   function env(g, t, peak, a, len) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + len); }
@@ -159,7 +180,9 @@
     // biplane buzz: 110 Hz sawtooth, 18 Hz tremolo, lowpassed, pitch bends down (doppler-ish) and fades as it flies away, ~1.6 s
     'biplane-buzz': function (v) {
       var t = ctx.currentTime, L = per(1), o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), trem = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
-      o.type = 'sawtooth'; o.frequency.setValueAtTime(118, t); o.frequency.linearRampToValueAtTime(112, t + L * 0.35); o.frequency.exponentialRampToValueAtTime(96, t + L);
+      o.type = 'sawtooth';
+      if (ONEKEY) { o.frequency.setValueAtTime(110, t); o.frequency.linearRampToValueAtTime(108, t + L * 0.35); o.frequency.exponentialRampToValueAtTime(98, t + L); }   // A2 -> G2, both in key
+      else { o.frequency.setValueAtTime(118, t); o.frequency.linearRampToValueAtTime(112, t + L * 0.35); o.frequency.exponentialRampToValueAtTime(96, t + L); }
       lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(420, t + L); lp.Q.value = 0.8;
       lfo.frequency.value = 18; lg.gain.value = 0.45; trem.gain.value = 0.55; lfo.connect(lg); lg.connect(trem.gain);
       o.connect(lp); lp.connect(trem); trem.connect(g); g.connect(cueBus);
@@ -171,11 +194,36 @@
     unlock: function () { var sp = per(-3); tone(semi(12), 0.6, 0, 0.35); tone(semi(19), 0.6, sp, 0.5); },
     nope: function () { tone(semi(-12), 0.7, 0, 0.32, 'triangle', 0.94); },
     // dial click: a tiny bandpassed click plus a short resonant tick (a mechanical detent)
-    'dial-click': function (v) { noise(0.004, 0, 'bandpass', 2600, 0, 3.5, 0.12 + 0.08 * v, 0.0005); tone(1700 + 300 * v, 0.35, 0.002, 0.03, 'sine'); },
+    'dial-click': function (v) { var hz = 1700 + 300 * v; if (ONEKEY) hz = inKey(hz); noise(0.004, 0, 'bandpass', ONEKEY ? inKey(2600) : 2600, 0, 3.5, 0.12 + 0.08 * v, 0.0005); tone(hz, 0.35, 0.002, 0.03, 'sine'); },
     // approve: bright rising root -> fifth; reject: soft falling minor third (in scale), never harsh
     approve: function () { var sp = per(-2.5); tone(semi(12), 0.7, 0, 0.28, 'triangle'); tone(semi(19), 0.7, sp, 0.42, 'triangle'); },
     reject: function () { var sp = per(-2), hi = inScale(3) ? 3 : 7; tone(semi(hi), 0.45, 0, 0.3, 'sine'); tone(semi(hi - 3), 0.4, sp, 0.42, 'sine'); }
   };
+  if (ONEKEY) {
+    // Dad chime: warmer than Simmie's, three notes rising through the flavour's scale (root, 3rd step, 5th step),
+    // triangle + a soft sine an octave down, Bonnie-ladder spacing PHI^-3 = 0.236 s
+    NEW.dad = function (v) {
+      var sp = per(-3), L = FLAV[flavour].scale.length;
+      [0, 2, 4].forEach(function (st, i) { var hz = freq(L + st); tone(hz, 0.5 + 0.3 * v, sp * i, per(-1 + i * 0.5), 'triangle'); tone(hz / 2, 0.35, sp * i, per(-1 + i * 0.5), 'sine'); });
+    };
+    // Ask Dad bell: ONE soft FM bell on the key's fifth (G5), long ring PHI^1 = 1.618 s; Simmie palette (Ask Dad is Simmie's)
+    NEW['askdad-bell'] = function (v) { bell(inKey(784), 0.55 + 0.3 * v, 0, per(1)); };
+    // lever boing: a sine that springs from a scale note down to the root and wobbles back (bend depth = pull),
+    // vibrato at PHI^3 Hz, length PHI^-1 = 0.618 s
+    NEW['lever-boing'] = function (v) {
+      var t = ctx.currentTime, L = per(-1), base = freq(FLAV[flavour].scale.length), top = freq(FLAV[flavour].scale.length + 1 + Math.round(3 * v));
+      var o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(top, t); o.frequency.exponentialRampToValueAtTime(base, t + L * 0.38);
+      lfo.frequency.value = Math.pow(PHI, 3) * 2; lg.gain.setValueAtTime(base * 0.05 * (0.4 + v), t); lg.gain.exponentialRampToValueAtTime(0.01, t + L);
+      lfo.connect(lg); lg.connect(o.frequency); o.connect(g); g.connect(cueBus); env(g, t, 0.15 * (0.5 + 0.5 * v), 0.008, L);
+      o.start(t); lfo.start(t); o.stop(t + L + 0.05); lfo.stop(t + L + 0.05);
+    };
+    // switch clack: a 6 ms bandpassed noise click plus a tiny in-key body tone (up = the 5th, down = the root), PHI^-5 = 0.09 s
+    NEW['switch-clack'] = function (v) {
+      noise(0.006, 0, 'bandpass', inKey(3100), 0, 2.2, 0.16, 0.0006);
+      tone(v >= 0.5 ? inKey(392) : inKey(262), 0.5, 0.003, per(-5), 'triangle');
+    };
+  }
 
   // ambient bed: a quiet pad (or wind for Nature) that breathes on PHI^8 s (slow drift slot), swept by the weather
   function startBed() {
@@ -248,13 +296,28 @@
       }).observe(d, { attributes: true, attributeFilter: ['aria-valuenow'] });
     });
   }
-  var downAt = new WeakMap();
+  var downAt = new WeakMap(), LEVSW_SEL = '.pl-lever, .pl-sw, .pl-switch, .pl-sw-w, .pl-swcell';
+  // lever: boing on release (spring-back), bend depth = how far it was pulled; switch: clack on change
+  var levPeak = new WeakMap();
+  function watchLevers() {
+    if (!ONEKEY) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.pl-lever'), function (lv) {
+      if (lv._bs) return; lv._bs = true; levPeak.set(lv, 0);
+      new MutationObserver(function () {
+        var v = (+lv.getAttribute('aria-valuenow') || 0) / 100, pk = levPeak.get(lv);
+        if (v > pk) levPeak.set(lv, v);
+        else if (v < 0.05 && pk > 0.15) { levPeak.set(lv, 0); cue('lever-boing', pk); }      // let go after a real pull
+      }).observe(lv, { attributes: true, attributeFilter: ['aria-valuenow'] });
+    });
+  }
+  document.addEventListener('change', function (e) { var t = e.target; if (ONEKEY && t && t.type === 'checkbox' && t.matches && t.matches('.pl-sw, .pl-switch')) cue('switch-clack', t.checked ? 1 : 0); }, true);
   var PRESS_SEL = PAGE === 'dash' ? '#app button, #ask-dad, #app .btn, .pl-play input, .pl-play [role="slider"]'
     : PAGE === 'quiz' ? 'button:not(.tile):not(.bs-toggle)' : 'button, .ft-chat, #play input';
   document.addEventListener('pointerdown', function (e) { var b = e.target.closest && e.target.closest(PRESS_SEL); if (b) downAt.set(b, { t: performance.now(), p: e.pressure }); }, true);
   document.addEventListener('pointerup', function (e) {
     var b = e.target.closest && e.target.closest(PRESS_SEL); var d = b && downAt.get(b); if (!d) return; downAt.delete(b);
     if (b.closest(DIAL_SEL) || b.closest('#passcode')) return;   // dials click; the passcode field ticks
+    if (ONEKEY && b.closest(LEVSW_SEL)) return;                   // the lever boings and the switch clacks
     setTimeout(function () {
       if (performance.now() - meterSeen < 120) return;      // the page's own meter already reported this press
       var held = (performance.now() - d.t) / 1000, x = d.p && d.p !== 0.5 ? d.p : Math.min(1, held / per(1));
@@ -265,10 +328,11 @@
 
   // message-status glow: chat dispatches 'simmie:msgpulse'; the dashboard exposes PhiTiming.msg()
   var status = null, remind = null;
+  function stCue(st) { return ONEKEY && st === 'urgent' ? 'askdad-bell' : st; }   // urgent = Ask Dad waiting -> the single soft bell
   function setStatus(st, silent) {
-    if (!st || st === status) return; status = st; if (!silent) cue(st);
+    if (!st || st === status) return; status = st; if (!silent) cue(stCue(st));
     if (remind) { remind(); remind = null; }
-    if (st === 'urgent' || st === 'dad') remind = every(7, false, 7, function () { cue(status); });   // soft reminder each PHI^7 s
+    if (st === 'urgent' || st === 'dad') remind = every(7, false, 7, function () { cue(stCue(status)); });   // soft reminder each PHI^7 s
   }
   window.addEventListener('simmie:msgpulse', function (e) { setStatus(e && e.detail && e.detail.state); });
   if (PAGE === 'dash') every(3, false, 3, function () { try { var T = window.PhiTiming; if (T && T.msg) setStatus(T.msg(), status === null); } catch (e) {} });
@@ -306,6 +370,10 @@
     for (var i = 0; i < muts.length; i++) for (var j = 0; j < muts[i].addedNodes.length; j++) {
       var n = muts[i].addedNodes[j]; if (n.nodeType !== 1) continue;
       if (n.classList.contains('biplane') || (n.querySelector && n.querySelector(':scope > svg.biplane'))) cue('biplane-buzz', 0.6);
+      else if (ONEKEY && n.classList.contains('msg') && n.classList.contains('them') && n.classList.contains('dad')) {
+        var did = 'd:' + (n.getAttribute('data-id') || n.textContent.slice(0, 40)); if (seenSim[did]) continue; seenSim[did] = 1;
+        if (performance.now() - bootAt > 1500) cue('dad', 0.5);
+      }
       else if (n.classList.contains('msg') && n.classList.contains('them') && !n.classList.contains('dad')) {
         var id = n.getAttribute('data-id') || n.textContent.slice(0, 40); if (seenSim[id]) continue; seenSim[id] = 1;   // re-renders don't chime again
         if (performance.now() - bootAt > 1500) cue('simmie', 0.5);
@@ -349,10 +417,12 @@
     paintToggle(); placeRow(); watchAskDad();
     var scr = document.getElementById('screen-chat');
     if (scr) new MutationObserver(placeRow).observe(scr, { attributes: true, attributeFilter: ['class'] });
-    bootAt = performance.now(); watchGate(); watchDials();
-    new MutationObserver(function (m) { watchAskDad(); watchDials(); onAdded(m); }).observe(document.body, { childList: true, subtree: true });
+    bootAt = performance.now(); watchGate(); watchDials(); watchLevers();
+    new MutationObserver(function (m) { watchAskDad(); watchDials(); watchLevers(); onAdded(m); }).observe(document.body, { childList: true, subtree: true });
     document.documentElement.classList.add('bs-ready');
-    window.BonnieSound = { cue: cue, get flavour() { return flavour; }, get on() { return on; }, get running() { return !!(ctx && ctx.state === 'running'); }, FLAVOURS: ORDER.slice(), CUES: ['press', 'peak', 'idle', 'new', 'dad', 'urgent', 'askdad', 'askdad-close', 'sparkle', 'simmie', 'send-whoosh', 'biplane-buzz', 'passcode-tick', 'unlock', 'nope', 'dial-click', 'approve', 'reject'] };
+    window.BonnieSound = { cue: cue, get flavour() { return flavour; }, get on() { return on; }, get running() { return !!(ctx && ctx.state === 'running'); }, FLAVOURS: ORDER.slice(), KEY: ONEKEY ? KEY.name : null,
+      EIGHT: ONEKEY ? ['simmie', 'dad', 'send-whoosh', 'biplane-buzz', 'askdad-bell', 'dial-click', 'lever-boing', 'switch-clack'] : null,
+      get bpm() { return 60 / per(-1); }, get ctx() { return ctx; }, get root() { return FLAV[flavour].root; }, inKey: inKey, CUES: ['press', 'peak', 'idle', 'new', 'dad', 'urgent', 'askdad', 'askdad-close', 'sparkle', 'simmie', 'send-whoosh', 'biplane-buzz', 'passcode-tick', 'unlock', 'nope', 'dial-click', 'approve', 'reject'].concat(ONEKEY ? ['askdad-bell', 'lever-boing', 'switch-clack'] : []) };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
