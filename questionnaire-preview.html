@@ -182,13 +182,13 @@ window.QUIZ_COPY = {
 
 /* Header ticker + Simmie terminal facts come from facts.json (sourced, verified, filtered by the age dial). */
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>Questionnaire preview for Bonnie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
-<link rel="stylesheet" href="css/dad-palette.css?v=1">
+<link rel="stylesheet" href="css/dad-palette.css?v=2">
 <style>
 /* PREVIEW ONLY. Nothing Bonnie types is sent anywhere: no forms, no POSTs. Answers live in page memory and vanish on reload.
    Only reads: age-dial.json (same site) for the ticker age, and Open-Meteo current weather for fixed Perth coordinates (GET, no key, no geolocation), cached 30 min in localStorage. */
@@ -462,35 +462,67 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 .bgloop-still{display:none;background:url("media/space-loop-poster.webp") center/cover no-repeat}
 @media(prefers-reduced-motion:reduce){.bgloop{display:none}.bgloop-still{display:block}}
 </style>
-<link rel="stylesheet" href="previews/shared/bonnie-sound.css?v=2">
-<link rel="stylesheet" href="previews/shared/command-centre.css?v=1">
-<link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=2">
-<link rel="stylesheet" href="previews/shared/dad-head-quiz.css?v=2">
-<link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=1">
+<link rel="stylesheet" href="previews/shared/bonnie-sound.css?v=3">
+<link rel="stylesheet" href="previews/shared/command-centre.css?v=2">
+<link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=3">
+<link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=2">
+<link rel="stylesheet" href="previews/shared/chat-head-quiz.css?v=1">
+<link rel="stylesheet" href="previews/shared/quiz-foot-lock.css?v=1">
 <style>
 /* inline volume note (not a pop-up): first thing on the page; the sound switch lives inside it */
-/* radiant sapphire (Danny 02:17 AWST): the one questionnaire box allowed translucency + glow */
-.vol-note{margin:0 0 .8rem;padding:.55rem .8rem .5rem;color:#F6EBD9;border:1px solid rgba(91,143,255,.6);border-radius:12px;line-height:1.3;background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 50%),linear-gradient(135deg,rgba(61,123,255,.86) 0%,rgba(24,90,212,.88) 25%,rgba(15,82,186,.9) 100%);box-shadow:0 0 20px rgba(61,123,255,.55),0 0 5px rgba(91,143,255,.45),inset 0 0 14px rgba(91,143,255,.35),inset 0 1px 0 rgba(255,255,255,.22)}
-.vol-note .vn-top{text-shadow:0 1px 2px rgba(10,47,110,.7),0 0 6px rgba(10,47,110,.45)}
+/* light sapphire (Danny 02:49 AWST: "more opaque and much lighter"; harmonised with the chat palette 02:50): was the radiant
+   translucent #3D7BFF .86 -> #185AD4 .88 -> #0F52BA .90 with a strong glow (47687f8). Now near-opaque pale sapphire
+   #C9D9FF .97 -> #AFC6FB .98 -> #9DBBFF .98, hairline #7FA6F5, soft proportionate glow; text deep sapphire #0A2F6E
+   (6.7:1 on #9DBBFF, 7.5:1 on #AFC6FB, 9.0:1 on #C9D9FF); chips/switch inside the box recoloured to match (below). */
+.vol-note{margin:0 0 .8rem;padding:.55rem .8rem .5rem;color:#0A2F6E;border:1px solid #7FA6F5;border-radius:12px;line-height:1.3;background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 50%),linear-gradient(135deg,rgba(201,217,255,.97) 0%,rgba(175,198,251,.98) 25%,rgba(157,187,255,.98) 100%);box-shadow:0 0 14px rgba(157,187,255,.45),0 0 4px rgba(201,217,255,.4),inset 0 1px 0 rgba(255,255,255,.6)}
+.vol-note .vn-top{text-shadow:none}
+/* sound switch + flavour chips inside the light box: deep sapphire on pale sapphire, selected = chat accent #B4436C with white (5.3:1);
+   the row wraps instead of side-scrolling, so no chip is cut off at 375 px */
+.vol-note .bs-row{color:#0A2F6E;flex-wrap:wrap;white-space:normal;overflow:visible;row-gap:5px}
+.vol-note .bs-flav{flex-wrap:wrap;row-gap:4px;flex:1 1 auto;max-width:100%;min-width:0}
+.vol-note .bs-flav legend{color:#0A2F6E}
+.vol-note .bs-flav span{border-color:rgba(10,47,110,.5);color:#0A2F6E;background:rgba(255,255,255,.35)}
+.vol-note .bs-flav input:checked + span{background:#B4436C;border-color:#B4436C;color:#FFFFFF}
+.vol-note .bs-flav input:focus-visible + span,.vol-note .bs-toggle:focus-visible{outline:3px solid #B4436C}
+.vol-note .bs-toggle{border-color:#0A2F6E;color:#0A2F6E}
+.vol-note .bs-toggle[aria-pressed="true"]{border-color:#7A2448;color:#7A2448;background:rgba(255,255,255,.45)}
 .vol-note .vn-top{margin:0 0 .3rem;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.45rem}
 .vol-note .vn-spk{color:#F2A541;display:inline-block;font-size:1.15rem;animation:vnBreathe 4.236s ease-in-out infinite}  /* PHI^3 s */
 .vol-note .bs-row{padding:2px 0;font-size:.76rem}
 @keyframes vnBreathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:1}}
 @media(prefers-reduced-motion:reduce){.vol-note .vn-spk{animation:none}}
 </style>
-<script src="previews/shared/bonnie-sound.js?v=3" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
-<script src="previews/shared/bonnie-sound-quiz.js?v=2" defer></script>
-<script src="previews/shared/dad-autodj-quiz.js?v=1" defer></script>
+<script src="previews/shared/bonnie-sound.js?v=4" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
+<script src="previews/shared/bonnie-sound-quiz.js?v=3" defer></script>
+<script src="previews/shared/dad-autodj-quiz.js?v=2" defer></script>
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
 <script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();})();</script>
 <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
-<!-- Dad's header (standard Dad mark header bar, as on the Bonnie's Dashboard preview masthead: 32 px dad-mark.svg + title + pill) -->
-<header class="dad-head"><div class="dh-in">
-  <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=2" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
-  <p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p>
+<!-- Questionnaire header (Danny 24 Oct 2026 02:50 AWST): the live Bonnie's Dashboard header STRUCTURE (rebella 517e809 moderation/:
+     top bar with logo + right-side key, weather chip / fun-fact ticker row, masthead row, tagline line under the header),
+     recoloured to the live Simmie chat page palette (css/chat.css values). Static: scrolls with the page, no Create button,
+     no Lock / Ask Dad keys (they would do nothing here); the only key is the existing REBELLA status beacon.
+     Replaces Dad's-palette header 53b7cda (restore from that commit: header.dad-head, previews/shared/dad-head-quiz.css). -->
+<div class="q-head dad-head" id="q-head">
+  <div class="qh-top"><div class="qh-c">
+    <svg class="qh-logo" viewBox="413 534 1810 893" width="97" height="38" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Rebella" focusable="false"><use href="img/bonnies-logo.svg?v=1#bonnies-logo"/></svg>
+    <span class="qh-right"><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
+  </div></div>
+  <div class="qh-hud"><div class="qh-c">
+    <div class="tick" id="tick" role="region" aria-label="Fun facts from Dad">
+      <span class="tag" id="ttag">From Dad &middot; age 13</span>
+      <span class="wx" id="wx" hidden><span id="wxIcon"></span> <span id="wxText"></span></span>
+      <span class="wxr" id="wxr" aria-hidden="true" hidden></span>
+      <div class="tview" aria-hidden="true"><div class="ttrack" id="ttrack"></div></div>
+      <span class="sr" id="tsr"></span>
+    </div>
+    <div class="lane" id="laneH" aria-hidden="true"></div>
+  </div></div>
+  <header class="qh-mast"><div class="qh-c">
+    <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=3" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
   <!-- Dad's auto-DJ (phi rule 10): generated in the browser, plays only after a tap; the sound switch below is the master mute -->
   <section class="dad-dj" id="dad-dj" data-guard="dad-dj" aria-label="Dad's music">
     <div class="dj-row">
@@ -500,18 +532,11 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     </div>
     <details class="dj-demo"><summary>try the pumps</summary><p class="dj-pumps" id="dj-pumps"></p><div class="dj-chips" id="dj-chips"></div></details>
   </section>
-</div></header>
+  </div></header>
+</div>
+<div class="qh-tagline"><div class="qh-c"><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p></div></div>
 <main class="wrap">
   <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><div id="vol-sound"></div></aside>
-  <header class="tick" id="tick" aria-label="Fun facts from Dad">
-    <span class="tag" id="ttag">From Dad &middot; age 13</span>
-    <span class="wx" id="wx" hidden><span id="wxIcon"></span> <span id="wxText"></span></span>
-    <span class="wxr" id="wxr" aria-hidden="true" hidden></span>
-    <div class="tview" aria-hidden="true"><div class="ttrack" id="ttrack"></div></div>
-    <span class="sr" id="tsr"></span>
-    <button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button>
-  </header>
-  <div class="lane" id="laneH" aria-hidden="true"></div>
 
   <section class="panel" id="start">
     <h1><span data-copy="intro">Hey Bonnie, here's a questionnaire I prepared for you,</span> <span class="from" data-copy="from">from Dad</span></h1>
@@ -844,7 +869,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     function log(text){q.push({kind:'log',t:hms(),text:text});if(q.length>8)q.splice(0,q.length-8);pump();}
     function say(text,hold){q.push({kind:'sim',text:text,hold:hold});pump();}
     // talk box: Enter clears, spinner ~1.5 s, then a canned reply typed out (jumps the queue)
-    function measure(){var c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(inp).font;blk.style.setProperty('--cx',Math.min(c.measureText(inp.value).width,inp.clientWidth-8)+'px');}
+    function measure(){var c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(inp).font;var k=(inp.offsetWidth&&inp.getBoundingClientRect().width/inp.offsetWidth)||1;blk.style.setProperty('--cx',Math.min(c.measureText(inp.value).width*k,inp.clientWidth*k-8)+'px');} /* k: iOS draws the 16px input at .75 (quiz-foot-lock.css) */
     inp.addEventListener('input',measure);
     inp.addEventListener('keydown',function(e){
       if(e.key!=='Enter')return;e.preventDefault();var v=inp.value.trim();inp.value='';measure();if(!v)return;

@@ -1,0 +1,30 @@
+/* PREVIEW ONLY (questionnaire): footer locked in place (Danny 24 Oct 2026 02:49 AWST: "the footer is good but it moves").
+   Same idea as the dashboard fix (rebella 517e809 moderation/css/dash-foot-lock.css). Look, text, colours and animations unchanged.
+   Why it moved:
+   1) .foot was sized by its content with only a max-height (112px), so its top edge followed the content: the tty line
+      wrapping to 2 lines / emoji line boxes, the weather reaction (#fwx) appearing in the credit line, and fonts that differ
+      on phones (emoji + ui-monospace fallbacks) changed the bar height by a few px, and the top edge jumped;
+   2) no safe-area padding: on notched / home-bar phones the bar sat under the home indicator and Safari re-positioned it
+      as its toolbar collapsed / expanded while scrolling;
+   3) the tty input is 12px: iOS Safari zooms the page on focus of any input under 16px, so tapping the terminal shifted
+      and scaled the whole bar (and the page);
+   4) the keyboard resizes the layout viewport on Android Chrome, pushing the fixed bar up mid-interaction.
+   Fix: constant height (112px + safe area), every row a fixed height, overflow clipped, its own compositing layer
+   (no repaint jitter on momentum scroll), safe-area aware; iOS input set to 16px and scaled back to 12px (same look);
+   viewport meta interactive-widget=resizes-visual (keyboard overlays instead of resizing); page content padded to the
+   locked height so nothing hides behind it. */
+html{overscroll-behavior-y:none}
+.foot{height:calc(112px + env(safe-area-inset-bottom,0px));max-height:none;min-height:0;overflow:hidden;
+  padding-bottom:calc(5px + env(safe-area-inset-bottom,0px));
+  padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));
+  transform:translateZ(0);backface-visibility:hidden;contain:layout paint;transition:none;animation:none}
+.foot>.row1{flex:0 0 12px;height:12px}
+.foot>.tty{flex:0 0 65px;height:65px}            /* = what it already rendered at (64.4-67px, clipped by the old max-height) */
+.foot .ttybar{flex:none}
+.foot>.note{flex:0 0 18px;height:18px;line-height:18px;overflow:hidden}
+.foot .fwx{height:18px;align-items:center}
+.wrap{padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))}
+/* iOS Safari only: 16px input so focusing it never zooms the page; scaled to the same 12px look */
+@supports (-webkit-touch-callout:none){
+  .foot .tin input{font-size:16px;height:16px;line-height:16px;transform:scale(.75);transform-origin:0 50%;width:133.34%;flex:0 0 133.34%;margin-right:-33.34%}
+}

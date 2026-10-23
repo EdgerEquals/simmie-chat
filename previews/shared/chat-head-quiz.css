@@ -1,0 +1,68 @@
+/* PREVIEW ONLY (questionnaire preview): header in the live Bonnie's Dashboard STRUCTURE (rebella 517e809 moderation/index.html:
+   .topbar logo + right-side keys / .wx-hud weather chip + ticker / .masthead / .tagline-line under the header),
+   recoloured to the live Simmie chat page palette (Danny 24 Oct 2026 02:50 AWST: "those colours are perfect").
+   Values copied from simmie-chat css/chat.css (:root + .chat-head + .choice):
+     blush #F8CFDB  dotted rule #E58AA6  bg #FFF8F4 (+ #FDE3EA / #E6F6F4 glows)  white #FFFFFF  line #EBCFC2
+     lavender #DCD0F2  butter #FBE7B0 / #FFF6DC  gold #E9B949  ink #3A2B35  heading #5B3A50  accent #B4436C
+     muted #6E5A66  rose text #7A2448  brown #8A5A00 / #6B4600
+   Contrast (WCAG): heading #5B3A50 on #FFF8F4 9.2, on #F8CFDB 6.9 | ink #3A2B35 on #FFFFFF 13.3 | accent #B4436C on #FFFFFF 5.3
+     | muted #6E5A66 on #FFFFFF 6.3 | #7A2448 on #F8CFDB 6.9 | #5B3A50 on #DCD0F2 6.6 | #3A2B35 on #FFF6DC 10.9 | #8A5A00 on #FFFFFF 5.9
+     | #6B4600 on #FFFFFF 8.4 | #3A2B35 on #E9B949 7.3 | #FFFFFF on #B4436C 5.3 | #5B3A50 on #FDE3EA 8.0 | logo #B4436C on #F8CFDB 3.8 (graphic, >=3)
+   Static: not sticky/fixed, scrolls with the page; the bar itself never animates (the ticker crawl, the beacon pulse and
+   the animal lane keep their existing phi timings). Replaces previews/shared/dad-head-quiz.css (Dad palette, 53b7cda). */
+.q-head{position:relative;z-index:1;color:#3A2B35;transform:none;transition:none;
+  background:radial-gradient(circle at 10% 0%,#FDE3EA 0,transparent 45%),radial-gradient(circle at 100% 100%,#E6F6F4 0,transparent 45%),#FFF8F4}
+.q-head .qh-c,.qh-tagline .qh-c{max-width:860px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+/* 1. top bar: logo left, the one working key (REBELLA status beacon) right */
+.q-head .qh-top{background:#F8CFDB;border-bottom:3px dotted #E58AA6;padding-top:env(safe-area-inset-top,0px)}
+.q-head .qh-top .qh-c{display:flex;align-items:center;justify-content:space-between;gap:10px;height:50px}
+.q-head .qh-logo{display:block;flex:none;height:38px;width:auto;max-width:40vw;color:#B4436C}
+.q-head .qh-right{display:flex;align-items:center;gap:8px;flex:none}
+.q-head .beacon{background:#FFFDFB;color:#5B3A50;border:1px solid var(--bc);box-shadow:none;margin-left:0}
+.q-head .beacon i{box-shadow:none}
+.q-head .beacon:focus-visible{outline:2px solid #B4436C}
+/* 2. weather chip + fun-fact ticker row */
+.q-head .qh-hud{position:relative;background:#FFFFFF;border-bottom:1px solid #EBCFC2}
+.q-head .tick{margin:0;height:34px;padding:0;background:transparent;border:0;border-radius:0;color:#3A2B35}
+.q-head .tick.static{height:auto;min-height:34px;padding:5px 0}
+.q-head .tick .tag{background:#DCD0F2;color:#5B3A50}
+.q-head .tick .wx{background:#FFF6DC;border:1px solid #E9B949;color:#3A2B35}
+.q-head .tick .wx b{color:#8A5A00}
+.q-head .tk{color:#B4436C}.q-head .tc{color:#6E5A66}.q-head .ts{color:#3A2B35}.q-head .tp{color:#8A5A00}
+.q-head #laneH{position:absolute;left:0;right:0;bottom:-17px;margin:0;z-index:2}
+.q-head .lane .cli{color:#B4436C}
+/* 3. masthead: Dad mark + title + pill, Dad's DJ strip underneath */
+.q-head .qh-mast .qh-c{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem 1rem;padding-top:.55rem;padding-bottom:.6rem}
+.q-head .dh-brand{display:flex;align-items:center;min-width:0}
+.q-head .dad-mark{flex:0 0 auto;width:32px;height:32px;margin-right:.6rem;display:block;box-sizing:content-box;padding:3px;background:#DCD0F2;border:1px solid #EBCFC2;border-radius:9px}
+.q-head .dh-title{font-family:var(--f-serif,"Lora",Georgia,serif);font-weight:500;font-size:1.2rem;line-height:1.2;color:#5B3A50;letter-spacing:.2px}
+.q-head .dh-pill{font-family:var(--f-hand,"Gochi Hand",cursive);text-transform:uppercase;letter-spacing:2px;background:#F8CFDB;color:#7A2448;
+  padding:.2rem .7rem .1rem;border-radius:999px;font-size:.9rem;line-height:1.2;margin-left:.65rem;white-space:nowrap;box-shadow:0 0 0 1px #E58AA6}
+/* 4. tagline: its own line directly under the header (as the dashboard's .tagline-line) */
+.qh-tagline{position:relative;z-index:1;background:#FDE3EA;border-bottom:3px dotted #E58AA6}
+.qh-tagline .qh-c{padding-top:.35rem;padding-bottom:.35rem}
+.qh-tagline .dh-sub{margin:0;font-size:.92rem;line-height:1.3;color:#5B3A50;border-left:2px solid #B4436C;padding-left:.5rem}
+/* Dad's DJ, recoloured to the chat palette (layout from dad-dj-quiz.css unchanged) */
+.q-head .dad-dj{background:#FFFFFF;border:2px solid #EBCFC2;color:#3A2B35}
+.q-head .dad-dj .dj-play{border-color:#B4436C;color:#5B3A50;background:#FFFFFF}
+.q-head .dad-dj .dj-play[aria-pressed="true"]{background:#B4436C;color:#FFFFFF}
+.q-head .dad-dj .dj-play:focus-visible,.q-head .dad-dj summary:focus-visible,.q-head .dad-dj input:focus-visible{outline:3px solid #B4436C}
+.q-head .dad-dj .dj-led{background:#EBCFC2;box-shadow:inset 0 0 0 1px #B4436C}
+.q-head .dad-dj .dj-play[aria-pressed="true"] .dj-led{background:#7A2448;box-shadow:inset 0 0 0 1px #FFFFFF}
+.q-head .dad-dj .dj-led.on{background:#FBE7B0}.q-head .dad-dj .dj-led.on2{background:#FFFFFF;box-shadow:0 0 0 2px #7A2448}
+.q-head .dad-dj .dj-vol{color:#6E5A66}
+.q-head .dad-dj .dj-vol input{accent-color:#B4436C}
+.q-head .dad-dj .dj-read{color:#5B3A50}
+.q-head .dad-dj .dj-pumps{color:#6E5A66}
+.q-head .dad-dj summary{color:#B4436C}
+.q-head .dad-dj .dj-grp legend{color:#6E5A66}
+.q-head .dad-dj .dj-grp span{background:#FFFFFF;border:1px solid #E9B949;color:#6B4600}
+.q-head .dad-dj .dj-grp input:checked + span{background:#E9B949;border-color:#E9B949;color:#3A2B35}
+.q-head .dad-dj .dj-grp input:focus-visible + span{outline:3px solid #B4436C}
+@media(max-width:480px){
+  .q-head .qh-c,.qh-tagline .qh-c{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  .q-head .qh-top .qh-c{height:44px}.q-head .qh-logo{height:32px}
+  .q-head .tick{height:auto;padding:5px 0}.q-head .tick .tview{border-top-color:#EBCFC2}
+  .q-head .dad-mark{width:28px;height:28px}.q-head .dh-title{font-size:1.05rem}
+  .q-head .dh-pill{font-size:.8rem;letter-spacing:1.5px;padding:.15rem .55rem .05rem;margin-left:.5rem}.qh-tagline .dh-sub{font-size:.85rem}}
+@media(prefers-reduced-motion:reduce){.q-head .dad-dj .dj-led.on,.q-head .dad-dj .dj-led.on2{background:#EBCFC2}}
