@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Dad's world mark (preview)</title>
+<link rel="icon" type="image/svg+xml" href="dad-mark-favicon.svg">
+<style>
+  :root{--dark:#24292E;--teal-dark:#0A3F4C;--teal:#0F5C6E;--amber:#F2A541;--sand:#F6EBD9;--mist:#D6ECEF}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--dark);color:var(--sand);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .band{margin:0;padding:.4rem 1rem;background:var(--amber);color:#24292E;font-weight:700;text-align:center;font-size:.9rem}
+  header{padding:1.2rem 1rem .4rem;max-width:960px;margin:0 auto}
+  h1{margin:0;font-size:1.4rem;color:var(--mist)} header p{margin:.3rem 0 0;color:var(--sand);opacity:.9}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;max-width:960px;margin:1rem auto;padding:0 1rem}
+  .tile{border-radius:16px;padding:1.2rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;border:1px solid rgba(214,236,239,.18)}
+  .tile img.big{width:160px;height:160px}
+  .tile .lbl{font:600 .85rem/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .on-dark{background:var(--dark);color:var(--mist)}
+  .on-teal{background:var(--teal-dark);color:var(--mist)}
+  .on-sand{background:var(--sand);color:var(--teal-dark)}
+  .sizes{max-width:960px;margin:0 auto 1rem;padding:0 1rem;display:flex;flex-wrap:wrap;gap:1.4rem;align-items:flex-end}
+  .sizes figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.3rem;font:.8rem ui-monospace,monospace;color:var(--mist)}
+  .sizes .chip{background:#000;border-radius:8px;padding:.5rem;display:flex}
+  .tab{display:flex;align-items:center;gap:.4rem;background:#3a4047;border-radius:8px 8px 0 0;padding:.35rem .7rem;font:.8rem system-ui;color:#eee}
+  footer{max-width:960px;margin:0 auto;padding:1rem;font-size:.85rem;opacity:.85}
+  a{color:var(--amber)}
+</style>
+</head>
+<body>
+<p class="band" role="note">Preview for Dad: Dad's world mark. Not on Rebella, not live anywhere else.</p>
+<header>
+  <h1>Dad's world: the equals mark</h1>
+  <p>Teal bar on top, amber bar below, two tilted orbit rings and a small satellite. Rings drift slowly on Simmie's phi ladder (22.84 s and 8.72 s) and stop if your device asks for reduced motion.</p>
+</header>
+<section class="grid" aria-label="Specimens at 160 px">
+  <div class="tile on-dark"><img class="big" src="dad-mark.svg" alt="Dad's world mark on dark"><span class="lbl">on dark #24292E</span></div>
+  <div class="tile on-teal"><img class="big" src="dad-mark.svg" alt="Dad's world mark on teal-dark"><span class="lbl">on teal-dark #0A3F4C</span></div>
+  <div class="tile on-sand"><img class="big" src="dad-mark-light.svg" alt="Dad's world mark on sand"><span class="lbl">on sand #F6EBD9 (rings #0A3F4C)</span></div>
+</section>
+<section class="sizes" aria-label="Small sizes">
+  <figure><span class="chip"><img src="dad-mark.svg" width="32" height="32" alt=""></span>32 px (dashboard header)</figure>
+  <figure><span class="chip"><img src="dad-mark.svg" width="24" height="24" alt=""></span>24 px</figure>
+  <figure><img src="dad-mark-favicon.svg" width="32" height="32" alt="">favicon 32 px</figure>
+  <figure><img src="dad-mark-favicon.svg" width="16" height="16" alt="">favicon 16 px</figure>
+  <figure><span class="tab"><img src="dad-mark-favicon.svg" width="16" height="16" alt="">Dad's world</span>in a browser tab</figure>
+</section>
+<footer>Files: <a href="dad-mark.svg">dad-mark.svg</a> (dark backgrounds), <a href="dad-mark-light.svg">dad-mark-light.svg</a> (light backgrounds), <a href="dad-mark-favicon.svg">dad-mark-favicon.svg</a>. In place: <a href="../bonnies-dashboard/">Bonnie's Dashboard preview</a> header.</footer>
+</body>
+</html>
