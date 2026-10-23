@@ -1,7 +1,7 @@
 /* Rebella moderation HUD: weather chip + fact ticker (header), quiet fixed footer (Simmie terminal, status strip,
    weather readout, emoji marquee) and background layers. Halfway palette: Bonnie's plum/berry pastels darkened,
    leaning to Dad's ocean teal #0F5C6E / #0A3F4C and amber #F2A541. Everything here is decorative or read-only. */
-#app{--hz-deep:#0B1114;--hz-panel:#12202A;--hz-plum:#2A1424;--hz-teal:#0F5C6E;--hz-teal-hi:#3FB8B0;--hz-amber:#F2A541;--hz-sand:#F6EBD9;--hz-green:#5EE6C0;--hz-foot-h:46px;
+#app{--hz-deep:#0B1114;--hz-panel:#12202A;--hz-plum:#2A1424;--hz-teal:#0F5C6E;--hz-teal-hi:#3FB8B0;--hz-amber:#F2A541;--hz-sand:#F6EBD9;--hz-green:#5B8FFF;--hz-foot-h:46px;
   position:relative;isolation:isolate;padding-bottom:calc(var(--hz-foot-h) + 10px)}
 /* ---------- background layers ---------- */
 .wx-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
@@ -70,7 +70,7 @@
 .tty-inwrap{position:relative;flex:1;min-width:0;display:flex;align-items:center}
 .tty-in{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--hz-green);font:inherit;font-size:16px;line-height:1;padding:1px 0;caret-color:transparent;transform-origin:left center}
 @media (pointer:fine){.tty-in{font-size:13px}}  /* touch screens keep 16px so iOS doesn't zoom in on focus */
-.tty-in::placeholder{color:rgba(94,230,192,.4)}
+.tty-in::placeholder{color:rgba(91,143,255,.4)}
 .tty-cursor{position:absolute;left:0;top:50%;width:.55em;height:1.05em;margin-top:-.55em;background:var(--hz-green);animation:tty-blink var(--phi-cursor) steps(1) var(--phi-cursor-d) infinite;pointer-events:none}
 .tty-in:not(:placeholder-shown)+.tty-cursor{display:none}
 .tty-form:not(:focus-within) .tty-cursor{opacity:.35;animation:none}
@@ -168,7 +168,7 @@ html.wx-paused #app *,html.wx-paused #app *::before{animation-play-state:paused!
 .il-comet i{position:absolute;top:2px;font-style:normal;font-size:7px;opacity:0;animation:il-spark var(--phi-space-spark) ease-out infinite}
 .il-comet i:nth-child(1){left:-8px}.il-comet i:nth-child(2){left:-15px;animation-delay:calc(var(--phi-space-spark) * -.618)}.il-comet i:nth-child(3){left:-22px;animation-delay:calc(var(--phi-space-spark) * -.236)}
 @keyframes il-spark{0%{opacity:0;transform:scale(.4)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(4px) scale(.3)}}
-.il-tokens{font:10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5EE6C0;white-space:nowrap;opacity:.85}
+.il-tokens{font:10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5B8FFF;white-space:nowrap;opacity:.85}
 /* Simmie's own piece: a tiny satellite orbiting the cloud avatar */
 .tty-cloudwrap{position:relative;flex:none;display:inline-flex}
 .cl-orbit{position:absolute;left:50%;top:50%;width:0;height:0;animation:il-spin var(--phi-cloud-orbit) linear var(--phi-cloud-orbit-d) infinite;pointer-events:none;z-index:1}
@@ -199,12 +199,12 @@ html.wx-paused #app *,html.wx-paused #app *::before{animation-play-state:paused!
 .dp-x{background:transparent;border:1px solid rgba(246,235,217,.35);color:var(--hz-sand);border-radius:4px;font:700 13px/1 ui-monospace,monospace;padding:2px 7px;cursor:pointer}
 .dp-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.45rem}
 .dp-chip{background:rgba(242,165,65,.12);border:1px solid rgba(242,165,65,.6);color:var(--hz-amber);border-radius:999px;padding:3px 8px;font:11px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;cursor:pointer}
-.dp-text,.dp-key{width:100%;box-sizing:border-box;background:rgba(11,17,20,.85);border:1px solid #24414A;border-radius:6px;color:#5EE6C0;font:16px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:.4rem .5rem;resize:none}
+.dp-text,.dp-key{width:100%;box-sizing:border-box;background:rgba(11,17,20,.85);border:1px solid #24414A;border-radius:6px;color:#5B8FFF;font:16px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:.4rem .5rem;resize:none}
 @media(pointer:fine){.dp-text,.dp-key{font-size:13px}}
 #app .dp-text:focus,#app .dp-key:focus,#app .tty-form :focus{outline:2px solid var(--hz-amber);outline-offset:0}
 .dp-keyrow{margin-top:.4rem}.dp-keyrow[hidden]{display:none}.dp-keylab{display:block;color:var(--hz-amber);margin-bottom:.2rem}
 .dp-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.45rem}
-.dp-status{color:#5EE6C0;min-height:1em}
+.dp-status{color:#5B8FFF;min-height:1em}
 .dp-send{background:var(--hz-amber);color:#24292E;border:0;border-radius:5px;font:700 12px/1 ui-monospace,monospace;padding:.45rem .8rem;cursor:pointer}
 #app .dp-chip:focus-visible,#app .dp-send:focus-visible,#app .dp-x:focus-visible{outline:2px solid var(--hz-sand);outline-offset:1px}
 .dp-ripple{position:absolute;right:22px;bottom:18px;width:12px;height:12px;border-radius:50%;border:2px solid var(--hz-amber);opacity:0;pointer-events:none}

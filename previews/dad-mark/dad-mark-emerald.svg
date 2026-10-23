@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="dm-t">
-  <title id="dm-t">Dad's world equals mark (preview, emerald option)</title>
+  <title id="dm-t">Dad's world equals mark (preview, sapphire option; file name kept)</title>
   <!-- PREVIEW. Dad's world mark: two equals bars inside two tilted orbit rings (-20deg, +25deg), satellite on ring 1.
        Layers kept separate (dm-rings / dm-bars / dm-sat) so a later vector trace can swap any one of them.
        RING SET: dark backgrounds (#D6ECEF, #F6EBD9). dad-mark-light.svg is the same file with rings #0A3F4C.
@@ -22,7 +22,7 @@
   </g>
   <defs><filter id="dm-glow" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
   <g id="dm-bars">
-    <rect id="dm-bar-top" filter="url(#dm-glow)" x="17" y="22.5" width="30" height="8" rx="4" fill="#00C27A" stroke="#19FF9C" stroke-width="1"/>
+    <rect id="dm-bar-top" filter="url(#dm-glow)" x="17" y="22.5" width="30" height="8" rx="4" fill="#0F52BA" stroke="#3D7BFF" stroke-width="1"/>
     <rect id="dm-bar-bot" x="17" y="33.5" width="30" height="8" rx="4" fill="#F2A541"/>
   </g>
   <g transform="rotate(-20 32 32)">

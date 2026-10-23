@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="dm-t">
-  <title id="dm-t">Dad's world equals mark (preview, emerald option, light)</title>
+  <title id="dm-t">Dad's world equals mark (preview, sapphire option, light; file name kept)</title>
   <!-- PREVIEW. Dad's world mark: two equals bars inside two tilted orbit rings (-20deg, +25deg), satellite on ring 1.
        Layers kept separate (dm-rings / dm-bars / dm-sat) so a later vector trace can swap any one of them.
        RING SET: light backgrounds (#0A3F4C). dad-mark.svg is the same file with rings #D6ECEF and #F6EBD9.
@@ -21,7 +21,7 @@
     </g>
   </g>
   <g id="dm-bars">
-    <rect id="dm-bar-top" x="17" y="22.5" width="30" height="8" rx="4" fill="#0B8F5A" stroke="#0A3F4C" stroke-width="1"/>
+    <rect id="dm-bar-top" x="17" y="22.5" width="30" height="8" rx="4" fill="#0F52BA" stroke="#0A3F4C" stroke-width="1"/>
     <rect id="dm-bar-bot" x="17" y="33.5" width="30" height="8" rx="4" fill="#F2A541"/>
   </g>
   <g transform="rotate(-20 32 32)">

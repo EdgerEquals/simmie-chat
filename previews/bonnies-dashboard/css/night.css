@@ -83,7 +83,7 @@ html #app .tty-bar{background:var(--nt-panel2);color:rgba(220,208,242,.7);border
 html #app .tty-bar i{background:#F8CFDB} html #app .tty-bar i:nth-child(2){background:#FBE7B0} html #app .tty-bar i:nth-child(3){background:#C8EBD5}
 html #app .tty-body::before{border-right-color:rgba(42,157,159,.55)}
 html #app .tty-p{color:var(--nt-amber)}
-html #app .tty-line,html #app .tty-in{color:#5EE6C0}
+html #app .tty-line,html #app .tty-in{color:#5B8FFF}
 html #app .tty-hint{color:rgba(220,208,242,0)} html #app .tty-line:hover .tty-hint{color:rgba(220,208,242,.5)}
 html #app .tty-send{background:var(--nt-amber);color:#24292E}
 html #app .tty-x{color:var(--nt-lav)}
@@ -114,8 +114,8 @@ html #app .dad-panel{left:10px;top:60px;bottom:auto;border:1px solid var(--nt-li
 html #app .dp-title{color:var(--nt-amber)!important}
 html #app .dp-x{color:var(--nt-ink);border-color:rgba(220,208,242,.35)}
 html #app .dp-chip{background:rgba(242,165,65,.12);border-color:rgba(242,165,65,.6);color:var(--nt-amber)}
-html #app .dp-text,html #app .dp-key{background:rgba(14,12,22,.9);border-color:rgba(42,157,159,.55);color:#5EE6C0}
-html #app .dp-status{color:#5EE6C0} html #app .dad-panel.sent .dp-status{color:var(--nt-butter)}
+html #app .dp-text,html #app .dp-key{background:rgba(14,12,22,.9);border-color:rgba(42,157,159,.55);color:#5B8FFF}
+html #app .dp-status{color:#5B8FFF} html #app .dad-panel.sent .dp-status{color:var(--nt-butter)}
 html #app .dad-panel.sent .dp-ripple,html #app .dad-panel.sent .dp-sat{animation:none;opacity:0}   /* the biplane replaces the zip + ripple */
 /* biplane + smoke (appended to body while flying) */
 .biplane{position:fixed;left:0;top:0;z-index:70;pointer-events:none;will-change:transform,opacity}

@@ -1,23 +1,26 @@
 /* PREVIEW ONLY: "command centre" theme tokens (Danny, 2026-10-24 01:14 AWST).
    Emerald "Matrix code" green replaces the old forest/teal greens; dark olive / gunmetal / charcoal panels with thin
    emerald or amber hairlines and small HUD labels; sand text (never white). Dad's palette kept:
+   SAPPHIRE (Danny 02:02 AWST): the emerald greens are now sapphire. Token names keep "emerald" so nothing that reads them breaks:
+   glow #19FF9C -> #5B8FFF, emerald #00E676 -> #3D7BFF, fill #0B8F5A -> #0F52BA, dim #16B877 -> #3D7BFF, deep #0E3A2A -> #0A2F6E,
+   hairlines/grid rgba(25,255,156,a) -> rgba(61,123,255,a) (same alpha). Olive panels unchanged.
    #0F5C6E #0A3F4C #F2A541 #F6EBD9 #D6ECEF #24292E.
    Contrast (WCAG AA, normal text >= 4.5:1): sand on panel #161D21 14.5 | sand on olive #262E1F 11.9 | sand on teal-deep #0A3F4C 9.7 |
-   emerald glow #19FF9C on #0B0F10 14.5 | emerald dim #16B877 on #0B0F10 7.5 | muted #B8CCC0 on #161D21 10.1 |
-   amber on olive 6.9 | charcoal on amber 7.2. The fill emerald #0B8F5A carries NO text (sand on it is only 3.5). */
+   sapphire glow #5B8FFF on #0B0F10 6.3 (on #161D21 5.5) | sapphire dim #3D7BFF on #0B0F10 5.0 | muted #B8CCC0 on #161D21 10.1 |
+   amber on olive 6.9 | charcoal on amber 7.2 | sand on sapphire fill #0F52BA 6.1 | sand on deep #0A2F6E 10.8. */
 :root{
-  --cc-emerald-glow:#19FF9C;   /* text / glow on dark */
-  --cc-emerald:#00E676;        /* bright accent, LEDs */
-  --cc-emerald-fill:#0B8F5A;   /* fills without text: bars, stars, meters */
-  --cc-emerald-dim:#16B877;    /* dim terminal lines (7.5:1 on #0B0F10) */
-  --cc-emerald-deep:#0E3A2A;   /* dark emerald surface, sand text 10.7:1 */
+  --cc-emerald-glow:#5B8FFF;   /* text / glow on dark */
+  --cc-emerald:#3D7BFF;        /* bright accent, LEDs */
+  --cc-emerald-fill:#0F52BA;   /* fills without text: bars, stars, meters */
+  --cc-emerald-dim:#3D7BFF;    /* dim terminal lines (7.5:1 on #0B0F10) */
+  --cc-emerald-deep:#0A2F6E;   /* dark emerald surface, sand text 10.7:1 */
   --cc-olive:#262E1F; --cc-olive-2:#323C27; --cc-olive-deep:#1A2016;
   --cc-gunmetal:#1F262B; --cc-charcoal:#24292E; --cc-panel:#11171A; --cc-panel-2:#161D21; --cc-ink:#0B0F10;
   --cc-teal:#0F5C6E; --cc-teal-deep:#0A3F4C; --cc-amber:#F2A541; --cc-sand:#F6EBD9; --cc-sky:#D6ECEF; --cc-muted:#B8CCC0;
-  --cc-hair-em:rgba(25,255,156,.38); --cc-hair-em-soft:rgba(25,255,156,.18); --cc-hair-am:rgba(242,165,65,.55);
+  --cc-hair-em:rgba(61,123,255,.38); --cc-hair-em-soft:rgba(61,123,255,.18); --cc-hair-am:rgba(242,165,65,.55);
   --cc-laser:#00B8FF; --cc-laser-hi:#4FD8FF; --cc-cyan:#2EE6F0;
   --cc-mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --cc-grid:repeating-linear-gradient(0deg,rgba(25,255,156,.035) 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,rgba(25,255,156,.035) 0 1px,transparent 1px 28px);
+  --cc-grid:repeating-linear-gradient(0deg,rgba(61,123,255,.035) 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,rgba(61,123,255,.035) 0 1px,transparent 1px 28px);
 }
 /* HUD label: small mono caps with a leading tick, used via data-hud="..." on any panel */
 [data-hud]{position:relative}
