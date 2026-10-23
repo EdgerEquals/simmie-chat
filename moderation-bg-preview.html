@@ -348,7 +348,10 @@ body.cr-on .pv-banner{background:#14555A;color:#F3EAF0}
 #app .agedial .ad-family g{fill:rgba(181,227,224,.55)}
 #app .agedial .ad-family .fm-k{fill:rgba(243,234,240,.62)}
 #app .agedial .ad-family .fm-floor{stroke:#2A9D9F;stroke-width:1;opacity:.6}
-#app .agedial .ad-family .fm-k{transform-box:fill-box;transform-origin:50% 100%;transform:scale(.835);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+#app .agedial .ad-family .fm-k{transform-box:fill-box;transform-origin:50% 100%;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+/* heights from CDC 2000 stature-for-age P50 (statage.csv); all figures drawn 59 units tall = dad (age-20 male median 176.85 cm) */
+#app .agedial .ad-family #ad-mum{transform-box:fill-box;transform-origin:50% 100%;transform:scale(0.9236)}
+#app .agedial .ad-family #ad-kid-b{transform:scale(0.8826)}#app .agedial .ad-family #ad-kid-g{transform:scale(0.8886)}
 @media (prefers-reduced-motion:reduce){#app .agedial .ad-family .fm-k{transition:none}}
 /* --- age dial animation (preview only): transform/opacity only, glow via pseudo-element opacity --- */
 #app .agedial .ad-label strong{position:relative;vertical-align:middle}
@@ -492,7 +495,7 @@ rx = <i class="f">filter</i>(rx, <i class="s">&#x27;noise&#x27;</i>);
         <span class="ad-btns"><button type="button" class="ad-btn" id="ad-down" aria-label="Turn the age dial down one year">&minus;</button><button type="button" class="ad-btn" id="ad-up" aria-label="Turn the age dial up one year">+</button></span>
         <span class="ad-limit" id="ad-limit" aria-live="polite"></span><span class="ad-status" id="ad-status" aria-live="polite"></span>
       </div>
-      <div class="ad-vis"><p class="ad-note">Content is written for a reader of this age (10&ndash;16).</p><svg class="ad-family" viewBox="0 0 160 64" aria-hidden="true" focusable="false"><line class="fm-floor" x1="2" y1="62.5" x2="158" y2="62.5"/><g class="fm-p"><circle cx="20" cy="9" r="6"/><path d="M12 19Q20 15 28 19L27 39H24V62H20.8V42H19.2V62H16V39H13Z"/></g><g class="fm-k" id="ad-kid-b"><circle cx="63" cy="9" r="6"/><path d="M55.5 20Q63 16 70.5 20L69.5 40H67V62H63.8V43H62.2V62H59V40H56.5Z"/></g><g class="fm-k" id="ad-kid-g"><circle cx="98" cy="8.5" r="5.5"/><path d="M101.5 5Q108 7 106.5 16Q104.5 11 101.5 9Z"/><path d="M92.5 20Q98 17 103.5 20L107 45H89Z"/><rect x="93.5" y="44" width="3" height="18" rx="1"/><rect x="99.5" y="44" width="3" height="18" rx="1"/></g><g class="fm-p"><circle cx="140" cy="10" r="5.5"/><circle cx="144" cy="6" r="3"/><path d="M134 19Q140 16 146 19L150 46H130Z"/><rect x="135" y="45" width="3" height="17" rx="1"/><rect x="142" y="45" width="3" height="17" rx="1"/></g></svg></div>
+      <div class="ad-vis"><p class="ad-note">Content is written for a reader of this age (10&ndash;16).</p><svg class="ad-family" viewBox="0 0 160 64" aria-hidden="true" focusable="false"><line class="fm-floor" x1="2" y1="62.5" x2="158" y2="62.5"/><g class="fm-p"><circle cx="20" cy="9" r="6"/><path d="M12 19Q20 15 28 19L27 39H24V62H20.8V42H19.2V62H16V39H13Z"/></g><g class="fm-k" id="ad-kid-b"><circle cx="63" cy="9" r="6"/><path d="M55.5 20Q63 16 70.5 20L69.5 40H67V62H63.8V43H62.2V62H59V40H56.5Z"/></g><g class="fm-k" id="ad-kid-g"><circle cx="98" cy="8.5" r="5.5"/><path d="M101.5 5Q108 7 106.5 16Q104.5 11 101.5 9Z"/><path d="M92.5 20Q98 17 103.5 20L107 45H89Z"/><rect x="93.5" y="44" width="3" height="18" rx="1"/><rect x="99.5" y="44" width="3" height="18" rx="1"/></g><g class="fm-p" id="ad-mum"><circle cx="140" cy="10" r="5.5"/><circle cx="144" cy="6" r="3"/><path d="M134 19Q140 16 146 19L150 46H130Z"/><rect x="135" y="45" width="3" height="17" rx="1"/><rect x="142" y="45" width="3" height="17" rx="1"/></g></svg></div>
     </section>
     <div class="notice dots-mustard"><span class="example">Preview</span> Placeholder moderation cards with dummy text. The buttons here only change this page.</div>
     <nav class="tabs" aria-label="Filter queue (dummy)"><button class="tab" aria-selected="true" type="button">Pending <span class="count">3</span></button><button class="tab" aria-selected="false" type="button">Approved <span class="count">0</span></button><button class="tab" aria-selected="false" type="button">All <span class="count">3</span></button></nav>
@@ -520,9 +523,11 @@ rx = <i class="f">filter</i>(rx, <i class="s">&#x27;noise&#x27;</i>);
 /* preview-only age dial: changes the number on this page, sends nothing (no network, no pop-ups) */
 (function(){ var v=13, a=document.getElementById("ad-age"), w=a.querySelector(".ad-win"), d=document.getElementById("ad-down"), u=document.getElementById("ad-up"),
     rm=window.matchMedia?window.matchMedia("(prefers-reduced-motion: reduce)"):{matches:false};
+  /* CDC 2000 stature-for-age 50th percentile, cm, at exact birthdays (https://www.cdc.gov/growthcharts/data/zscore/statage.csv). Dad = male median at 20, mum = female median at 20 (shown at 0.9236 of dad). */
+  var DAD=176.85, HB={10:138.62,11:143.52,12:149.05,13:156.09,14:163.84,15:169.94,16:173.51}, HG={10:137.99,11:143.98,12:151.19,13:157.15,14:160.39,15:161.86,16:162.55};
   function replay(el,c){ el.classList.remove(c); void el.offsetWidth; el.classList.add(c); }
   function r(){ a.setAttribute("aria-label",String(v)); d.setAttribute("aria-disabled",v<=10?"true":"false"); u.setAttribute("aria-disabled",v>=16?"true":"false");
-    var k="scale("+(0.75+(v-10)/6*0.17).toFixed(3)+")"; kb.style.transform=k; kg.style.transform=k; }
+    kb.style.transform="scale("+(HB[v]/DAD).toFixed(4)+")"; kg.style.transform="scale("+(HG[v]/DAD).toFixed(4)+")"; }
   function roll(dir){ /* dir: "up" for +, "down" for - */
     w.querySelectorAll(".ad-d.gone").forEach(function(n){ n.remove(); });
     var old=w.querySelector(".ad-d");
