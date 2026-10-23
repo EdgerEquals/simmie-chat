@@ -21,15 +21,14 @@ window.QUIZ_COPY = {
   ageQ: "Would you like this?",
   ageSum: "Age dial for your page",
   reroll: "\uD83C\uDFB2 Reroll",
-  ask: "\uD83D\uDCAC Ask more",
   askLabel: "Type a question or comment",
   askPlaceholder: "Got a question or an idea about this one? Type it here\u2026",
   send: "Send",
   saved: "Saved \u2713 (preview: kept on this page, not sent)",
   empty: "Type something first!",
   back: "\u2190 Back",
-  skip: "Skip \u2192",
-  finish: "Finish \u2192",
+  skip: "Skip",
+  backRight: "Back \u2192",
   sumTitle: "\u2728 You did it, Bonnie! \u2728",
   sumLead: "Here are your picks. Nice choices!",
   skipped: "Skipped",
@@ -129,19 +128,20 @@ h1{font-family:var(--f-hand);font-weight:400;color:var(--heading);font-size:2.2r
 .tile.swap{animation:swap .35s ease}
 @keyframes swap{0%{transform:scale(.94);opacity:.4}100%{transform:none;opacity:1}}
 .reroll{font-size:.95rem;padding:.35rem .9rem;background:var(--lavender)}
-.askrow{text-align:center;margin-top:1.3rem}
 .ask{background:var(--aqua)}
-.askbox{display:none;margin-top:1rem}
-.askbox.open{display:block}
+.askbox{display:block;margin-top:1.2rem}
 .askbox label{display:block;font-weight:700;margin-bottom:.35rem}
 textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px solid #E7D3DC;border-radius:10px;padding:.7rem;color:var(--ink);background:#FFFDFB;resize:vertical}
-.sendrow{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-top:.5rem;flex-wrap:wrap}
+.btnrow{display:flex;flex-wrap:nowrap;justify-content:center;gap:8px;margin:.7rem auto 0;max-width:520px}
+.btnrow .btn{flex:1 1 0;min-width:0;white-space:nowrap;font-size:1rem;padding:.55rem .4rem;text-align:center}
+.btnrow .bk{background:#F2E8EE}
+.btnrow .btn:disabled{opacity:.4;cursor:default;filter:grayscale(1)}
+.saved{display:block;text-align:center;min-height:1.4em;margin-top:.4rem}
+@media(max-width:400px){.btnrow{gap:5px}.btnrow .btn{font-size:.9rem;padding:.5rem .2rem;letter-spacing:.5px}}
 .send{background:var(--accent);color:#fff}
 .saved{font-size:.95rem;color:#2E6B47;font-weight:700}
 .notes{list-style:none;padding:0;margin:.6rem 0 0}
 .notes li{background:var(--bg);border-radius:8px;padding:.4rem .7rem;margin-top:.3rem;font-size:1rem}
-.nav{display:flex;justify-content:space-between;margin-top:1.3rem}
-.nav .btn{background:#F2E8EE;font-size:.95rem}
 .sum h2{font-family:var(--f-hand);font-weight:400;font-size:2rem;color:var(--heading);text-align:center;margin:0 0 .3rem}
 .sum .yay{text-align:center;margin:0 0 1.2rem}
 .sum ol{list-style:none;padding:0;margin:0 0 1.4rem;display:grid;gap:.6rem}
@@ -153,7 +153,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .foot{position:fixed;left:0;right:0;bottom:0;text-align:center;font-size:.9rem;font-weight:700;color:var(--ink);background:rgba(255,255,255,.94);padding:.45rem;border-top:2px dashed var(--blush);z-index:5}
 [hidden]{display:none!important}
 .agenote{background:var(--butter);border-left:8px solid #E9C25A;border-radius:12px;padding:1rem 1.2rem;margin:0 auto 1.2rem;max-width:640px;font-size:1.15rem;line-height:1.55}
-.yn .reroll,.yn .askrow,.yn .askbox{display:none!important}
+.yn .reroll{display:none!important}
 .yn .qlabel{font-size:1.6rem;line-height:1.3;max-width:640px;margin-left:auto;margin-right:auto}
 @media(max-width:600px){.yn .qlabel{font-size:1.3rem}}
 @media(max-width:600px){
@@ -189,14 +189,13 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
       <div class="choice"><button class="tile" id="t0"><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="emo" aria-hidden="true"></span><span class="txt"></span></button><button class="btn reroll" data-i="0" data-copy="reroll">&#x1F3B2; Reroll</button></div>
       <div class="choice"><button class="tile" id="t1"><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="emo" aria-hidden="true"></span><span class="txt"></span></button><button class="btn reroll" data-i="1" data-copy="reroll">&#x1F3B2; Reroll</button></div>
     </div>
-    <div class="askrow"><button class="btn ask" id="ask" aria-expanded="false" aria-controls="askbox" data-copy="ask">&#x1F4AC; Ask more</button></div>
     <div class="askbox" id="askbox">
       <label for="note" data-copy="askLabel">Type a question or comment</label>
       <textarea id="note" placeholder="Anything you want to ask or tell Dad about this one…"></textarea>
-      <div class="sendrow"><span class="saved" id="saved" role="status"></span><button class="btn send" id="send" data-copy="send">Send</button></div>
+      <div class="btnrow"><button class="btn bk" id="back" data-copy="back">&larr; Back</button><button class="btn send" id="send" data-copy="send">Send</button><button class="btn skip" id="skip" data-copy="skip">Skip</button><button class="btn bk" id="back2" data-copy="backRight">Back &rarr;</button></div>
+      <span class="saved" id="saved" role="status"></span>
       <ul class="notes" id="notes"></ul>
     </div>
-    <div class="nav"><button class="btn" id="back" data-copy="back">&larr; Back</button><button class="btn" id="skip">Skip &rarr;</button></div>
   </section>
 
   <section class="panel sum" id="summary" hidden>
@@ -320,11 +319,10 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
     var an=$('agenote');an.hidden=s.yn!=='age';an.textContent=C.ageNote;
     document.getElementById('quiz').classList.toggle('yn',!!s.yn);
     [0,1].forEach(function(i){var t=$('t'+i),o=s.opts[i];t.querySelector('.emo').textContent=o.e;t.querySelector('.txt').textContent=o.t;t.style.setProperty('--c',o.c);t.classList.toggle('picked',s.pick===i);t.setAttribute('aria-pressed',String(s.pick===i));});
-    $('askbox').classList.remove('open');$('ask').setAttribute('aria-expanded','false');$('saved').textContent='';$('note').value='';
+    $('saved').textContent='';$('note').value='';
     $('notes').innerHTML=s.notes.map(function(n){return '<li></li>';}).join('');
     Array.prototype.forEach.call($('notes').children,function(li,i){li.textContent='\u2709\uFE0F '+s.notes[i];});
-    $('back').style.visibility=qi?'visible':'hidden';
-    $('skip').textContent=qi===state.length-1?C.finish:C.skip;
+    $('back').disabled=$('back2').disabled=(qi===0);
     theme(s.theme);
   }
   function next(){if(qi<state.length-1){qi++;render();}else summary();}
@@ -362,10 +360,9 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
       theme(s.opts[i].th); // lean toward the new topic
     };
   });
-  $('ask').onclick=function(){var o=!$('askbox').classList.contains('open');$('askbox').classList.toggle('open',o);this.setAttribute('aria-expanded',String(o));if(o)$('note').focus();};
   $('send').onclick=function(){var v=$('note').value.trim();if(!v){$('saved').textContent=C.empty;return;}
-    state[qi].notes.push(v);var keep=qi;render();$('askbox').classList.add('open');$('ask').setAttribute('aria-expanded','true');$('saved').textContent=C.saved;};
-  $('back').onclick=function(){if(qi>0){qi--;render();}};
+    state[qi].notes.push(v);render();$('saved').textContent=C.saved;};
+  $('back').onclick=$('back2').onclick=function(){if(qi>0){qi--;render();}};
   $('skip').onclick=next;
   reset();theme('teen');
 })();
