@@ -57,3 +57,17 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 .send{flex:none;width:48px;height:48px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:1.3rem;cursor:pointer}
 .send:disabled{opacity:.5}
 @media (min-width:700px){.chat{height:calc(100vh - 32px);margin:16px 0;border-radius:18px;overflow:hidden;box-shadow:0 8px 30px rgba(58,43,53,.12)}}
+.msg.dad{background:#FFF6DC;border:2px solid #E9B949;border-bottom-left-radius:6px}
+.msg .sender{display:block;font-family:var(--f-hand);text-transform:uppercase;letter-spacing:1.5px;font-size:.85rem;color:#8A5A00;margin-bottom:1px}
+.msg .quote{display:block;font-size:.75rem;color:#7A2448;opacity:.8;margin-bottom:1px}
+.choices{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;white-space:normal}
+.choice{font:inherit;font-weight:700;min-width:84px;padding:.45rem 1rem;border-radius:999px;border:2px solid #E9B949;background:#fff;color:#6B4600;cursor:pointer}
+.choice:not(:disabled):hover{background:#FBE7B0}
+.choices.done .choice{opacity:.45;cursor:default}
+.choices.done .choice.picked{opacity:1;background:#E9B949;color:#3A2B35}
+.choice-note{font-size:.8rem;color:var(--muted)}
+.choices + .choice-note{display:block;margin-top:4px}
+.choice.ask{border-style:dashed}
+.choice.open{background:#FBE7B0}
+.ask-box{display:flex;gap:8px;align-items:flex-end;margin-top:8px;white-space:normal}
+.ask-box textarea{font-size:1rem;resize:none;border-radius:14px;padding:.45rem .7rem;min-width:0}

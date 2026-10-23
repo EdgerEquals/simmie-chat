@@ -70,6 +70,20 @@ python3 chat.py append --from simmie --text "reply..."            # 2. live ping
   `decrypt-payload`, `relay-ensure`, `relay-restart` (after code/password changes), `relay-status`
   (log: `~/.config/simmie-chat/relay.log`).
 
+## Questions with buttons (Dad or Simmie)
+
+```bash
+python3 chat.py append --from dad --text "..."                         # plain message, shown as from Dad
+python3 chat.py ask --from dad --text "..."                            # Yes / No / Ask more
+python3 chat.py ask --from simmie --text "..." --options "Crafts & how-tos" "Nature & plants"   # custom labels
+```
+
+The page shows the two choice buttons plus **Ask more** (opens a small text box). Her tap is sent like any of her
+messages (encrypted, relay -> webhook), so `context` shows it under NEEDS REPLY as
+`daughter: [Answer to Dad: "<question>"] Yes` or `[Answer to Simmie: "<question>"] Ask more: <her text>`
+(the plain message also carries `reply_to` = question id, `answer`, `comment`). Buttons lock once she answers; the
+answered state is rebuilt from the log on reload. Log entries: `{from:'dad'|'simmie', kind:'question', options:[a,b]}`.
+
 ## Password rotation
 
 Put the new password in `SIMMIE_CHAT_PASSWORD_NEW` (it wins over `SIMMIE_CHAT_PASSWORD` everywhere), then:

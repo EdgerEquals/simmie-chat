@@ -71,7 +71,7 @@
   // ---------- pending (sent but not yet in the log) ----------
   async function savePending() {
     const list = [...msgs.values()].filter((m) => m.state === 'pending' || m.state === 'sent' || m.state === 'failed')
-      .map(({ id, ts, from, text, state }) => ({ id, ts, from, text, state: state === 'failed' ? 'failed' : 'sent' }));
+      .map(({ id, ts, from, text, state, reply_to, answer, comment }) => ({ id, ts, from, text, reply_to, answer, comment, state: state === 'failed' ? 'failed' : 'sent' }));
     try { localStorage.setItem(PKEY, JSON.stringify(await C.encryptJSON(key, list))); } catch (e) {}
   }
   async function loadPending() {
@@ -162,6 +162,7 @@
             return;
           }
           if (m.from === 'simmie') { addMsg(m, 'logged'); typingUntil = 0; render(); }
+          else if (m.from === 'dad') { addMsg(m, 'logged'); render(); }
           else if (m.from === 'daughter' && msgs.has(m.id) && msgs.get(m.id).state === 'pending') { msgs.get(m.id).state = 'sent'; render(); }
         } catch (e) {}
       };
@@ -175,7 +176,36 @@
     if (!m || !m.id || typeof m.text !== 'string') return;
     const cur = msgs.get(m.id);
     if (cur && cur.state === 'logged') return;
-    msgs.set(m.id, { id: m.id, ts: +m.ts || Date.now(), from: m.from === 'simmie' ? 'simmie' : 'daughter', text: m.text, state });
+    const from = m.from === 'simmie' || m.from === 'dad' ? m.from : 'daughter';
+    const rec = { id: m.id, ts: +m.ts || Date.now(), from, text: m.text, state };
+    if (from !== 'daughter' && m.kind === 'question') {
+      rec.kind = 'question'; rec.options = Array.isArray(m.options) && m.options.length ? m.options.map(String).filter((o) => o && o !== 'Ask more').slice(0, 2) : ['Yes', 'No'];
+      if (rec.options.length < 2) rec.options = ['Yes', 'No'];
+    }
+    if (from === 'daughter' && m.reply_to) { rec.reply_to = String(m.reply_to); rec.answer = String(m.answer || ''); if (m.comment) rec.comment = String(m.comment); }
+    msgs.set(m.id, rec);
+  }
+
+  // ---------- Dad's Yes / No questions ----------
+  // Her tap is sent like any other message of hers (same encrypted relay -> webhook path), with reply_to + answer.
+  const senderName = (from) => (from === 'dad' ? 'Dad' : 'Simmie');
+  const ASK = 'Ask more';
+  function answerFor(q) {
+    const prefix = '[Answer to ' + senderName(q.from) + ': "' + q.text + '"] ';
+    for (const m of msgs.values()) {
+      if (m.from !== 'daughter' || m.state === 'failed') continue;
+      if (m.reply_to === q.id) return m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text.slice(m.text.indexOf('"] ') + 3));
+      if (!m.reply_to && m.text.startsWith(prefix)) return m.text.slice(prefix.length);
+    }
+    return null;
+  }
+  async function answerQuestion(q, opt, comment) {
+    if (answerFor(q) !== null) return;
+    const m = { id: 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8), ts: Date.now(), from: 'daughter',
+      text: '[Answer to ' + senderName(q.from) + ': "' + q.text + '"] ' + (comment ? opt + ': ' + comment : opt), reply_to: q.id, answer: opt };
+    if (comment) m.comment = comment;
+    addMsg(m, 'pending'); render();
+    await deliver(m);
   }
 
   // ---------- sending ----------
@@ -193,7 +223,9 @@
   async function deliver(m) {
     const rec = msgs.get(m.id); rec.state = 'pending'; render();
     try {
-      const body = JSON.stringify({ v: 1, ...(await C.encryptJSON(key, { id: m.id, ts: m.ts, from: 'daughter', text: m.text })) });
+      const plain = { id: m.id, ts: m.ts, from: 'daughter', text: m.text };
+      if (rec.reply_to) { plain.reply_to = rec.reply_to; plain.answer = rec.answer; if (rec.comment) plain.comment = rec.comment; }
+      const body = JSON.stringify({ v: 1, ...(await C.encryptJSON(key, plain)) });
       if (body.length > 3800) throw new Error('too long');
       const r = await fetch(`${cfg.relay.base}/${cfg.relay.topic}`, { method: 'POST', body, headers: { 'Content-Type': 'text/plain' } });
       if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -221,26 +253,67 @@
       const d = fmtDay(m.ts);
       if (d !== day) { day = d; const s = document.createElement('div'); s.className = 'day'; s.textContent = d; log.appendChild(s); }
       const b = document.createElement('div');
-      b.className = 'msg ' + (m.from === 'simmie' ? 'them' : 'me') + (m.state === 'pending' ? ' pending' : '') + (m.state === 'failed' ? ' failed' : '');
-      b.textContent = m.text;
+      const mine = m.from === 'daughter';
+      b.className = 'msg ' + (mine ? 'me' : 'them') + (m.from === 'dad' ? ' dad' : '') + (m.reply_to ? ' answer' : '') + (m.state === 'pending' ? ' pending' : '') + (m.state === 'failed' ? ' failed' : '');
+      if (m.from === 'dad') { const w = document.createElement('span'); w.className = 'sender'; w.textContent = 'Dad'; b.appendChild(w); }
+      if (m.reply_to) {
+        const qm = msgs.get(m.reply_to), q = document.createElement('span'); q.className = 'quote';
+        q.textContent = 'Answer to ' + (qm ? senderName(qm.from) : (m.text.match(/^\[Answer to (\w+)/) || [, 'Dad'])[1]); b.appendChild(q);
+        b.appendChild(document.createTextNode(m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text)));
+      } else b.appendChild(document.createTextNode(m.text));
+      if (m.from !== 'daughter' && m.kind === 'question') b.appendChild(questionControls(m));
       const meta = document.createElement('span'); meta.className = 'meta';
       let label = fmtTime(m.ts);
-      if (m.from !== 'simmie') label += m.state === 'pending' ? ' · sending…' : m.state === 'sent' ? ' · sent ✓' : m.state === 'failed' ? ' · ' + (m.err || "didn't send") : ' · ✓✓';
+      if (mine) label += m.state === 'pending' ? ' · sending…' : m.state === 'sent' ? ' · sent ✓' : m.state === 'failed' ? ' · ' + (m.err || "didn't send") : ' · ✓✓';
       meta.textContent = label;
       if (m.state === 'failed') { const r = document.createElement('button'); r.className = 'retry'; r.type = 'button'; r.textContent = 'Try again'; r.onclick = () => deliver(m); meta.appendChild(r); }
       b.appendChild(meta); log.appendChild(b);
     }
     // typing hint: shown while her latest message is newer than Simmie's latest reply (for up to 20 min)
-    const lastMine = list.filter((m) => m.from !== 'simmie' && m.state !== 'failed').pop();
+    const lastMine = list.filter((m) => m.from === 'daughter' && m.state !== 'failed').pop();
     const lastTheirs = list.filter((m) => m.from === 'simmie').pop();
     const waiting = lastMine && (!lastTheirs || lastTheirs.ts < lastMine.ts) && Date.now() - lastMine.ts < 20 * 60 * 1000;
     const typing = waiting && Date.now() < typingUntil;
     $('typing-text').textContent = typing ? 'Simmie is typing…' : 'Waiting for Simmie… replies usually take under a minute';
     $('typing').classList.toggle('active', typing);
     $('typing').hidden = !waiting;
-    log.scrollTop = log.scrollHeight;
+    const box = askOpen && document.querySelector('.ask-box textarea');
+    if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); box.scrollIntoView({ block: 'nearest' }); }
+    else log.scrollTop = log.scrollHeight;
   }
-  setInterval(() => { if (key) render(); }, 30000);
+  // Yes / No (+ "Ask more" -> small text box). Locked once answered; the answered state comes from the log.
+  let askOpen = '', askDraft = '';
+  function questionControls(m) {
+    const ans = answerFor(m), wrap = document.createElement('div'), row = document.createElement('div');
+    row.className = 'choices' + (ans !== null ? ' done' : ''); wrap.appendChild(row);
+    const picked = ans === null ? null : (ans.startsWith(ASK) ? ASK : ans);
+    const opts = m.options.concat([ASK]);   // Ask more is always the third option
+    for (const opt of opts) {
+      const btn = document.createElement('button'); btn.type = 'button';
+      btn.className = 'choice' + (opt === ASK ? ' ask' : '') + (picked === opt ? ' picked' : '') + (askOpen === m.id && opt === ASK ? ' open' : '');
+      btn.textContent = (picked === opt ? '✓ ' : '') + opt; btn.disabled = ans !== null;
+      btn.onclick = () => {
+        if (opt === ASK) { askOpen = askOpen === m.id ? '' : m.id; render(); if (askOpen) { const t = document.querySelector('.ask-box textarea'); if (t) t.focus(); } return; }
+        row.querySelectorAll('button').forEach((x) => { x.disabled = true; }); askOpen = ''; answerQuestion(m, opt);
+      };
+      row.appendChild(btn);
+    }
+    if (ans !== null) {
+      const n = document.createElement('span'); n.className = 'choice-note';
+      n.textContent = ans.startsWith(ASK) ? 'You asked: ' + ans.replace(/^Ask more:?\s*/, '') : 'You answered: ' + ans; wrap.appendChild(n);
+    } else if (askOpen === m.id) {
+      const f = document.createElement('form'); f.className = 'ask-box';
+      const t = document.createElement('textarea'); t.rows = 2; t.maxLength = 1000; t.placeholder = 'Type your question or comment…'; t.value = askDraft;
+      t.setAttribute('aria-label', 'Your question or comment for ' + senderName(m.from));
+      t.oninput = () => { askDraft = t.value; };
+      const s = document.createElement('button'); s.type = 'submit'; s.className = 'choice'; s.textContent = 'Send';
+      f.onsubmit = (e) => { e.preventDefault(); const v = t.value.trim(); if (!v) return; askOpen = ''; askDraft = ''; answerQuestion(m, ASK, v); };
+      f.appendChild(t); f.appendChild(s); wrap.appendChild(f);
+    }
+    return wrap;
+  }
+  // The answer as the page knows it: "Yes" / "No" / "Ask more: <text>"
+  setInterval(() => { if (key && !askOpen) render(); }, 30000);
 
   boot();
 })();

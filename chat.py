@@ -17,9 +17,14 @@ Other subcommands
   decrypt-payload            stdin: webhook body (or {"body": "<json string>"}) -> prints the plain message JSON
   ingest                     like decrypt-payload, and also appends her message to log.enc.json (dedup by id), pushes
   history [n]                last n plain messages (default 20)
-  append --from simmie|daughter --text TEXT [--id ID --ts MS] [--no-ping]
+  append --from simmie|daughter|dad --text TEXT [--id ID --ts MS] [--no-ping]
                              encrypt + append to log.enc.json, git pull/commit/push; a simmie reply is also
                              pinged (encrypted) on the relay topic so the open page shows it instantly
+  ask --from dad|simmie --text QUESTION [--options FIRST SECOND] [--id ID --ts MS] [--no-ping]
+                             post a question; the page shows two choice buttons (default Yes / No) + Ask more (opens a
+                             text box). Her answer comes back as a normal daughter message with the label she picked:
+                             '[Answer to Dad: "QUESTION"] Yes' or
+                             '[Answer to Simmie: "QUESTION"] Ask more: <her text>' (+ reply_to=<question id>, answer, comment)
   pending [--ingest]         her messages still on the relay (last ~12 h) that are not in the log yet
   relay                      run the relay forever (relay topic -> routine webhook); normally via relay-ensure
   relay-ensure               start the relay in the background if it isn't running
@@ -227,7 +232,7 @@ class Chat:
         try: m = decrypt_json(self.key, obj)
         except Exception: die('payload did not decrypt (wrong password or not from the chat page)')
         if not isinstance(m, dict) or not isinstance(m.get('text'), str) or not m.get('id'): die('payload has no message')
-        m['from'] = 'daughter' if m.get('from') != 'simmie' else 'simmie'
+        m['from'] = m.get('from') if m.get('from') in ('simmie', 'dad') else 'daughter'
         return m
 
     # ---- relay topic ----
@@ -255,7 +260,8 @@ class Chat:
 
 def fmt(m):
     t = time.strftime('%a %d %b %H:%M', time.localtime(int(m.get('ts', 0)) / 1000))
-    return f"[{t}] {m.get('from')}: {m.get('text')}"
+    q = ' [question, buttons: %s / Ask more]' % ' / '.join(m.get('options') or ['Yes', 'No']) if m.get('kind') == 'question' else ''
+    return f"[{t}] {m.get('from')}{q}: {m.get('text')}"
 
 
 # ---------------- relay daemon ----------------
@@ -372,8 +378,11 @@ def main():
     sub = ap.add_subparsers(dest='cmd', required=True)
     sub.add_parser('decrypt-payload'); sub.add_parser('ingest')
     h = sub.add_parser('history'); h.add_argument('n', nargs='?', type=int, default=20); h.add_argument('--json', action='store_true')
-    a = sub.add_parser('append'); a.add_argument('--from', dest='frm', choices=['simmie', 'daughter'], required=True)
+    a = sub.add_parser('append'); a.add_argument('--from', dest='frm', choices=['simmie', 'daughter', 'dad'], required=True)
     a.add_argument('--text', required=True); a.add_argument('--id'); a.add_argument('--ts', type=int); a.add_argument('--no-ping', action='store_true')
+    q = sub.add_parser('ask'); q.add_argument('--from', dest='frm', choices=['dad', 'simmie'], required=True)
+    q.add_argument('--options', nargs=2, metavar=('FIRST', 'SECOND'), default=['Yes', 'No'], help='labels of the two choice buttons (default: Yes No); Ask more is always the third')
+    q.add_argument('--text', required=True); q.add_argument('--id'); q.add_argument('--ts', type=int); q.add_argument('--no-ping', action='store_true')
     p = sub.add_parser('pending'); p.add_argument('--ingest', action='store_true')
     sub.add_parser('relay'); sub.add_parser('relay-ensure'); sub.add_parser('relay-status'); sub.add_parser('relay-restart')
     c = sub.add_parser('context'); c.add_argument('-n', type=int, default=8)
@@ -405,12 +414,17 @@ def main():
         plain.sort(key=lambda m: m.get('ts', 0))
         for m in plain[-args.n:] if args.n else plain:
             print(json.dumps(m, ensure_ascii=False) if args.json else fmt(m))
-    elif args.cmd == 'append':
-        m = {'id': args.id or ('s-' if args.frm == 'simmie' else 'd-') + uuid.uuid4().hex[:12],
+    elif args.cmd in ('append', 'ask'):
+        m = {'id': args.id or {'simmie': 's-', 'dad': 'dad-'}.get(args.frm, 'd-') + uuid.uuid4().hex[:12],
              'ts': args.ts or int(time.time() * 1000), 'from': args.frm, 'text': args.text}
+        if args.cmd == 'ask':
+            opts = [o.strip() for o in args.options]
+            if not all(opts) or len(set(opts)) < 2 or 'Ask more' in opts: die('--options needs two different non-empty labels (not "Ask more")')
+            if any(len(o) > 40 for o in opts): die('--options labels must be 40 characters or less')
+            m.update(kind='question', options=opts)
         _, plain = chat.read_log()
         if m['id'] in {x.get('id') for x in plain}: print('already in log ' + m['id']); return
-        if args.frm == 'simmie' and not args.no_ping: chat.ping(m)   # page shows it now; the log follows
+        if args.frm in ('simmie', 'dad') and not args.no_ping: chat.ping(m)   # page shows it now; the log follows
         staged = chat.read_staged()
         new = chat.append(staged + [m])                            # one commit: her staged msg(s) + the reply
         chat.write_staged([])
