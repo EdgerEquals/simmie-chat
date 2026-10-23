@@ -118,7 +118,7 @@
     clearTimeout(pollTimer);
     if (!key || document.hidden) return;
     const recent = Date.now() - lastSentAt < 10 * 60 * 1000;
-    pollTimer = setTimeout(pollLog, recent ? 15000 : 45000);
+    pollTimer = setTimeout(pollLog, recent ? 15000 : 20000);
   }
   document.addEventListener('visibilitychange', () => {
     if (!key) return;

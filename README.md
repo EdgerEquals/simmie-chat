@@ -9,7 +9,7 @@ Live: https://edgerequals.github.io/simmie-chat/ (noindex, robots.txt Disallow).
 page (password unlocks key) --encrypted msg, simple text/plain POST--> ntfy.sh/<secret topic>
       ^                                                                       |
       |  live encrypted ping (EventSource)              box relay (chat.py relay, holds webhook key)
-      |  + polls log.enc.json (raw.githubusercontent, 15-45 s)               |  POST + Authorization: Bearer <key>
+      |  + polls log.enc.json (raw.githubusercontent, 15-20 s)               |  POST + Authorization: Bearer <key>
       |                                                                       v
 log.enc.json in this repo  <--chat.py ingest / append (git push)--  Grok Bot routine "Daughter chat page replies"
 ```
@@ -67,6 +67,6 @@ bash -lc 'python3 chat.py append --from simmie --text "reply..."' # encrypt, app
   last seen id when restarted, and `pending --ingest` recovers them too. A cheap safety net: give the routine an
   extra hourly cron listener that just runs `relay-ensure` and `pending --ingest`.
 * ntfy.sh is a free public relay (rate limits apply, ~4 KB per message, so the page caps messages at 1500 chars).
-* Replies show instantly via the live ping while the page is open; otherwise via the log poll (15 s after sending,
-  45 s idle, paused while the tab is hidden; raw.githubusercontent can lag a few minutes behind a push).
+* Replies show instantly via the live ping while the page is open; otherwise via the log poll (every 15 s for 10 min after sending,
+  20 s otherwise, paused while the tab is hidden; raw.githubusercontent can lag a few minutes behind a push).
 * Password-based encryption: a weak password could be brute-forced offline from the public files. Use a long one.
