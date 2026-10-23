@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#F8CFDB">
+<title>Chat with Simmie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+<main id="app">
+
+  <section id="screen-loading" class="screen card center">
+    <p class="hand">Loading…</p>
+  </section>
+
+  <section id="screen-notready" class="screen card center" hidden>
+    <h1 class="logo">Chat with <span>Simmie</span></h1>
+    <p class="big">This chat isn't set up yet.</p>
+    <p class="muted">Check back soon. It'll be ready once the password is set.</p>
+  </section>
+
+  <section id="screen-login" class="screen card" hidden>
+    <h1 class="logo">Chat with <span>Simmie</span></h1>
+    <p class="muted">Type the password to open your private chat.</p>
+    <form id="login-form" autocomplete="off">
+      <label for="pw" class="hand">Password</label>
+      <div class="pw-row">
+        <input id="pw" type="password" autocomplete="current-password" required autocapitalize="off" spellcheck="false">
+        <button type="button" id="pw-toggle" class="ghost" aria-label="Show password">Show</button>
+      </div>
+      <p id="login-error" class="error" role="alert" hidden></p>
+      <button id="login-btn" class="btn" type="submit">Open chat</button>
+    </form>
+  </section>
+
+  <section id="screen-chat" class="screen chat" hidden>
+    <header class="chat-head">
+      <div class="who">
+        <div class="avatar" aria-hidden="true">S</div>
+        <div><div class="name">Simmie</div><div id="status" class="status">Replies usually take a minute or two</div></div>
+      </div>
+      <button id="lock-btn" class="ghost" type="button" title="Lock this chat">🔒 Lock</button>
+    </header>
+    <div id="log" class="log" aria-live="polite" aria-label="Messages"></div>
+    <div id="typing" class="typing" hidden><span class="dots"><i></i><i></i><i></i></span> Simmie is typing… replies usually take a minute or two</div>
+    <form id="send-form" class="composer" autocomplete="off">
+      <textarea id="msg" rows="1" maxlength="1500" placeholder="Type a message…" aria-label="Message"></textarea>
+      <button id="send-btn" class="send" type="submit" aria-label="Send">➤</button>
+    </form>
+  </section>
+
+</main>
+<script src="js/crypto.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
