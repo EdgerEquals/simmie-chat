@@ -40,7 +40,7 @@
     ev.preventDefault();
     const btn = $('login-btn'), err = $('login-error'); err.hidden = true; btn.disabled = true; btn.textContent = 'Checking…';
     try {
-      const k = await C.deriveKey($('pw').value, meta.kdf.salt, meta.kdf.iter);
+      const k = await C.deriveKey($('pw').value.trim(), meta.kdf.salt, meta.kdf.iter);
       cfg = await C.decryptJSON(k, meta.config);
       key = k; sessionStorage.setItem(SKEY, await C.exportKey(k)); $('pw').value = '';
       openChat();
