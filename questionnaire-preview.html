@@ -36,6 +36,7 @@ window.QUIZ_COPY = {
   either: "{a} or {b}",
   again: "Start again",
   footer: "Preview only, nothing is sent",
+  credit: "Made by Dad, with help from Simmie",
   tickerLabel: "Fun facts from Dad",
   tag: "From Dad",
   ageTag: "age {age}",
@@ -108,7 +109,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .tile.burst .sp{animation:spk .7s ease-out 1}
 .tile .sp:nth-child(2),.tile .sp:nth-child(3){animation-delay:.08s!important}
 /* Layout */
-.wrap{max-width:860px;margin:0 auto;padding:1rem 18px 5.5rem}
+.wrap{max-width:860px;margin:0 auto;padding:1rem 18px 132px}
 .panel{background:rgba(17,48,58,.9);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1.6rem 1.6rem 1.4rem}
 h1{font-family:var(--f-hand);font-weight:400;color:var(--heading);font-size:2.2rem;line-height:1.2;text-align:center;margin:.3rem 0 .8rem}
 .from{display:block;font-family:var(--f-script);color:var(--accent);font-size:1.6rem;margin-top:.3rem}
@@ -156,8 +157,39 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .sum .e{font-size:1.7rem;line-height:1}
 .sum .vs{display:block;font-size:.95rem;color:#D9CDB9}
 .sum .note{display:block;font-size:.98rem;margin-top:.2rem;background:rgba(246,235,217,.08);border-radius:6px;padding:.2rem .5rem}
-.foot{position:fixed;left:0;right:0;bottom:0;text-align:center;font-size:.9rem;font-weight:700;color:var(--dad-sand);background:rgba(14,37,45,.96);padding:.4rem .6rem;border-top:2px dashed var(--teal-hi);z-index:5;display:flex;align-items:center;justify-content:center;gap:.5rem;margin:0}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:5;margin:0;padding:4px 8px 5px;background:rgba(10,24,30,.97);border-top:2px dashed var(--teal-hi);color:var(--dad-sand);font-size:.8rem;display:flex;flex-direction:column;gap:3px;max-height:112px}
 .foot a{color:var(--dad-amber)}
+.foot .strip{display:flex;align-items:center;gap:8px;font:700 9.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.4px;color:#A9C3C8;white-space:nowrap;overflow:hidden;max-width:860px;width:100%;margin:0 auto}
+.foot .lt{display:inline-flex;align-items:center;gap:3px}.foot .lt b{color:var(--dad-sand)}
+.foot .lt i{width:6px;height:6px;border-radius:50%;background:var(--lc,#3FD3C0);box-shadow:0 0 5px var(--lc,#3FD3C0);animation:lblink var(--lp,3s) ease-in-out infinite}
+.foot .lt.warn{--lc:#F2A541}.foot .lt.bad{--lc:#E5484D}.foot .lt.idle{--lc:#5C7378}
+.foot .lt.blip i{animation:lblip .6s ease-out 1}
+@keyframes lblink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes lblip{0%{transform:scale(1)}40%{transform:scale(1.9)}100%{transform:scale(1)}}
+.foot .ro{margin-left:auto;color:#E0A251}
+.foot .tty{max-width:860px;width:100%;margin:0 auto;background:#0B1215;border:1px solid rgba(78,170,190,.35);border-radius:7px;overflow:hidden}
+.ttybar{display:flex;align-items:center;gap:4px;height:14px;padding:0 6px;background:#16222A;font:9.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#A9C3C8}
+.ttybar i{width:6px;height:6px;border-radius:50%;background:#F4B6B6}.ttybar i:nth-child(2){background:#F6E3A1}.ttybar i:nth-child(3){background:#B7E4C7}
+.ttybar .tt{flex:1;text-align:center}.ttybar .sat{font-size:9px}
+.ttybody{display:flex;align-items:center;gap:7px;padding:3px 7px 4px 5px}
+.ttybody .simmie{--sz:30px}
+.ttyl{flex:1;min-width:0;font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5EE6C0;text-align:left}
+.ttyl .pr{color:var(--dad-amber)}
+.tout{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.35em}
+.tin{display:flex;align-items:center;gap:6px;cursor:text}
+.tfield{position:relative;flex:1;min-width:0;display:flex;align-items:center}
+.tin input{flex:1;min-width:0;width:100%;border:0;outline:0;background:transparent;color:#5EE6C0;font:inherit;padding:0;caret-color:transparent}
+.tin .blk{position:absolute;left:var(--cx,0);top:50%;width:.6em;height:1.1em;margin-top:-.55em;background:#5EE6C0;animation:cblink 1.06s steps(1) infinite;pointer-events:none}
+@keyframes cblink{50%{opacity:0}}
+.tin:focus-within{box-shadow:0 1px 0 0 var(--dad-amber)}
+.simmie.talk{animation:sTalk .45s ease-in-out infinite}
+@keyframes sTalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-8%)}}
+.foot .note{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:.78rem;white-space:nowrap}
+.foot .note .dot{opacity:.6}
+.foot .fwx{font-size:.85rem}
+body.paused .foot .lt i,body.paused .tin .blk,body.paused .simmie.talk{animation-play-state:paused}
+@media(max-width:400px){.foot .note{font-size:.7rem;gap:4px}.foot .strip{gap:6px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.foot .lt i,.tin .blk,.simmie.talk,.foot .lt.blip i{animation:none!important}}
 [hidden]{display:none!important}
 
 /* see ticker block below */
@@ -168,9 +200,11 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .tick .tag i{font-style:normal;font-weight:400;opacity:.85}
 .tick .wx{flex:0 0 auto;font-size:11px;color:var(--dad-sand);border:1px solid rgba(242,165,65,.55);border-radius:999px;padding:3px 6px}
 .tick .wx b{color:var(--dad-amber);font-weight:700}
-.tick .wxr{flex:0 0 auto;position:relative;width:18px;height:18px;font-size:15px;line-height:18px}
-.tick .wxr span{position:absolute;inset:0;text-align:center;opacity:0;transition:opacity .9s ease}
-.tick .wxr span.on{opacity:1}
+.wxr,.fwx{flex:0 0 auto;display:inline-flex;gap:2px;line-height:1}
+.wxr .fs,.wxr .os,.fwx .fs,.fwx .os{position:relative;display:inline-block;width:1.2em;height:1.2em}
+.wxr .fs>span,.wxr .os>span,.fwx .fs>span,.fwx .os>span{position:absolute;left:0;top:0;width:100%;text-align:center;opacity:0;transition:opacity .6s ease}
+.wxr .on,.fwx .on{opacity:1!important}
+.tick .wxr{font-size:15px}
 .tick .tview{flex:1 1 auto;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
 .ttrack{display:inline-flex;will-change:transform;animation:tickmove var(--td,120s) linear infinite}
 .ttrack>span{padding-right:2.5em}
@@ -181,10 +215,6 @@ body.paused .ttrack{animation-play-state:paused}
 .tick.static{height:auto;min-height:36px;padding:6px 8px;flex-wrap:wrap;white-space:normal;row-gap:5px}
 .tick.static .ttrack{animation:none;display:block;transition:opacity .8s ease;line-height:1.4}
 .tick.static .tview{flex-basis:100%;-webkit-mask-image:none;mask-image:none}
-.tick.static .wxr{width:auto;letter-spacing:2px}.tick.static .wxr span{position:static;opacity:1}
-.foot .fwx{font-size:.95rem;letter-spacing:1px;position:relative;display:inline-block;min-width:1.3em;height:1.2em}
-.foot .fwx span{position:absolute;left:0;top:0;opacity:0;transition:opacity .9s ease}.foot .fwx span.on{opacity:1}
-.foot.static-wx .fwx span{position:static;opacity:1}
 
 /* REBELLA status beacon (right end of the ticker). Live = teal breathing, checking/slow = amber, down = red faster. */
 .beacon{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;margin-left:2px;font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.4px;color:var(--dad-sand);background:#0E1A1F;border:1px solid var(--bc,#2A8FA3);border-radius:999px;padding:4px 7px 4px 6px;cursor:pointer;box-shadow:0 0 8px -2px var(--bc,#2A8FA3)}
@@ -220,7 +250,6 @@ body.paused .simmie,body.paused .simmie *{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.simmie,.simmie *{animation:none!important}.simmie .s-sheen{opacity:0}}
 .leadrow{display:flex;align-items:center;justify-content:center;gap:.8rem;max-width:560px;margin:0 auto 1.6rem}
 .leadrow .lead{margin:0;text-align:left}
-.foot .simmie{--sz:32px}
 /* ---- Dad palette for the "from Dad" parts (css/dad-palette.css); Bonnie's pastel tiles and themed backgrounds stay ---- */
 #start.panel,#quiz.panel,#summary.panel{border-top:8px solid var(--teal-hi);}
 #start h1,.sum h2{color:var(--dad-sand)}
@@ -322,7 +351,26 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     <button class="btn big" id="again" data-copy="again">Start again</button>
   </section>
 </main>
-<div class="foot"><span class="simmie" data-simmie id="footSimmie"></span><span data-copy="footer">Preview only, nothing is sent</span><span class="fwx" id="fwx" aria-hidden="true" hidden></span></div>
+<div class="foot" id="foot">
+  <div class="strip" aria-label="Page status">
+    <span class="lt" id="ltStep" style="--lp:3.1s"><i></i>STEP <b id="vStep">--</b></span>
+    <span class="lt" id="ltDone" style="--lp:4.3s"><i></i>DONE <b id="vDone">0</b></span>
+    <span class="lt" id="ltSky" style="--lp:5.7s"><i></i>SKY <b id="vSky">&hellip;</b></span>
+    <span class="lt" id="ltLink" style="--lp:2.7s"><i></i>LINK <b id="vLink">&hellip;</b></span>
+    <span class="ro" id="ro" aria-hidden="true"></span>
+  </div>
+  <div class="tty" id="tty">
+    <div class="ttybar" aria-hidden="true"><i></i><i></i><i></i><span class="tt">simmie &mdash; tty</span><span class="sat">&#x1F6F0;&#xFE0F;</span></div>
+    <div class="ttybody">
+      <span class="simmie" data-simmie id="footSimmie"></span>
+      <div class="ttyl">
+        <div class="tout" id="tout" aria-live="polite"><span class="pr">simmie&gt;</span> <span id="ttext"></span></div>
+        <label class="tin"><span class="pr">bonnie$</span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
+      </div>
+    </div>
+  </div>
+  <div class="note"><span data-copy="footer">Preview only, nothing is sent</span><span class="dot" aria-hidden="true">&middot;</span><span data-copy="credit">Made by Dad, with help from Simmie</span><span class="fwx" id="fwx" aria-hidden="true" hidden></span></div>
+</div>
 <script>
 (function(){
   'use strict';
@@ -479,17 +527,21 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   Promise.all([factsP,ageP]).then(function(v){setTicker(v[1]);});
 
   // ---- Weather chip + caring reaction (fixed Perth coords, Open-Meteo, no geolocation, cached 30 min) ----
+  // Three faces per condition on a 3 s / 4 s / 5 s polyrhythm (realigns every 60 s); offerings hand over one at a time.
+  var U=function(c){return String.fromCodePoint(c);};
   var WX={
-    sun:{i:'\u2600\uFE0F',r:['\uD83D\uDE42','\uD83C\uDF3B']},
-    cloud:{i:'\u26C5',r:['\uD83D\uDE42','\uD83C\uDF24\uFE0F']},
-    fog:{i:'\uD83C\uDF2B\uFE0F',r:['\uD83D\uDE0C','\uD83E\uDDCB']},
-    rain:{i:'\uD83C\uDF27\uFE0F',r:['\uD83E\uDD7A','\u2615','\uD83E\uDDF8']},
-    storm:{i:'\u26C8\uFE0F',r:['\uD83D\uDE2E','\uD83E\uDEC2','\uD83D\uDD6F\uFE0F']},
-    night:{i:'\uD83C\uDF19',r:['\u2728','\uD83D\uDE0C']},
-    snow:{i:'\u2744\uFE0F',r:['\uD83D\uDE42','\u2603\uFE0F']}
+    sun:  {i:'\u2600\uFE0F',f:['\uD83D\uDE04','\uD83E\uDD29','\uD83D\uDE0E'],o:['\uD83D\uDD76\uFE0F','\uD83C\uDF66','\uD83C\uDF3B'],say:'sunny'},
+    hot:  {i:'\uD83C\uDF1E',f:['\uD83D\uDE04','\uD83E\uDD29','\uD83D\uDE0E'],o:['\uD83C\uDFD6\uFE0F','\uD83C\uDF66','\uD83D\uDD76\uFE0F'],say:'hot, so plenty of water'},
+    cloud:{i:'\u26C5',f:['\uD83D\uDE10','\uD83E\uDDD0','\uD83D\uDE34'],o:['\u26C5','\uD83C\uDF24\uFE0F'],say:'cloudy'},
+    fog:  {i:'\uD83C\uDF2B\uFE0F',f:['\uD83D\uDE0C','\uD83E\uDD14','\uD83D\uDE34'],o:['\uD83C\uDF2B\uFE0F','\uD83E\uDDCB'],say:'foggy'},
+    rain: {i:'\uD83C\uDF27\uFE0F',f:['\uD83E\uDD7A','\uD83E\uDD14','\uD83E\uDD79'],o:['\u2602\uFE0F','\uD83C\uDF38','\uD83C\uDF81','\u2615'],say:'rainy, a good day for something warm'},
+    storm:{i:'\u26C8\uFE0F',f:['\uD83E\uDD17','\uD83E\uDEE3','\uD83D\uDE2E'],o:['\uD83E\uDEC2','\uD83D\uDD6F\uFE0F','\uD83D\uDECB\uFE0F'],say:'stormy, cosy inside'},
+    night:{i:'\uD83C\uDF19',f:['\uD83D\uDE0C','\uD83E\uDD70','\uD83E\uDD29'],o:['\uD83C\uDF19','\u2728'],say:'clear tonight'},
+    snow: {i:'\u2744\uFE0F',f:['\uD83D\uDE42','\uD83E\uDDD0','\uD83D\uDE0C'],o:['\u2744\uFE0F','\u2603\uFE0F'],say:'snowy'}
   };
-  function wmo(code,day){ // WMO weather codes -> condition
-    if(code===0||code===1)return day?'sun':'night';
+  window.SIM_WX={status:'loading'};
+  function wmo(code,day,temp){ // WMO weather codes -> condition
+    if(code===0||code===1)return day?(temp!=null&&temp>=30?'hot':'sun'):'night';
     if(code===2||code===3)return 'cloud';
     if(code===45||code===48)return 'fog';
     if((code>=51&&code<=67)||(code>=80&&code<=82))return 'rain';
@@ -497,23 +549,34 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     if(code>=95&&code<=99)return 'storm';
     return null;
   }
-  var wxTimer=null;
-  function cycle(el,seq){
-    el.innerHTML=seq.map(function(e){return '<span>'+e+'</span>';}).join('');el.hidden=false;
-    if(reduce)return; var k=0,sp=el.children;sp[0].classList.add('on');
-    return setInterval(function(){if(document.hidden)return;sp[k].classList.remove('on');k=(k+1)%sp.length;sp[k].classList.add('on');},2600);
+  var wxTimers=[];
+  function reaction(el,w){ // el gets a face slot (3 stacked faces) + an offering slot
+    el.innerHTML='<span class="fs">'+w.f.map(function(e){return '<span>'+e+'</span>';}).join('')+'</span><span class="os">'+w.o.map(function(e){return '<span>'+e+'</span>';}).join('')+'</span>';
+    el.hidden=false;
+    var faces=el.querySelector('.fs').children,offs=el.querySelector('.os').children;
+    faces[0].classList.add('on');offs[0].classList.add('on');
+    if(reduce)return;
+    var P=[3000,4000,5000],O=[0,1300,2600],t0=Date.now(),cur=0,k=0;
+    wxTimers.push(setInterval(function(){ // most recent beat wins: face i beats at O[i] + n*P[i]
+      if(document.hidden)return; var t=Date.now()-t0,best=-1,bt=-1;
+      for(var i=0;i<3;i++){if(t<O[i])continue;var last=O[i]+Math.floor((t-O[i])/P[i])*P[i];if(last>bt){bt=last;best=i;}}
+      if(best>=0&&best!==cur){faces[cur].classList.remove('on');faces[best].classList.add('on');cur=best;}
+    },100));
+    wxTimers.push(setInterval(function(){if(document.hidden)return;offs[k].classList.remove('on');k=(k+1)%offs.length;offs[k].classList.add('on');},2600));
   }
   function showWx(cond,temp){
     var w=WX[cond];if(!w)return;
+    window.SIM_WX.cond=cond;window.SIM_WX.temp=temp;window.SIM_WX.say=w.say;
     $('wxIcon').textContent=w.i;$('wxText').innerHTML=esc(C.place)+(temp!=null?' <b>'+Math.round(temp)+'\u00B0</b>':'');
     $('wx').hidden=false;$('wx').setAttribute('aria-label',C.place+' weather'+(temp!=null?' '+Math.round(temp)+' degrees':''));
-    clearInterval(wxTimer);wxTimer=cycle($('wxr'),w.r);
-    var f=$('fwx');f.parentNode.classList.toggle('static-wx',reduce);cycle(f,w.r);
+    wxTimers.forEach(clearInterval);wxTimers=[];
+    reaction($('wxr'),w);reaction($('fwx'),w);
+    document.dispatchEvent(new Event('simwx'));
   }
   (function(){
-    var force=(qs.get('weather')||'').toLowerCase();if(!WX[force]||force==='snow')force=null;
+    var force=(qs.get('weather')||'').toLowerCase();if(!WX[force]||force==='snow')force=null;window.SIM_WX.forced=force;
     var KEY='dadWxPerth',url='https://api.open-meteo.com/v1/forecast?latitude=-31.95&longitude=115.86&current=weather_code,temperature_2m,is_day&timezone=Australia%2FPerth';
-    function use(d){var cond=force||(d?wmo(d.code,d.day):null);if(cond)showWx(cond,d?d.temp:null);}
+    function use(d){window.SIM_WX.status=d?'ok':'fail';var cond=force||(d?wmo(d.code,d.day,d.temp):null);if(cond)showWx(cond,d?d.temp:null);else document.dispatchEvent(new Event('simwx'));}
     var cached=null;try{cached=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
     if(cached&&Date.now()-cached.t<30*60*1000){use(cached);return;}
     try{fetch(url,{cache:'no-store',referrerPolicy:'no-referrer'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
@@ -521,14 +584,14 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       var d={t:Date.now(),code:c.weather_code,temp:c.temperature_2m,day:c.is_day===1};
       try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}
       use(d);
-    }).catch(function(){if(force)use(null);});}catch(e){if(force)use(null);}
+    }).catch(function(){use(null);});}catch(e){use(null);}
   })();
 
   // ---- REBELLA status beacon: reads the live Rebella home page (same origin), on load, every 60 s, and on tap ----
   (function(){
     var b=$('beacon'),st=b.querySelector('.bs'),force=(qs.get('rebella')||'').toLowerCase(),busy=false;
     function stamp(){try{return new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit',timeZone:'Australia/Perth'}).toUpperCase()+' AWST';}catch(e){return new Date().toLocaleTimeString();}}
-    function set(state,label,note){b.className='beacon '+state;st.textContent=label;var t='Rebella '+label.toLowerCase()+(note?' ('+note+')':'');b.title=t;b.setAttribute('aria-label',t+'. Tap to check again.');}
+    function set(state,label,note){window.SIM_BEACON={state:state,label:label};b.className='beacon '+state;st.textContent=label;var t='Rebella '+label.toLowerCase()+(note?' ('+note+')':'');b.title=t;b.setAttribute('aria-label',t+'. Tap to check again.');}
     function check(){
       if(busy)return;busy=true;var t0=Date.now(),slow=setTimeout(function(){set('chk','CHECKING','slow, still waiting');},3000);
       set('chk','CHECKING','checking now');
@@ -542,11 +605,82 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     check();setInterval(function(){if(!document.hidden)check();},60000);
   })();
 
+  // ---- Footer status lights: real page state (STEP, DONE, SKY, LINK) + readout ----
+  var lastDone=0;
+  function light(id,cls,val){var el=$(id);el.classList.remove('warn','bad','idle');if(cls)el.classList.add(cls);el.querySelector('b').textContent=val;}
+  window.SIM_LIGHTS=function(){
+    var q=$('quiz'),sm=$('summary'),total=state?state.length:12;
+    light('ltStep',(q.hidden&&sm.hidden)?'idle':'',!q.hidden?(qi+1)+'/'+total:(!sm.hidden?total+'/'+total:'--'));
+    var done=state?state.filter(function(x){return x.pick!=null;}).length:0;
+    light('ltDone',done?'':'idle',String(done));
+    if(done>lastDone){var d=$('ltDone');d.classList.remove('blip');void d.offsetWidth;d.classList.add('blip');}
+    lastDone=done;
+    var w=window.SIM_WX||{};light('ltSky',w.status==='ok'?'':(w.status==='fail'?'bad':'warn'),w.status==='ok'?'OK':(w.status==='fail'?'N/A':'\u2026'));
+    light('ltLink',navigator.onLine?'':'bad',navigator.onLine?'ON':'OFF');
+  };
+  function clock(){try{return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Australia/Perth'});}catch(e){return '';}}
+  function readout(){$('ro').textContent='AWST '+clock()+' \u00B7 AGE '+(window.SIM_AGE?window.SIM_AGE():13);}
+  window.addEventListener('online',function(){SIM_LIGHTS();});window.addEventListener('offline',function(){SIM_LIGHTS();});
+  document.addEventListener('simwx',function(){SIM_LIGHTS();});
+  setInterval(function(){if(!document.hidden)readout();},15000);
+
+  // ---- Simmie terminal (preview only: replies are canned, nothing is sent) ----
+  (function(){
+    var out=$('ttext'),inp=$('tinp'),blk=document.querySelector('.tin .blk'),sim=$('footSimmie');
+    var SPIN=['\u280B','\u2819','\u2839','\u2838','\u283C','\u2834','\u2826','\u2827','\u2807','\u280F'];
+    var REPLIES=['got it. (preview only, not sent)','thanks, Bonnie. this is just a preview, so nothing went anywhere.','noted. in the real version, Dad would see this.','understood. preview mode, so it stays on this page.'];
+    var IDLE=['all quiet on deck.','steady as she goes.','take your time.','proud of you.','no rush. pick whatever feels right.','one question at a time.'];
+    var busy=false,typingT=null,holdUntil=0,cycleN=0,factN=0;
+    function type(text,done){
+      clearInterval(typingT);
+      if(reduce){out.textContent=text;if(done)setTimeout(done,1200);return;}
+      var i=0;out.textContent='';sim.classList.add('talk');
+      typingT=setInterval(function(){if(document.hidden)return;i++;out.textContent=text.slice(0,i);if(i>=text.length){clearInterval(typingT);sim.classList.remove('talk');if(done)setTimeout(done,1600);}},32);
+    }
+    function seq(lines,done){var k=0;(function nx(){if(k>=lines.length){if(done)done();return;}type(lines[k++],nx);})();}
+    function measure(){ // keep the block cursor at the end of the typed text
+      var c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(inp).font;blk.style.setProperty('--cx',Math.min(c.measureText(inp.value).width,inp.clientWidth-8)+'px');
+    }
+    inp.addEventListener('input',measure);
+    inp.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;e.preventDefault();var v=inp.value.trim();inp.value='';measure();if(!v||busy)return;
+      busy=true;var f=0;clearInterval(typingT);
+      if(reduce){out.textContent='\u2026';}else{sim.classList.add('talk');typingT=setInterval(function(){out.textContent=SPIN[f++%SPIN.length];},90);}
+      setTimeout(function(){clearInterval(typingT);type(REPLIES[Math.floor(Math.random()*REPLIES.length)],function(){busy=false;holdUntil=Date.now()+30000;});},1500);
+    });
+    function factLine(){var fs=window.SIM_FACTS?window.SIM_FACTS(window.SIM_AGE()):[];if(!fs.length)return null;var f=fs[(factN++*7)%fs.length];return 'FACT \u00B7 '+f.source+': '+f.text;}
+    function report(done){
+      var L=['SYSTEM REPORT '+clock()+' AWST'],b=window.SIM_BEACON;
+      L.push('rebella: '+(b&&b.state!=='chk'?b.label:'n/a'));
+      var pA=fetch('https://edgerequals.github.io/rebella/sitemap.xml',{cache:'no-cache'}).then(function(r){return r.ok?r.text():null;}).then(function(t){if(!t)return;var n=(t.match(/<loc>[^<]*\/articles\/[^<]+<\/loc>/g)||[]).length;if(n)L.push('articles: '+n+' published');}).catch(function(){});
+      var pS=fetch('https://edgerequals.github.io/rebella/moderation/pipeline-stats.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+        if(!j||!j.generated_at)return;var g=Date.parse(j.generated_at);if(!(g>0)||Date.now()-g>3*3600*1000)return;
+        var parts=[];if(j.passed!=null)parts.push(j.passed+' passed filters');if(j.waiting!=null)parts.push(j.waiting+' waiting for Bonnie');
+        if(parts.length)L.push('pipeline: '+parts.join(' \u00B7 '));
+        try{L.push('last scan: '+new Date(g).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Australia/Perth'})+' AWST');}catch(e){}
+      }).catch(function(){});
+      Promise.all([pA,pS]).then(function(){
+        L.push('age dial: '+window.SIM_AGE()+(window.SIM_AGE_SRC==='url'?' (preview ?age)':''));
+        var w=window.SIM_WX||{};if(w.status==='ok'&&w.cond&&!w.forced)L.push('perth: '+(w.temp!=null?Math.round(w.temp)+'\u00B0, ':'')+w.say);
+        seq(L,done);
+      });
+    }
+    function idle(){
+      if(document.hidden||busy||document.activeElement===inp||Date.now()<holdUntil){setTimeout(idle,3000);return;}
+      cycleN++;var next=function(){setTimeout(idle,7000);};
+      if(cycleN%4===0){report(next);return;}
+      if(cycleN%4===2){var f=factLine();if(f){type(f,next);return;}}
+      var w=window.SIM_WX||{},pool=IDLE.slice();if(w.status==='ok'&&w.say&&!w.forced)pool.push('perth is '+w.say+'.');
+      type(pool[(cycleN*5)%pool.length],next);
+    }
+    out.textContent='hello, Bonnie.';setTimeout(idle,4000);
+  })();
+
   // ---- Quiz state (memory only) ----
   var $=function(id){return document.getElementById(id);};
   var state,qi,simLastQ=-1;
   function reset(){state=PAIRS.map(function(p){var th=p.yn==='age'?'teen':'weather';return p.yn?{yn:p.yn,opts:[O(C.yes,'\uD83D\uDC4D','#C6E9D2',th),O(C.no,'\uD83D\uDC4E','#F8C8D5',th)],theme:th,pick:null,notes:[]}:{opts:[p[0],p[1]],theme:p[2],pick:null,notes:[]};});qi=0;}
-  function show(id){['start','quiz','summary'].forEach(function(s){$(s).hidden=(s!==id);});window.scrollTo(0,0);}
+  function show(id){['start','quiz','summary'].forEach(function(s){$(s).hidden=(s!==id);});window.scrollTo(0,0);if(window.SIM_LIGHTS)SIM_LIGHTS();}
   function render(){
     var s=state[qi];
     $('stars').innerHTML=state.map(function(x,i){return '<i class="'+(i<qi?'done':i===qi?'now':'')+'"></i>';}).join('');
@@ -561,6 +695,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     $('back').disabled=$('back2').disabled=(qi===0);
     theme(s.theme);
     if(qi!==simLastQ){simLastQ=qi;simHop();}
+    SIM_LIGHTS();
   }
   function next(){if(qi<state.length-1){qi++;render();}else summary();}
   function summary(){
@@ -601,7 +736,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     state[qi].notes.push(v);render();$('saved').textContent=C.saved;};
   $('back').onclick=$('back2').onclick=function(){if(qi>0){qi--;render();}};
   $('skip').onclick=next;
-  reset();theme('teen');
+  reset();theme('teen');SIM_LIGHTS();readout();
 })();
 </script>
 </body>
