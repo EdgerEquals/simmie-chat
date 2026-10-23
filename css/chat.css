@@ -47,6 +47,7 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 .msg.failed{background:#FDE2E2;border:2px dashed #C0392B}
 .msg .retry{font:inherit;font-size:.8rem;margin-left:6px;background:none;border:0;color:#A1173F;text-decoration:underline;cursor:pointer;padding:0}
 .typing{padding:4px 16px 6px;font-size:.88rem;color:var(--muted)}
+.typing.active{color:var(--ink,#333);font-weight:700}
 .dots{display:inline-flex;gap:3px;vertical-align:middle;margin-right:4px}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.35;animation:b 1.2s infinite}
 .dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}

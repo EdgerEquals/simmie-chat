@@ -14,7 +14,7 @@
   let key = null;       // CryptoKey
   let cfg = null;       // decrypted config {relay:{base,topic}, repo, branch}
   const msgs = new Map(); // id -> {id, ts, from, text, state}
-  let pollTimer = null, lastSentAt = 0, es = null, lastLogText = '';
+  let pollTimer = null, lastSentAt = 0, es = null, lastLogText = '', lastLiveId = '', typingUntil = 0, esRetry = null;
 
   async function boot() {
     try {
@@ -51,9 +51,14 @@
 
   $('lock-btn').addEventListener('click', () => {
     sessionStorage.removeItem(SKEY); key = null; cfg = null; msgs.clear(); $('log').innerHTML = '';
-    clearTimeout(pollTimer); if (es) { es.close(); es = null; }
-    show('login'); $('pw').focus();
+    lockOut('');
   });
+  function lockOut(msg) {
+    sessionStorage.removeItem(SKEY); key = null; cfg = null; msgs.clear(); $('log').innerHTML = ''; lastLogText = '';
+    clearTimeout(pollTimer); stopLive();
+    const err = $('login-error'); if (msg) { err.textContent = msg; err.hidden = false; } else err.hidden = true;
+    show('login'); $('pw').focus();
+  }
 
   async function openChat() {
     show('chat'); render();
@@ -105,38 +110,63 @@
     if (text && text !== lastLogText) {
       lastLogText = text;
       try {
-        const data = JSON.parse(text);
+        const data = JSON.parse(text); let ok = 0;
         for (const box of data.entries || []) {
-          try { addMsg(await C.decryptJSON(key, box), 'logged'); } catch (e) {}
+          try { addMsg(await C.decryptJSON(key, box), 'logged'); ok++; } catch (e) {}
         }
+        if ((data.entries || []).length && !ok && await passwordChanged()) return;
         await savePending(); render();
       } catch (e) {}
     }
     schedulePoll();
   }
+  // If nothing in the log opens with our key, check whether the password was changed (new config) and ask again.
+  async function passwordChanged() {
+    try {
+      const r = await fetch('config.enc.json?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return false;
+      const m = await r.json();
+      try { await C.decryptJSON(key, m.config); return false; } catch (e) {}
+      meta = m; lockOut('The chat password has been changed. Type the new one to open your chat.'); return true;
+    } catch (e) { return false; }
+  }
   function schedulePoll() {
     clearTimeout(pollTimer);
     if (!key || document.hidden) return;
-    const recent = Date.now() - lastSentAt < 10 * 60 * 1000;
-    pollTimer = setTimeout(pollLog, recent ? 15000 : 20000);
+    const since = Date.now() - lastSentAt;
+    pollTimer = setTimeout(pollLog, since < 2 * 60 * 1000 ? 5000 : since < 10 * 60 * 1000 ? 15000 : 20000);
   }
   document.addEventListener('visibilitychange', () => {
     if (!key) return;
-    if (document.hidden) clearTimeout(pollTimer); else pollLog();
+    if (document.hidden) { clearTimeout(pollTimer); return; }
+    startLive(true); pollLog();   // phone came back: reconnect live + check now
   });
+  window.addEventListener('online', () => { if (key) { startLive(true); pollLog(); } });
 
   // ---------- live relay pings (instant replies) ----------
-  function startLive() {
-    if (es || !cfg.relay || !window.EventSource) return;
+  function stopLive() { clearTimeout(esRetry); if (es) { es.close(); es = null; } }
+  function startLive(force) {
+    if (!key || !cfg || !cfg.relay || !window.EventSource) return;
+    if (es && !force && es.readyState !== 2) return;
+    if (es && force && es.readyState === 1) return;   // already open
+    stopLive();
     try {
-      es = new EventSource(`${cfg.relay.base}/${cfg.relay.topic}/sse`);
+      const since = lastLiveId ? '?since=' + encodeURIComponent(lastLiveId) : '';
+      es = new EventSource(`${cfg.relay.base}/${cfg.relay.topic}/sse${since}`);
       es.onmessage = async (ev) => {
         try {
           const outer = JSON.parse(ev.data); if (outer.event !== 'message') return;
+          if (outer.id) lastLiveId = outer.id;
           const m = await C.decryptJSON(key, JSON.parse(outer.message));
-          if (m.from === 'simmie') { addMsg(m, 'logged'); render(); }
+          if (m.type === 'typing') {
+            if (Date.now() - (+m.ts || 0) < 5 * 60 * 1000) { typingUntil = Date.now() + 3 * 60 * 1000; render(); }
+            return;
+          }
+          if (m.from === 'simmie') { addMsg(m, 'logged'); typingUntil = 0; render(); }
           else if (m.from === 'daughter' && msgs.has(m.id) && msgs.get(m.id).state === 'pending') { msgs.get(m.id).state = 'sent'; render(); }
         } catch (e) {}
+      };
+      es.onerror = () => {   // browser retries by itself unless closed; if closed, reopen with ?since=
+        if (es && es.readyState === 2) { clearTimeout(esRetry); esRetry = setTimeout(() => startLive(true), 3000); }
       };
     } catch (e) {}
   }
@@ -183,7 +213,7 @@
     log.innerHTML = '';
     if (!list.length) {
       const e = document.createElement('div'); e.className = 'empty';
-      e.innerHTML = '<p class="big">Hi! 👋</p><p>Type a message below and Simmie will reply here. Replies usually take a minute or two.</p>';
+      e.innerHTML = '<p class="big">Hi! 👋</p><p>Type a message below and Simmie will reply here. Replies usually take under a minute.</p>';
       log.appendChild(e);
     }
     let day = '';
@@ -204,10 +234,13 @@
     const lastMine = list.filter((m) => m.from !== 'simmie' && m.state !== 'failed').pop();
     const lastTheirs = list.filter((m) => m.from === 'simmie').pop();
     const waiting = lastMine && (!lastTheirs || lastTheirs.ts < lastMine.ts) && Date.now() - lastMine.ts < 20 * 60 * 1000;
+    const typing = waiting && Date.now() < typingUntil;
+    $('typing-text').textContent = typing ? 'Simmie is typing…' : 'Waiting for Simmie… replies usually take under a minute';
+    $('typing').classList.toggle('active', typing);
     $('typing').hidden = !waiting;
     log.scrollTop = log.scrollHeight;
   }
-  setInterval(() => { if (key) render(); }, 60000);
+  setInterval(() => { if (key) render(); }, 30000);
 
   boot();
 })();
