@@ -263,17 +263,63 @@
     });
   }
 
-  // ---------- Ask Dad: a small non-modal transmission window (the one pop-up) ----------
-  // Same encrypted relay path as the talk box; the plain message is tagged type:"ask-dad".
+  // ---------- Ask Dad: ONE floating, draggable amber button + a small non-modal transmission window ----------
+  // Starts in the header beside Lock; drag (pointer events, > 6 px) to move it; clamped to the screen and re-clamped on
+  // resize/rotation; position remembered in localStorage. Tap opens the window next to it. The plain message is tagged
+  // type:"ask-dad" and goes the same encrypted relay path as the talk box (in the preview copy nothing is sent).
   function dadWire(){
     var btn = $("#ask-dad"), panel = $("#dad-panel"), ta = $("#dp-text"), st = $("#dp-status"), keyRow = $("#dp-keyrow"), key = $("#dp-key");
     if(!btn || !panel) return;
-    var closeT = null;
+    var POS = PREVIEW ? "preview-askdad-pos" : "bd-askdad-pos", closeT = null, pos = null, drag = null;
+    function topMin(){ var b = document.querySelector(".preview-band"); return b ? Math.ceil(b.getBoundingClientRect().bottom) + 4 : 6; }
+    function clamp(p){
+      var w = btn.offsetWidth || 90, h = btn.offsetHeight || 30;
+      return {x:Math.min(Math.max(6, p.x), innerWidth - w - 6), y:Math.min(Math.max(topMin(), p.y), innerHeight - h - 6)};
+    }
+    function home(){   // the reserved spot beside Lock in the top bar
+      var s = $("#ad-spot"), r = s ? s.getBoundingClientRect() : null, h = btn.offsetHeight || 30;
+      return r && r.width ? {x:r.left, y:r.top + (r.height - h)/2} : {x:innerWidth - (btn.offsetWidth || 90) - 110, y:topMin()};
+    }
+    function place(p){ pos = clamp(p); btn.style.transform = "translate(" + Math.round(pos.x) + "px," + Math.round(pos.y) + "px)"; if(!panel.hidden) placePanel(); }
+    function load(){ try{ var p = JSON.parse(localStorage.getItem(POS)); if(p && isFinite(p.x) && isFinite(p.y)) return p; }catch(e){} return null; }
+    function start(){ place(load() || home()); btn.classList.add("ready"); }
+    function placePanel(){   // next to the button, fully on screen: below if it fits, else above; clamped sideways
+      var r = btn.getBoundingClientRect(), pw = panel.offsetWidth, ph = panel.offsetHeight, m = 8;
+      var y = r.bottom + m; if(y + ph > innerHeight - m) y = Math.max(topMin(), r.top - ph - m);
+      if(y + ph > innerHeight - m) y = Math.max(topMin(), innerHeight - ph - m);
+      var x = Math.min(Math.max(m, r.right - pw), innerWidth - pw - m);
+      panel.style.left = Math.round(x) + "px"; panel.style.top = Math.round(y) + "px";
+    }
+    var rT = null; function reclamp(){ clearTimeout(rT); rT = setTimeout(function(){ if(pos) place(pos); }, 120); }
+    window.addEventListener("resize", reclamp); window.addEventListener("orientationchange", function(){ setTimeout(reclamp, 350); });
+    btn.addEventListener("pointerdown", function(e){
+      if(e.button > 0) return; drag = {id:e.pointerId, sx:e.clientX, sy:e.clientY, ox:pos.x, oy:pos.y, moving:false};
+      try{ btn.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    btn.addEventListener("pointermove", function(e){
+      if(!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+      if(!drag.moving && Math.hypot(dx, dy) > 6){ drag.moving = true; btn.classList.add("dragging"); }
+      if(drag.moving){ e.preventDefault(); place({x:drag.ox + dx, y:drag.oy + dy}); }
+    });
+    function endDrag(e){
+      if(!drag || (e && e.pointerId !== drag.id)) return;
+      if(drag.moving){ btn.classList.remove("dragging"); try{ localStorage.setItem(POS, JSON.stringify(pos)); }catch(err){} LOG("ask dad moved"); }
+      else if(e && e.type === "pointerup") toggle();   // a tap (no drag) opens/closes; touch browsers don't always follow a drag with a click
+      drag = null;
+    }
+    btn.addEventListener("pointerup", endDrag); btn.addEventListener("pointercancel", endDrag);
+    function toggle(){ panel.hidden ? open() : close(); }
+    btn.addEventListener("click", function(e){ if(e.detail === 0) toggle(); });   // keyboard (Enter/Space) only; pointers use pointerup
+    btn.addEventListener("keydown", function(e){   // arrow keys move it too
+      var k = {ArrowLeft:[-16,0], ArrowRight:[16,0], ArrowUp:[0,-16], ArrowDown:[0,16]}[e.key]; if(!k || !pos) return;
+      e.preventDefault(); place({x:pos.x + k[0], y:pos.y + k[1]}); try{ localStorage.setItem(POS, JSON.stringify(pos)); }catch(err){}
+    });
     function open(){
-      clearTimeout(closeT); panel.hidden = false; panel.classList.remove("sent","closing"); void panel.offsetWidth; panel.classList.add("opening");
+      clearTimeout(closeT); panel.hidden = false; panel.classList.remove("sent","closing"); placePanel(); void panel.offsetWidth; panel.classList.add("opening");
       btn.setAttribute("aria-expanded","true"); st.textContent = "";
-      ensureKey().catch(function(){ return false; }).then(function(ok){ keyRow.hidden = !!ok; });
-      setTimeout(function(){ ta.focus(); }, RM.matches ? 0 : 280);
+      ensureKey().catch(function(){ return false; }).then(function(ok){ keyRow.hidden = !!ok; placePanel(); });
+      setTimeout(function(){ ta.focus({preventScroll:true}); }, RM.matches ? 0 : 280);
     }
     function close(){
       clearTimeout(closeT); if(panel.hidden) return;
@@ -282,39 +328,59 @@
       if(RM.matches) done(); else { panel.classList.add("closing"); setTimeout(done, 220); }
       if(panel.contains(document.activeElement) || document.activeElement === document.body) btn.focus({preventScroll:true});
     }
-    btn.addEventListener("click", function(){ panel.hidden ? open() : close(); });
+    // the biplane: takes off from the window and climbs off screen, trailing smoke puffs (transform + opacity only)
+    function fly(done){
+      if(RM.matches || !document.body.animate){ done(); return; }
+      var tpl = $("#biplane-tpl"), r = panel.getBoundingClientRect(); if(!tpl){ done(); return; }
+      var plane = tpl.content.firstElementChild.cloneNode(true); document.body.appendChild(plane);
+      var x0 = r.left + 30, y0 = r.bottom - 40, dx = innerWidth - x0 + 80, dy = -(y0 + 80), T = 2000, t0 = performance.now(), puffs = 0, layer = document.createElement("div");
+      layer.className = "bp-smoke"; layer.setAttribute("aria-hidden","true"); document.body.appendChild(layer);
+      var path = function(k){ return {x:x0 + dx * k, y:y0 + dy * k * k + Math.sin(k * 9) * 4}; };   // gentle climb with a bob
+      var frames = []; for(var i = 0; i <= 10; i++){ var k = i/10, p = path(k), bank = -8 - 14 * k + Math.sin(k * 7) * 4;
+        frames.push({transform:"translate(" + p.x.toFixed(1) + "px," + p.y.toFixed(1) + "px) rotate(" + bank.toFixed(1) + "deg)", opacity:i === 10 ? 0 : 1}); }
+      var a = plane.animate(frames, {duration:T, easing:"cubic-bezier(.35,.05,.6,1)", fill:"forwards"});
+      var spawn = setInterval(function(){
+        if(puffs >= 25 || document.hidden) return;
+        var m = new DOMMatrixReadOnly(getComputedStyle(plane).transform), tail = m.transformPoint(new DOMPoint(4, 20)), s = document.createElement("span"); puffs++;
+        s.className = "bp-puff"; layer.appendChild(s);
+        var wx = (Math.random() - .5) * 14, wy = -6 - Math.random() * 10, sc = 2.2 + Math.random();
+        s.animate([{transform:"translate(" + tail.x.toFixed(1) + "px," + tail.y.toFixed(1) + "px) scale(.5)", opacity:.85},
+                   {transform:"translate(" + (tail.x - 10 + wx).toFixed(1) + "px," + (tail.y + wy).toFixed(1) + "px) scale(" + sc.toFixed(2) + ")", opacity:0}],
+                  {duration:1200, easing:"ease-out", fill:"forwards"}).onfinish = function(){ s.remove(); };
+      }, 80);
+      a.onfinish = function(){ clearInterval(spawn); plane.remove(); setTimeout(function(){ layer.remove(); }, 1300); };
+      setTimeout(done, 1500);   // the window closes while the plane is still climbing away
+    }
     $("#dp-x").addEventListener("click", close);
     panel.addEventListener("keydown", function(e){ if(e.key === "Escape"){ e.preventDefault(); close(); } });
     [].forEach.call(panel.querySelectorAll(".dp-chip"), function(c){ c.addEventListener("click", function(){ ta.value = c.textContent; ta.focus(); }); });
     ta.addEventListener("keydown", function(e){ if(e.key === "Enter" && !e.shiftKey && !e.isComposing && window.matchMedia("(pointer:fine)").matches){ e.preventDefault(); $("#dp-form").requestSubmit(); } });
+    function sent(label){
+      ta.value = ""; panel.classList.add("sent"); st.textContent = label;
+      fly(function(){ closeT = setTimeout(close, RM.matches ? 2500 : 300); });
+    }
     $("#dp-form").addEventListener("submit", async function(e){
       e.preventDefault();
       var text = ta.value.trim(); if(!text){ st.textContent = "type something first"; return; }
       var sendBtn = $("#dp-send"); sendBtn.disabled = true; st.textContent = "transmitting\u2026";
       try{
+        if(PREVIEW){ await new Promise(function(r){ setTimeout(r, 400); }); LOG("preview: not sent"); sent("Sent to Dad (preview, not sent)"); return; }
         if(!(await ensureKey())){
-          if(!key.value.trim()){ keyRow.hidden = false; key.focus(); st.textContent = "chat password needed once for this tab"; return; }
+          if(!key.value.trim()){ keyRow.hidden = false; placePanel(); key.focus(); st.textContent = "chat password needed once for this tab"; return; }
           try{ await unlock(key.value); }catch(err){ key.value = ""; st.textContent = "that password didn't open your chat"; key.focus(); return; }
           key.value = ""; keyRow.hidden = true;
-        }
-        if(PREVIEW){
-          await new Promise(function(r){ setTimeout(r, 500); });
-          ta.value = ""; LOG("preview: not sent");
-          panel.classList.add("sent"); st.textContent = "preview, not sent";
-          closeT = setTimeout(close, RM.matches ? 3500 : 2600); return;
         }
         var m = {id:"d-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8), ts:Date.now(), from:"daughter", type:"ask-dad", text:text, source:"moderation"};
         var body = JSON.stringify(Object.assign({v:1}, await SC.encryptJSON(chat.key, m)));
         if(body.length > 3800) throw new Error("too long");
         var r = await fetch(chat.cfg.relay.base + "/" + chat.cfg.relay.topic, {method:"POST", body:body, headers:{"Content-Type":"text/plain"}});
         if(!r.ok) throw new Error("HTTP " + r.status);
-        ta.value = ""; LOG("message sent to Dad");
-        panel.classList.add("sent"); st.textContent = "Sent to Dad \u2713";
-        closeT = setTimeout(close, RM.matches ? 3500 : 2600);
+        LOG("message sent to Dad"); sent("Sent to Dad \u2713");
       }catch(err){ st.textContent = String(err.message) === "too long" ? "too long - try a shorter one" : "didn't send - try again"; }
       finally{ sendBtn.disabled = false; }
     });
     document.addEventListener("rebella:locked", close);
+    requestAnimationFrame(start);
   }
 
   document.addEventListener("visibilitychange", function(){ if(!document.hidden && job && !timer && job.step) timer = setTimeout(job.step, 200); });

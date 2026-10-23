@@ -11,11 +11,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,700;1,400&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
 <link rel="stylesheet" href="css/mod.css?v=5">
 <link rel="stylesheet" href="css/hud.css?v=1">
+<link rel="stylesheet" href="css/night.css?v=1">
 <script src="js/config.js?v=2"></script>
 <script src="js/crypto.js?v=3"></script>
 <script src="js/mlog.js?v=1" defer></script>
 <script src="js/hud.js?v=1" defer></script>
-<script src="js/talk.js?v=1" defer></script>
+<script src="js/talk.js?v=2" defer></script>
 <script src="js/interludes.js?v=1" defer></script>
 <script src="js/app.js?v=7" defer></script>
 </head>
@@ -48,6 +49,7 @@
   </div>
   <div class="topbar"><div class="container">
     <span class="tagline">Keep Rebella safe, fun and cool</span>
+    <span id="ad-spot" class="ad-spot" aria-hidden="true"></span>
     <button id="lock" class="lockbtn" type="button" aria-label="Lock dashboard">&#128274; Lock</button>
   </div></div>
   <!-- weather chip + age-linked fun-fact ticker -->
@@ -94,6 +96,21 @@
     <span>Bonnie's Dashboard</span><span>Decisions are sent securely to Simmie's publisher</span>
   </div></footer>
 
+  <!-- Ask Dad: one floating, draggable button (starts beside Lock; drag to move; arrow keys too) -->
+  <button id="ask-dad" class="ask-dad" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="dad-panel" aria-label="Ask Dad (drag to move)"><span class="ad-orbit" aria-hidden="true"><span class="ad-sat">🛰️</span></span><span class="ad-ico" aria-hidden="true">📡</span> Ask Dad</button>
+  <template id="biplane-tpl"><svg class="biplane" viewBox="0 0 48 30" width="64" height="40" aria-hidden="true" focusable="false">
+    <g stroke="#2A9D9F" stroke-width="1.2" stroke-linejoin="round">
+      <rect x="9" y="3" width="28" height="4" rx="2" fill="#F8CFDB"/>
+      <line x1="15" y1="7" x2="15" y2="17"/><line x1="31" y1="7" x2="31" y2="17"/><line x1="15" y1="7" x2="31" y2="17" stroke-width=".8"/>
+      <path d="M2 12 L8 9 L9 15 Z" fill="#F2A541"/><path d="M1 8 L5 8 L8 13 L4 13 Z" fill="#F8CFDB"/>
+      <path d="M6 13 Q22 8 38 11 Q41 14 38 17 Q22 19 6 15 Z" fill="#FBE7B0"/>
+      <rect x="9" y="16" width="28" height="4" rx="2" fill="#F8CFDB"/>
+      <circle cx="40" cy="14" r="2.6" fill="#F2A541"/>
+      <line x1="20" y1="20" x2="18" y2="25"/><line x1="26" y1="20" x2="28" y2="25"/><circle cx="18" cy="26" r="2" fill="#14555A"/><circle cx="28" cy="26" r="2" fill="#14555A"/>
+      <circle cx="22" cy="12" r="1.6" fill="#14555A" stroke="none"/>
+    </g>
+    <g class="bp-prop"><rect x="42.2" y="6" width="1.6" height="16" rx=".8" fill="#DCD0F2" opacity=".85"/></g>
+  </svg></template>
   <!-- Ask Dad transmission window (the one pop-up; Esc or the close key dismisses it) -->
   <section id="dad-panel" class="dad-panel" role="dialog" aria-modal="false" aria-labelledby="dad-title" hidden>
     <div class="dp-head"><h2 id="dad-title" class="dp-title">transmit to Dad</h2><button id="dp-x" class="dp-x" type="button" aria-label="Close, don't send">×</button></div>
@@ -115,7 +132,7 @@
   <!-- quiet fixed footer bar: Simmie terminal + control strip + weather -->
   <div id="wx-foot" class="wx-foot" role="region" aria-label="Simmie and status">
     <div id="tty" class="tty">
-      <div class="tty-bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span aria-hidden="true">simmie — tty</span><em id="tty-mlog" class="tty-mlog" aria-hidden="true"></em><button id="ask-dad" class="ask-dad" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="dad-panel">Ask Dad<span class="ad-orbit" aria-hidden="true"><span class="ad-sat">🛰️</span></span></button></div>
+      <div class="tty-bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span aria-hidden="true">simmie — tty</span><em id="tty-mlog" class="tty-mlog" aria-hidden="true"></em></div>
       <div class="tty-body">
         <span class="tty-cloudwrap"><span class="cl-orbit" aria-hidden="true"><span>🛰️</span></span><svg id="tty-cloud" class="tty-cloud" viewBox="0 0 196 172" aria-hidden="true" focusable="false"><defs><clipPath id="tty-cl"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></clipPath><linearGradient id="tty-sh" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g class="cl-body"><g fill="#8C6640"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></g><g clip-path="url(#tty-cl)"><rect class="cl-shine" x="-120" y="0" width="90" height="172" fill="url(#tty-sh)"/></g><g class="cl-eyes" fill="#1E1E1E"><rect x="93.10" y="44.4" width="18" height="42" rx="9.0" transform="rotate(-27 102.1 65.4)"/><rect x="130.65" y="34.5" width="16.5" height="42" rx="8.25" transform="rotate(-27 138.9 55.5)"/></g></g></svg></span>
         <button id="tty-open" class="tty-line" type="button" aria-label="Simmie says hello. Tap to talk to Simmie"><span class="tty-p">simmie&gt;</span> <span id="tty-out" class="tty-out"></span><span class="tty-hint" aria-hidden="true">tap to talk to Simmie</span></button>
