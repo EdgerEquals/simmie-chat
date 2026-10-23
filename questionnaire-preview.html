@@ -202,9 +202,16 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   .stars i{width:17px;height:17px}
 }
 @media(prefers-reduced-motion:reduce){.rain{display:none}.tile .sp{display:none!important}.tile.swap{animation:none}.btn,.tile{transition:none}}
+/* ---- Space loop background (trial, preview only): fixed full-page video at 30% behind all content; poster only for reduced motion ---- */
+.bgloop,.bgloop-still{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none;opacity:.3}
+.bgloop{object-fit:cover}
+.bgloop-still{display:none;background:url("media/space-loop-poster.webp") center/cover no-repeat}
+@media(prefers-reduced-motion:reduce){.bgloop{display:none}.bgloop-still{display:block}}
 </style>
 </head>
 <body>
+<video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
+<script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();})();</script>
 <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
 <main class="wrap">
