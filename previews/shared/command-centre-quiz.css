@@ -1,0 +1,51 @@
+/* PREVIEW ONLY (questionnaire preview): command-centre look, Danny 2026-10-24 01:14 AWST. Tokens in command-centre.css.
+   Emerald "Matrix code" green replaces the old forest/teal greens (#0E7C6B code drift, #3FD3C0 status lights, #5EE6C0 terminal,
+   #2A8FA3 panel rule); less white: the light Yes/No tiles and the sky/sand buttons become dark panels with thin emerald or amber
+   hairlines; sand text, never white. Yes/No buttons stay. The volume note and sound switch (bonnie-sound) are untouched. */
+:root{--bg:#0B0F10;--bg-top:#1A2016;--surface:#161D21;--surface-2:#0E1518;--line:rgba(25,255,156,.30);--teal-hi:#00E676;--code-light:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22240%22%3E%3Cg font-family=%22monospace%22 font-size=%2211%22 fill=%22%2319FF9C%22%3E%3Ctext x=%226%22 y=%2214%22%3E%5Bok%5D worker-3 heartbeat 200 12ms%3C/text%3E%3Ctext x=%226%22 y=%2234%22%3EGET /api/v1/items%3Fpage=4 200%3C/text%3E%3Ctext x=%226%22 y=%2254%22%3Ecache hit ratio=0.93 keys=4096%3C/text%3E%3Ctext x=%226%22 y=%2274%22%3Ejob%234821 queued -%3E running%3C/text%3E%3Ctext x=%226%22 y=%2294%22%3Esync batch 17/40 done%3C/text%3E%3Ctext x=%226%22 y=%22114%22%3EINFO tick 0x3fa2 latency=8ms%3C/text%3E%3Ctext x=%226%22 y=%22134%22%3Eretry 1/3 ... ok%3C/text%3E%3Ctext x=%226%22 y=%22154%22%3Ebuild step 5/9 passed%3C/text%3E%3Ctext x=%226%22 y=%22174%22%3Eping node-b 4ms ttl=58%3C/text%3E%3Ctext x=%226%22 y=%22194%22%3EINFO pool size=12 idle=7%3C/text%3E%3Ctext x=%226%22 y=%22214%22%3E%5Bok%5D checksum 9f3c a1e0 7b21%3C/text%3E%3Ctext x=%226%22 y=%22234%22%3Eflush queue len=0%3C/text%3E%3C/g%3E%3C/svg%3E");--code-dark:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22240%22%3E%3Cg font-family=%22monospace%22 font-size=%2211%22 fill=%22%230B8F5A%22%3E%3Ctext x=%226%22 y=%2214%22%3E%5Bok%5D worker-3 heartbeat 200 12ms%3C/text%3E%3Ctext x=%226%22 y=%2234%22%3EGET /api/v1/items%3Fpage=4 200%3C/text%3E%3Ctext x=%226%22 y=%2254%22%3Ecache hit ratio=0.93 keys=4096%3C/text%3E%3Ctext x=%226%22 y=%2274%22%3Ejob%234821 queued -%3E running%3C/text%3E%3Ctext x=%226%22 y=%2294%22%3Esync batch 17/40 done%3C/text%3E%3Ctext x=%226%22 y=%22114%22%3EINFO tick 0x3fa2 latency=8ms%3C/text%3E%3Ctext x=%226%22 y=%22134%22%3Eretry 1/3 ... ok%3C/text%3E%3Ctext x=%226%22 y=%22154%22%3Ebuild step 5/9 passed%3C/text%3E%3Ctext x=%226%22 y=%22174%22%3Eping node-b 4ms ttl=58%3C/text%3E%3Ctext x=%226%22 y=%22194%22%3EINFO pool size=12 idle=7%3C/text%3E%3Ctext x=%226%22 y=%22214%22%3E%5Bok%5D checksum 9f3c a1e0 7b21%3C/text%3E%3Ctext x=%226%22 y=%22234%22%3Eflush queue len=0%3C/text%3E%3C/g%3E%3C/svg%3E")}
+body{background:radial-gradient(120% 55% at 50% 0%,rgba(38,46,31,.85),transparent 70%),linear-gradient(180deg,#1A2016 0,#12171A 40%,#0B0F10 100%) fixed #0B0F10}
+body::before{background:var(--cc-grid),radial-gradient(ellipse at 80% 0,rgba(242,165,65,.08),transparent 55%),linear-gradient(180deg,#1A2016 0,#12171A 40%,#0B0F10 100%)}
+/* panels: dark gunmetal, emerald hairline, HUD label */
+.panel{background:rgba(22,29,33,.92);border:1px solid var(--cc-hair-em);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45)}
+#start.panel,#quiz.panel,#summary.panel{border-top:2px solid var(--cc-emerald-glow);--scrim:rgba(17,23,26,.6)}
+#start.panel::before,#quiz.panel::before,#summary.panel::before{opacity:.09}
+.panel .hud-lab{display:block;margin:-.6rem 0 .6rem;font:700 9.5px/1.2 var(--cc-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cc-emerald-glow)}
+/* buttons: no light fills; hairlines + sand text. Start = teal with an emerald rule, sand text. Send stays amber. */
+.btn,.reroll,.btnrow .btn.skip{background:#0E1A1E;color:var(--cc-sand);box-shadow:inset 0 0 0 1px var(--cc-hair-em)}
+.btnrow .bk{background:#0E1A1E;color:var(--cc-sand);box-shadow:inset 0 0 0 1px var(--cc-hair-am)}
+.btnrow .btn.send{background:var(--cc-amber);color:#24292E}
+.big{background:var(--cc-teal);color:var(--cc-sand);border:1px solid var(--cc-emerald-glow);box-shadow:0 5px 0 var(--cc-teal-deep),0 0 14px rgba(25,255,156,.22)}
+.big:active{box-shadow:0 2px 0 var(--cc-teal-deep)}
+.btnrow .btn,.btnrow .btn.skip,.yn #t0,.yn #t1{--scrim:rgba(17,23,26,.5)}
+.btnrow .btn.send{--scrim:rgba(242,165,65,.4)}
+.btnrow .btn::before,.big::before,.yn .tile::before{opacity:.10}
+/* choice tiles: their own topic colour stays (already darkened), plus an emerald hairline */
+.tile{border:1px solid var(--cc-hair-em);box-shadow:0 4px 0 rgba(0,0,0,.45)}
+.tile:hover{border-color:var(--cc-emerald-glow)}
+.tile.picked{border-color:var(--cc-amber)}
+/* Yes / No tiles (were sky and sand): dark panels, sand text, emerald / amber hairlines */
+.yn .tile{color:var(--cc-sand)}
+.yn #t0{background:var(--cc-emerald-deep)!important;border:1px solid var(--cc-emerald-glow)}
+.yn #t1{background:var(--cc-olive)!important;border:1px solid var(--cc-amber)}
+.yn .tile.picked{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--cc-amber)}
+/* progress stars + notes + summary */
+.stars i{background:#2A3136}.stars i.done{background:var(--cc-emerald-fill)}.stars i.now{background:var(--cc-amber)}
+.saved{color:var(--cc-emerald-glow)}
+textarea{background:#0B1215;border:1px solid var(--cc-hair-em);color:var(--cc-sand)}
+.notes li,.sum li{border-color:var(--cc-hair-em)}
+.sum .n{background:var(--cc-teal-deep);box-shadow:inset 0 0 0 1px var(--cc-emerald-glow)}
+.agenote{background:var(--cc-olive);border-left-color:var(--cc-amber)}
+/* header ticker + beacon */
+.tick{background:linear-gradient(90deg,#1A2016,#161D21);border:1px solid var(--cc-hair-em)}
+.tk{color:var(--cc-emerald-glow)}
+.beacon{background:#0B0F10}
+.beacon.live{--bc:#00E676}
+/* footer status strip + terminal: emerald */
+.foot{background:rgba(11,15,16,.97);border-top:1px solid var(--cc-hair-em)}
+.foot .lt:not(.warn):not(.bad):not(.idle) i{background:#00E676;box-shadow:0 0 6px #00E676}
+.foot .tty{background:#0B0F10;border:1px solid var(--cc-hair-em)}
+.ttybar{background:#161C1E;color:var(--cc-muted);letter-spacing:.12em}
+.ttybar i{background:#F2A541}.ttybar i:nth-child(2){background:#D6ECEF}.ttybar i:nth-child(3){background:#00E676}
+.ttyl,.tin input{color:var(--cc-emerald-glow)}
+.tin .blk{background:var(--cc-emerald-glow)}
+.lane .cli{color:var(--cc-emerald-glow)}

@@ -7,7 +7,10 @@
   const chat = document.getElementById('screen-chat'), composer = document.getElementById('send-form');
   if (!chat || !composer || !window.matchMedia) return;
   const mq = window.matchMedia('(orientation: landscape) and (pointer: coarse)');
-  const IDS = ['wx', 'lane-h', 'fact-ticker', 'lane-f', 'tty-dock', 'play'];   // order along the row
+  const IDS = ['wx', 'lane-h', 'fact-ticker', 'lane-f', 'play'];   // order along the row
+  // PREVIEW (Danny 01:14): Ask Dad must always be on screen, so the terminal (which carries the Ask Dad key) is no longer a
+  // segment of the sideways-scrolling row; it sits full width under the row, where the typing bar used to be.
+  const BELOW = ['tty-dock'];
   const strip = document.createElement('div');
   strip.id = 'ls-strip'; strip.className = 'ls-strip'; strip.setAttribute('role', 'group'); strip.setAttribute('aria-label', 'Simmie strip: weather, feed, terminal and play');
   const marks = new Map(); let on = false;
@@ -21,9 +24,14 @@
         const m = document.createComment('ls:' + id); el.parentNode.insertBefore(m, el); marks.set(id, m);
         el.classList.add('ls-seg'); strip.appendChild(el);
       });
+      BELOW.forEach((id) => {
+        const el = document.getElementById(id); if (!el) return;
+        const m = document.createComment('ls:' + id); el.parentNode.insertBefore(m, el); marks.set(id, m);
+        el.classList.add('ls-below'); strip.after(el);
+      });
       chat.classList.add('ls'); strip.scrollLeft = 0;
     } else {
-      IDS.forEach((id) => { const el = document.getElementById(id), m = marks.get(id); if (el && m) { m.parentNode.insertBefore(el, m); m.remove(); el.classList.remove('ls-seg'); } });
+      IDS.concat(BELOW).forEach((id) => { const el = document.getElementById(id), m = marks.get(id); if (el && m) { m.parentNode.insertBefore(el, m); m.remove(); el.classList.remove('ls-seg', 'ls-below'); } });
       marks.clear(); strip.remove(); chat.classList.remove('ls');
     }
     window.dispatchEvent(new CustomEvent('simmie:log', { detail: on ? 'layout: landscape strip' : 'layout: portrait' }));

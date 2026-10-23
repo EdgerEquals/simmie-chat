@@ -1,0 +1,66 @@
+/* PREVIEW ONLY (chat page review preview): command-centre look, Danny 2026-10-24 01:14 AWST. Tokens in ../../shared/command-centre.css.
+   Less white: every white/cream bubble, chip and input becomes a dark panel with a thin emerald or amber hairline and a
+   small HUD label; sand text. Emerald #19FF9C / #00E676 replaces the old terminal green #5EE6C0 / #3E8F7C.
+   Item 4: the big white typing bar with the raspberry play-style send button is gone; she types in the footer terminal
+   (simmie — tty: "tap to talk to Simmie"), the page's existing pathway, which uses the same send path. */
+html,body{background:#0B0F10!important}
+body{background-image:radial-gradient(120% 60% at 50% 0%,rgba(38,46,31,.65),transparent 70%),var(--cc-grid)!important;background-attachment:fixed}
+.chat{background:linear-gradient(180deg,rgba(31,38,43,.55),rgba(11,15,16,.0) 40%)!important}
+/* header: gunmetal band, emerald hairline, HUD caps */
+.chat-head{background:linear-gradient(180deg,#1F262B,#151B1E);border-bottom:1px solid var(--cc-hair-em)}
+.chat-head .name{color:var(--cc-sand);font-family:var(--cc-mono);font-size:1rem;letter-spacing:.12em;text-transform:uppercase}
+.chat-head .status{color:var(--cc-muted);font-family:var(--cc-mono);font-size:.7rem;letter-spacing:.06em}
+.chat-head #lock-btn{color:var(--cc-sand);border:1px solid var(--cc-hair-am);background:#151B1E}
+.pv-band{background:#F2A541;color:#24292E}
+/* bubbles */
+.msg{box-shadow:none;border-radius:6px 14px 14px 14px}
+.msg::before{display:block;font:700 9px/1.4 var(--cc-mono);letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+.msg.them{background:var(--cc-panel-2);border:1px solid var(--cc-hair-em);color:var(--cc-sand)}
+.msg.them:not(.dad)::before{content:"SIMMIE // RX";color:var(--cc-emerald-glow)}
+.msg.me{background:var(--cc-olive);border:1px solid rgba(242,165,65,.4);color:var(--cc-sand);border-radius:14px 6px 14px 14px}
+.msg.me::before{content:"BONNIE // TX";color:var(--cc-amber);text-align:right}
+.msg .meta{color:var(--cc-muted)}
+.msg.dad{background:var(--cc-teal-deep);border:1px solid var(--cc-hair-am);color:var(--cc-sand)}
+.msg.dad .sender{color:var(--cc-amber);font-family:var(--cc-mono);font-size:.7rem;letter-spacing:.16em}
+.msg.dad .sender::before{content:"\25B8 ";color:var(--cc-emerald-glow)}
+.msg.dad .meta{color:#BFD9DD}
+.msg .quote{color:var(--cc-muted)}
+.msg.failed{background:#2A1A1A;border:1px dashed #E5484D}
+.msg .retry{color:#FFB4A8}
+/* Yes / No (and Ask more) stay real buttons; dark with hairlines, picked = amber */
+.choice,.msg.dad .choice{background:#0E1A1E;color:var(--cc-sand);border:1px solid var(--cc-emerald-glow);font-family:var(--cc-mono);font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.choice:not(:disabled):hover,.msg.dad .choice:not(:disabled):hover,.msg.dad .choice.open,.choice.open{background:rgba(25,255,156,.14)}
+.choices.done .choice.picked,.msg.dad .choices.done .choice.picked{background:var(--cc-amber);border-color:var(--cc-amber);color:#24292E}
+.choice:focus-visible{outline:2px solid var(--cc-amber);outline-offset:2px}
+.choice-note{color:var(--cc-muted)}
+input[type=password],input[type=text],textarea,.msg.dad .ask-box textarea{background:#0B1215;color:var(--cc-sand);border:1px solid var(--cc-hair-em)}
+input:focus,textarea:focus{border-color:var(--cc-amber);box-shadow:0 0 0 2px rgba(242,165,65,.25)}
+textarea::placeholder,input::placeholder{color:#9FB3A8;opacity:1}
+.day{background:#1F262B;color:var(--cc-muted);border:1px solid var(--cc-hair-em-soft);font-family:var(--cc-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+.typing,.empty{color:var(--cc-muted)}.typing.active{color:var(--cc-sand)}
+.dots i{background:var(--cc-emerald-glow)}
+.dad-chip{background:var(--cc-teal-deep);border:1px solid var(--cc-hair-am)}
+/* item 4: no typing bar at the bottom (kept in the DOM, hidden, so the page script keeps its hooks) */
+#send-form.composer,.chat.ls #send-form.composer{display:none!important}
+/* terminal: emerald "Matrix code" text, gunmetal bar, emerald hairline */
+.tty{--tty-bg:#0B0F10;--tty-bar:#161C1E;--tty-text:#19FF9C;--tty-dim:#16B877;--tty-line:rgba(25,255,156,.28);border-color:var(--cc-hair-em);
+  box-shadow:0 0 0 1px rgba(25,255,156,.06),0 0 14px rgba(25,255,156,.08)}
+.tty-dot:nth-child(1){background:#F2A541}.tty-dot:nth-child(2){background:#D6ECEF}.tty-dot:nth-child(3){background:#00E676}
+.tty-title{color:var(--cc-muted);letter-spacing:.14em;text-transform:uppercase}
+.tty-mrow .ts{color:#C79A55}
+.tty-body:not(:focus-within) .tty-screen::after{content:""}
+/* Ask Dad window: emerald text */
+.ad-dlg{color:#19FF9C}
+.ad-dlg textarea.ad-text{color:#19FF9C;border-color:rgba(25,255,156,.35)}
+.ad-dlg textarea.ad-text::placeholder{color:#16B877}
+.ad-sent::before{color:#19FF9C}
+/* footer feed + play strip: HUD tones (was pink/lavender on black) */
+.chat .fact-ticker{border-top:1px solid var(--cc-hair-em-soft)!important}
+.chat .fact-ticker .ft-item{color:var(--cc-muted)}
+.chat .fact-ticker .ft-status .ft-lead{color:var(--cc-emerald-glow)}
+.chat .fact-ticker .ft-btn{background:#0E1A1E;color:var(--cc-sand);box-shadow:inset 0 0 0 1px var(--cc-hair-em)}
+.pl-hint{color:#9FB3A8}
+/* item 3: header avatar slot (placeholder, see shared/command-centre.css) */
+.chat-head .avatar-slot{margin-right:2px}
+/* landscape: the terminal (with Ask Dad) sits full width under the sideways row, clear of the notch and home bar */
+.chat.ls .tty-dock.ls-below .tty{margin:2px max(10px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}

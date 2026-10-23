@@ -25,10 +25,12 @@
 <link rel="stylesheet" href="css/msg-pulse.css?v=1">
 <link rel="stylesheet" href="css/play-meters.css?v=2">
 <link rel="stylesheet" href="css/landscape-strip.css?v=1">
-<link rel="stylesheet" href="css/chat-replies.css?v=1">
 <script src="../common/ad-plane.js?v=4" defer></script>
 <link rel="stylesheet" href="../shared/bonnie-music.css?v=1">
 <link rel="stylesheet" href="../shared/bonnie-sound.css?v=1">
+<link rel="stylesheet" href="../shared/command-centre.css?v=1">
+<link rel="stylesheet" href="../shared/music-glow.css?v=1">
+<link rel="stylesheet" href="css/command-centre.css?v=1">
 </head>
 <body>
 <main id="app">
@@ -37,7 +39,8 @@
     <p class="pv-band" role="note">Preview for Dad, not Bonnie's real chat page</p>
     <header class="chat-head">
       <div class="who">
-        <div class="avatar" aria-hidden="true">S</div>
+        <!-- PLACEHOLDER: Danny's dancing-around logo/avatar goes here (not designed yet). Dad's world mark stands in. -->
+        <div id="avatar-slot" class="avatar-slot" data-placeholder="dancing-avatar" role="img" aria-label="Avatar placeholder: Dad's logo, dancing avatar coming soon" title="Placeholder: Danny's dancing logo/avatar goes here"><span class="as-dance" aria-hidden="true"><img src="../dad-mark/dad-mark.svg?v=2" width="30" height="30" alt=""></span><span class="as-tag" aria-hidden="true">TBD</span></div>
         <div><div class="name">Simmie</div><div id="status" class="status">Replies usually take under a minute</div></div>
       </div>
       <span id="wx" class="wx" role="img" hidden></span>
@@ -73,10 +76,11 @@
 <script src="js/fact-send.js?v=phi1"></script>
 <script src="js/msg-pulse.js?v=2"></script>
 <script src="js/play-meters.js?v=2"></script>
-<script src="js/landscape-strip.js?v=1"></script>
-<script src="js/chat-replies.js?v=1" data-inbox-mode="preview" data-mock="../mock/inbox-mock.json"></script>
+<script src="js/landscape-strip.js?v=2"></script>
+<!-- Chat | Replies toggle removed from the top (Danny 01:14): js/chat-replies.js is no longer loaded here -->
 <script src="../shared/bonnie-music.js?v=1" data-page="chat"></script>
 <script src="../shared/bonnie-sound.js?v=3" data-page="chat"></script>
 <script src="../shared/dad-dj.js?v=1"></script>
+<script src="../shared/music-glow.js?v=1"></script>
 </body>
 </html>
