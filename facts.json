@@ -1,0 +1,533 @@
+{
+ "about": "Shared, sourced fact bank for the Dad ticker and the Simmie terminal. Each fact checked against its source page on 2026-10-23. Age filter: age_min <= dial age <= age_max.",
+ "facts": [
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "A day on Venus, 243 Earth days, is longer than its year of 225 Earth days.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/venus/venus-facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "On Venus the Sun rises in the west and sets in the east, because Venus spins the other way.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/venus/venus-facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Venus is hotter than Mercury, even though Mercury is closer to the Sun.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/venus/venus-facts/"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Venus has no moon, but it has a companion asteroid called Zoozve, a name that began as a misread poster label.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/venus/venus-facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Sunlight takes about eight minutes to reach Earth, and about six to reach Venus.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/venus/venus-facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Saturn is the only planet whose average density is less than water's.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/saturn/facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "The Moon moves about an inch, roughly 2.5 cm, farther from Earth each year.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/moon/facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "We only ever see one side of the Moon, because it spins at the same rate it circles Earth.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/moon/facts/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "space",
+   "text": "No one saw the far side of the Moon until a spacecraft flew past it in 1959.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/moon/facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Apollo astronauts brought 382 kilograms of Moon rock and soil back to Earth.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/moon/facts/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Jupiter holds more than twice the material of every other planet, moon and asteroid combined.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/jupiter/jupiter-facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Jupiter's Great Red Spot is a storm bigger than Earth that has lasted for hundreds of years.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/jupiter/jupiter-facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Olympus Mons on Mars is about 40 km tall from base to summit. Everest is 8.8 km.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/mars/facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "A day on Mars lasts 24.6 hours, very close to a day on Earth.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/mars/facts/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Sunlight takes about 13 minutes to reach Mars.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/mars/facts/"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "space",
+   "text": "One full day-night cycle on Mercury lasts 176 Earth days, just over two Mercury years.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/mercury/facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Uranus is tipped at nearly 90 degrees, so it rolls around the Sun like a ball.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/uranus/facts/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Neptune was the first planet found by mathematical prediction rather than by looking.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/neptune/neptune-facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Neptune is the only planet in our solar system you can't see with the naked eye.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/neptune/neptune-facts/"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "space",
+   "text": "One lap of the Sun takes Neptune 165 years. It finished its first since discovery in 2011.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/neptune/neptune-facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "The space station circles Earth 16 times a day, so its crew passes through 16 sunrises and sunsets.",
+   "source": "NASA",
+   "url": "https://www.nasa.gov/international-space-station/space-station-facts-and-figures/"
+  },
+  {
+   "age_min": 14,
+   "age_max": 16,
+   "topic": "space",
+   "text": "A sugar cube of neutron star material would weigh about a billion tonnes on Earth, about as much as a mountain.",
+   "source": "NASA",
+   "url": "https://imagine.gsfc.nasa.gov/science/objects/neutron_stars1.html"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "space",
+   "text": "The Andromeda Galaxy, our nearest large neighbour, is 2.5 million light-years away.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/mission/hubble/science/explore-the-night-sky/hubble-messier-catalog/messier-31/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "The Sun holds 99.8% of all the mass in our solar system.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/sun/facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Earth is the only planet whose English name doesn't come from Greek or Roman myths.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/earth/facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "space",
+   "text": "A year is about 365.25 days. The extra quarter day is why we add a leap day every four years.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/earth/facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Pluto's moon Charon is about half Pluto's size, the largest moon for its planet's size in the solar system.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/dwarf-planets/pluto/facts/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Pluto was discovered in 1930 and reclassified as a dwarf planet in 2006.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/dwarf-planets/pluto/facts/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Titan is the only world besides Earth known to have rivers, lakes and seas on its surface, of liquid methane and ethane.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/saturn/moons/titan/facts/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Saturn's moon Titan is bigger than the planet Mercury.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/saturn/moons/titan/facts/"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "space",
+   "text": "Some comets from the distant Oort Cloud take as long as 30 million years to orbit the Sun once.",
+   "source": "NASA",
+   "url": "https://science.nasa.gov/solar-system/comets/facts/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Platypuses and echidnas are monotremes, mammals that lay eggs.",
+   "source": "Australian Museum",
+   "url": "https://australian.museum/learn/animals/mammals/platypus/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Male platypuses have a venom spur on each ankle, making them one of the few venomous mammals.",
+   "source": "Australian Museum",
+   "url": "https://australian.museum/learn/animals/mammals/platypus/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Blue whales are the largest animals ever known to have lived on Earth.",
+   "source": "NOAA Fisheries",
+   "url": "https://www.fisheries.noaa.gov/species/blue-whale"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Blue whale calls may carry to other whales up to about 1,600 km away.",
+   "source": "NOAA Fisheries",
+   "url": "https://www.fisheries.noaa.gov/species/blue-whale"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Blue whales are estimated to live around 80 to 90 years.",
+   "source": "NOAA Fisheries",
+   "url": "https://www.fisheries.noaa.gov/species/blue-whale"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "A newborn blue whale calf weighs about 2.5 tonnes.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/animals/whales/blue-whale/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Some humpback whales swim about 8,000 km between their breeding and feeding grounds.",
+   "source": "NOAA Fisheries",
+   "url": "https://www.fisheries.noaa.gov/species/humpback-whale"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Every humpback's tail markings are unique, so scientists can recognise individuals from photos.",
+   "source": "NOAA Fisheries",
+   "url": "https://www.fisheries.noaa.gov/species/humpback-whale"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "About 80% of a superb lyrebird's song is mimicry. It can copy chainsaws and car engines.",
+   "source": "Australian Museum",
+   "url": "https://australian.museum/learn/animals/birds/superb-lyrebird/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Wombats are among the world's largest burrowing animals.",
+   "source": "Australian Museum",
+   "url": "https://australian.museum/learn/animals/mammals/common-wombat/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Emperor penguins are the only animals that breed during the Antarctic winter.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/animals/penguins/emperor-penguin/"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "The emperor is the largest of the 18 penguin species.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/animals/penguins/emperor-penguin/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "A red kangaroo joey leaves the pouch for good at around 235 days old.",
+   "source": "Australian Museum",
+   "url": "https://australian.museum/learn/animals/mammals/red-kangaroo/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "animals",
+   "text": "Female Antarctic krill can lay up to 10,000 eggs at a time.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/animals/krill/"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "body",
+   "text": "Babies have about 300 bones. They gradually fuse into the 206 bones adults have.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/bones.html"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "body",
+   "text": "Your lower jawbone is the only bone in your head you can move.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/bones.html"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "body",
+   "text": "The stirrup bone behind your eardrum is only about 3 mm long.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/bones.html"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "body",
+   "text": "Your spine is made of 33 bones.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/bones.html"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "body",
+   "text": "Your heart pumps blood to every cell in your body in less than a minute.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/heart.html"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "body",
+   "text": "You have more than 600 muscles.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/muscles.html"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "body",
+   "text": "Each of your eyes has about 120 million rods and 7 million cones.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/eyes.html"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "body",
+   "text": "You get 20 baby teeth, then 32 permanent ones.",
+   "source": "KidsHealth (Nemours)",
+   "url": "https://kidshealth.org/en/kids/teeth.html"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "science",
+   "text": "Lightning can heat the air to about five times hotter than the surface of the Sun.",
+   "source": "NOAA National Weather Service",
+   "url": "https://www.weather.gov/safety/lightning-temperature"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "science",
+   "text": "Helium was found in the Sun's light during an 1868 eclipse, years before it was found on Earth.",
+   "source": "Royal Society of Chemistry",
+   "url": "https://periodic-table.rsc.org/element/2/helium"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "science",
+   "text": "Diamond and graphite are both forms of pure carbon.",
+   "source": "Royal Society of Chemistry",
+   "url": "https://periodic-table.rsc.org/element/6/carbon"
+  },
+  {
+   "age_min": 14,
+   "age_max": 16,
+   "topic": "science",
+   "text": "In 1694, scientists focused sunlight on a diamond with a large magnifying glass, and it slowly disappeared.",
+   "source": "Royal Society of Chemistry",
+   "url": "https://periodic-table.rsc.org/element/6/carbon"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "tech",
+   "text": "Australian Wi-Fi technology developed at CSIRO is in more than 15 billion devices.",
+   "source": "CSIRO",
+   "url": "https://www.csiro.au/en/research/technology-space/it/wireless-lan"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "tech",
+   "text": "CSIRO's Wi-Fi breakthrough drew on what its team had learned about radio waves from radio astronomy.",
+   "source": "CSIRO",
+   "url": "https://www.csiro.au/en/research/technology-space/it/wireless-lan"
+  },
+  {
+   "age_min": 10,
+   "age_max": 16,
+   "topic": "tech",
+   "text": "The first prototype computer mouse had a wooden case.",
+   "source": "Computer History Museum",
+   "url": "https://www.computerhistory.org/revolution/input-output/14/350"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "tech",
+   "text": "The word 'mouse' doesn't appear in Engelbart's patent for the device.",
+   "source": "Computer History Museum",
+   "url": "https://www.computerhistory.org/revolution/input-output/14/350"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "nature",
+   "text": "Great Basin bristlecone pines grow only in California, Nevada and Utah, and some are thousands of years old.",
+   "source": "US National Park Service",
+   "url": "https://www.nps.gov/grba/planyourvisit/identifying-bristlecone-pines.htm"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "nature",
+   "text": "Pando, an aspen grove in Utah's Wasatch Mountains, is estimated to be around 16,000 years old.",
+   "source": "US National Park Service",
+   "url": "https://www.nps.gov/grba/planyourvisit/identifying-bristlecone-pines.htm"
+  },
+  {
+   "age_min": 11,
+   "age_max": 16,
+   "topic": "nature",
+   "text": "Only about 0.4% of Antarctica isn't covered by ice.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/ice-and-atmosphere/ice-sheet/"
+  },
+  {
+   "age_min": 12,
+   "age_max": 16,
+   "topic": "nature",
+   "text": "Antarctica's ice sheet is 2.16 km thick on average.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/ice-and-atmosphere/ice-sheet/"
+  },
+  {
+   "age_min": 13,
+   "age_max": 16,
+   "topic": "nature",
+   "text": "The Lambert Glacier in Antarctica is the world's largest glacier, about 400 km long.",
+   "source": "Australian Antarctic Division",
+   "url": "https://www.antarctica.gov.au/about-antarctica/ice-and-atmosphere/ice-sheet/"
+  }
+ ]
+}
