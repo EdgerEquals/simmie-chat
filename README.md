@@ -3,6 +3,8 @@
 A small private chat page: the user's daughter types messages to Simmie and gets replies on the page.
 Live: https://edgerequals.github.io/simmie-chat/ (noindex, robots.txt Disallow).
 
+**Naming rule:** Always refer to her as Bonnie.
+
 ## How it works
 
 ```
