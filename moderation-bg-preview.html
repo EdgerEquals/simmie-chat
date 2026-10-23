@@ -279,6 +279,27 @@ html.cr-paused .cr-bg *,html.cr-paused .cr-bg{animation-play-state:paused!import
   .cr-donut .seg{opacity:1}.cr-comet{opacity:1;transform:translate(55vw,-20px)}.cr-bot{opacity:1;transform:translateX(12px)}.cr-bot .f1{opacity:1}.cr-bot .f2{opacity:0}
   .cr-globe .m2{transform:scaleX(.5)}.cr-globe .m3{transform:scaleX(-.5)}.cr-meters .b{transform:scaleY(.6)}.cr-meters .b2{transform:scaleY(.85)}.cr-meters .b4{transform:scaleY(.4)}
 }
+/* --- header LIVE signal meter + background code window (preview only; transform/opacity only) --- */
+.cr-live{display:inline-flex;align-items:center;gap:.4rem;font:700 11px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:2px;color:#2BE38B;padding:.3rem .55rem;border-radius:999px;border:1px solid rgba(42,157,159,.55);background:rgba(8,7,13,.6)}
+.cr-live .dot{width:8px;height:8px;border-radius:50%;background:#2BE38B;box-shadow:0 0 6px #2BE38B,0 0 0 2px rgba(248,207,219,.35);animation:cr-beat 1.2s ease-out infinite}
+.cr-live svg{width:46px;height:14px;display:block;overflow:visible}
+.cr-live .ecg{fill:none;stroke:#2BE38B;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 0 2px rgba(43,227,139,.8));animation:cr-beatline 1.2s ease-out infinite}
+.cr-live .ecg-base{fill:none;stroke:#F8CFDB;stroke-width:1;opacity:.35}
+.cr-live .lbl{color:#F8CFDB}
+@keyframes cr-beat{0%{opacity:.35;transform:scale(1)}8%{opacity:1;transform:scale(1.35)}18%{opacity:.45;transform:scale(1)}28%{opacity:1;transform:scale(1.25)}45%,100%{opacity:.35;transform:scale(1)}}
+@keyframes cr-beatline{0%{opacity:.25}8%{opacity:1}18%{opacity:.4}28%{opacity:.95}50%,100%{opacity:.25}}
+.cr-win{position:fixed;left:1.5%;top:60%;z-index:-1;pointer-events:none;width:190px;opacity:.55;border:1px solid rgba(42,157,159,.55);border-radius:6px;background:rgba(12,14,22,.92);overflow:hidden;font:10.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#9FB3C8}
+.cr-win .bar{display:flex;align-items:center;gap:4px;padding:4px 6px;background:#1F1B30;border-bottom:1px solid rgba(42,157,159,.35)}
+.cr-win .bar i{width:7px;height:7px;border-radius:50%;display:block}
+.cr-win .bar i:nth-child(1){background:#F8CFDB}.cr-win .bar i:nth-child(2){background:#FBE7B0}.cr-win .bar i:nth-child(3){background:#C8EBD5}
+.cr-win .bar span{margin-left:auto;color:#DCD0F2;font-size:9px;opacity:.7}
+.cr-win pre{margin:0;padding:5px 8px 6px;white-space:pre;font:inherit}
+.cr-win .k{color:#F8CFDB;font-style:normal}.cr-win .f{color:#FBE7B0;font-style:normal}.cr-win .s{color:#C8EBD5;font-style:normal}.cr-win .n{color:#DCD0F2;font-style:normal}.cr-win .c{color:#FCD9C0;opacity:.75}
+.cr-win .cur{display:inline-block;width:.6em;height:1.1em;vertical-align:-.2em;background:#2BE38B;margin-left:1px;animation:cr-caret 1s steps(1) infinite}
+@keyframes cr-caret{50%{opacity:0}}
+@media (max-width:575px){.cr-win{left:auto;right:3%;top:auto;bottom:4%;width:160px}}
+html.cr-paused .cr-live *,html.cr-paused .cr-win *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){.cr-live .dot,.cr-live .ecg,.cr-win .cur{animation:none!important}.cr-live .dot,.cr-live .ecg,.cr-win .cur{opacity:1}}
 /* ===== DARK "HALFWAY ZONE" THEME (preview): dark surfaces + Rebella pastels, a touch of deep-ocean teal and sunset amber ===== */
 body.cr-on #app{--dk-bg:#0E0C16;--dk-panel:#171425;--dk-panel2:#1F1B30;--dk-line:#2A9D9F;--dk-teal-deep:#14555A;--dk-amber:#F2A541;
   --dk-ink:#F3EAF0;--dk-soft:#C9BFD3;--blush:#F8CFDB;--zpink:#E58AA6;--mint:#C8EBD5;--lav:#DCD0F2;--butter:#FBE7B0;--peach:#FCD9C0;--aqua:#B5E3E0;color:var(--dk-ink)}
@@ -320,6 +341,50 @@ body.cr-on #app .agedial .ad-btn{background:#0E0C16;color:var(--blush);box-shado
 body.cr-on #app .agedial .ad-status{color:var(--mint)}
 body.cr-on #app .agedial .ad-note{color:var(--dk-soft);opacity:1}
 body.cr-on .pv-banner{background:#14555A;color:#F3EAF0}
+
+#app .agedial .ad-vis{display:flex;align-items:flex-end;justify-content:space-between;gap:.5rem .9rem;flex-wrap:wrap}
+#app .agedial .ad-vis .ad-gauge{flex:1 1 140px}
+#app .agedial .ad-family{width:132px;height:53px;flex:0 0 auto;display:block;overflow:visible}
+#app .agedial .ad-family g{fill:rgba(181,227,224,.55)}
+#app .agedial .ad-family .fm-k{fill:rgba(243,234,240,.62)}
+#app .agedial .ad-family .fm-floor{stroke:#2A9D9F;stroke-width:1;opacity:.6}
+#app .agedial .ad-family .fm-k{transform-box:fill-box;transform-origin:50% 100%;transform:scale(.7);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){#app .agedial .ad-family .fm-k{transition:none}}
+/* --- age dial animation (preview only): transform/opacity only, glow via pseudo-element opacity --- */
+#app .agedial .ad-label strong{position:relative;vertical-align:middle}
+#app .agedial .ad-win{display:inline-block;position:relative;overflow:hidden;height:1.3em;line-height:1.3em;min-width:1.6em;vertical-align:bottom}
+#app .agedial .ad-d{display:block;text-align:center;will-change:transform,opacity}
+#app .agedial .ad-d.gone{position:absolute;left:0;right:0;top:0}
+#app .agedial .ad-d.in-up{animation:adInUp .25s cubic-bezier(.2,.8,.2,1) both}
+#app .agedial .ad-d.out-up{animation:adOutUp .25s cubic-bezier(.4,0,.6,1) both}
+#app .agedial .ad-d.in-down{animation:adInDown .25s cubic-bezier(.2,.8,.2,1) both}
+#app .agedial .ad-d.out-down{animation:adOutDown .25s cubic-bezier(.4,0,.6,1) both}
+@keyframes adInUp{from{transform:translateY(100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes adOutUp{from{transform:none;opacity:1}to{transform:translateY(-100%);opacity:0}}
+@keyframes adInDown{from{transform:translateY(-100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes adOutDown{from{transform:none;opacity:1}to{transform:translateY(100%);opacity:0}}
+#app .agedial .ad-label strong::after{content:"";position:absolute;inset:-.3em -.35em;border-radius:50%;pointer-events:none;opacity:0;
+  background:radial-gradient(ellipse at center,rgba(242,165,65,.5),rgba(242,165,65,0) 70%);box-shadow:0 0 14px rgba(242,165,65,.45)}
+#app .agedial .ad-label strong.glow::after{animation:adGlow .6s ease-out .2s both}
+@keyframes adGlow{0%{opacity:0;transform:scale(.85)}35%{opacity:1;transform:scale(1.08)}100%{opacity:0;transform:scale(1.15)}}
+#app .agedial .ad-btn{position:relative}
+#app .agedial .ad-btn::after{content:"";position:absolute;inset:-3px;border-radius:9px;pointer-events:none;opacity:0;box-shadow:0 0 0 2px #2A9D9F,0 0 10px rgba(42,157,159,.6)}
+#app .agedial .ad-btn.ring::after{animation:adRing .45s ease-out both}
+@keyframes adRing{0%{opacity:1;transform:scale(.96)}100%{opacity:0;transform:scale(1.18)}}
+#app .agedial .ad-btn[aria-disabled="true"]{opacity:.4;cursor:default}
+#app .agedial .ad-btn.shake{animation:adShake .32s ease-in-out}
+@keyframes adShake{0%,100%{transform:none}20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+#app .agedial .ad-limit{font:700 .8rem/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px;text-transform:uppercase;color:#F2A541;opacity:0;transition:opacity .25s ease}
+#app .agedial .ad-limit.show{opacity:1}
+#app .agedial .ad-gauge{display:flex;align-items:center;gap:.45rem;margin:.35rem 0 .1rem;max-width:240px;font:600 .7rem/1 ui-monospace,Menlo,Consolas,monospace;color:var(--dk-soft,#C9BFD3)}
+#app .agedial .ad-track{flex:1;height:4px;border-radius:2px;background:#14555A;overflow:hidden;position:relative}
+#app .agedial .ad-fill{position:absolute;inset:0;background:linear-gradient(90deg,#14555A,#2A9D9F);transform-origin:left center;transform:scaleX(.5);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){
+  #app .agedial .ad-d,#app .agedial .ad-label strong::after,#app .agedial .ad-btn::after,#app .agedial .ad-btn.shake{animation:none!important}
+  #app .agedial .ad-fill,#app .agedial .ad-limit{transition:none}
+  #app .agedial .ad-label strong.flash{color:#FFD08A!important}
+  #app .agedial .ad-btn.ring{outline:2px solid #2A9D9F;outline-offset:2px}
+}
 
 body.cr-on:not(.locked){background:#07060C}
 .pv-banner{background:#2B1A2E;color:#F8CFDB;font:700 .8rem/1.4 ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px;text-align:center;padding:.35rem .5rem}
@@ -415,17 +480,22 @@ rx = <i class="f">filter</i>(rx, <i class="s">&#x27;noise&#x27;</i>);
   <div class="cr-sys"><span>SYS OK</span><span class="cur">&#9608;</span><br><span class="dim">LINK 5/5 &middot; DIAL 13</span></div>
   <div class="cr-bot"><svg class="f1" viewBox="0 0 32 32"><rect x="12" y="0" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="12" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="8" width="4" height="4" fill="#2BE38B"/><rect x="12" y="8" width="4" height="4" fill="#0B0A12"/><rect x="16" y="8" width="4" height="4" fill="#0B0A12"/><rect x="20" y="8" width="4" height="4" fill="#2BE38B"/><rect x="4" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="12" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="24" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="4" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="16" width="4" height="4" fill="#F8CFDB"/><rect x="12" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="16" width="4" height="4" fill="#F8CFDB"/><rect x="24" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="12" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="24" width="4" height="4" fill="#B5E3E0"/><rect x="20" y="24" width="4" height="4" fill="#B5E3E0"/><rect x="4" y="28" width="4" height="4" fill="#B5E3E0"/><rect x="8" y="28" width="4" height="4" fill="#B5E3E0"/><rect x="20" y="28" width="4" height="4" fill="#B5E3E0"/><rect x="24" y="28" width="4" height="4" fill="#B5E3E0"/></svg><svg class="f2" viewBox="0 0 32 32"><rect x="12" y="0" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="12" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="4" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="8" width="4" height="4" fill="#2BE38B"/><rect x="12" y="8" width="4" height="4" fill="#0B0A12"/><rect x="16" y="8" width="4" height="4" fill="#0B0A12"/><rect x="20" y="8" width="4" height="4" fill="#2BE38B"/><rect x="4" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="12" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="24" y="12" width="4" height="4" fill="#DCD0F2"/><rect x="4" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="16" width="4" height="4" fill="#F8CFDB"/><rect x="12" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="16" width="4" height="4" fill="#F8CFDB"/><rect x="24" y="16" width="4" height="4" fill="#DCD0F2"/><rect x="8" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="12" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="16" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="20" y="20" width="4" height="4" fill="#DCD0F2"/><rect x="4" y="24" width="4" height="4" fill="#B5E3E0"/><rect x="24" y="24" width="4" height="4" fill="#B5E3E0"/><rect x="0" y="28" width="4" height="4" fill="#B5E3E0"/><rect x="4" y="28" width="4" height="4" fill="#B5E3E0"/><rect x="24" y="28" width="4" height="4" fill="#B5E3E0"/><rect x="28" y="28" width="4" height="4" fill="#B5E3E0"/></svg></div>
 </div>
+<div class="cr-win" aria-hidden="true"><div class="bar"><i></i><i></i><i></i><span>dial.js</span></div><pre><i class="c">// demo only</i>
+<i class="k">const</i> age = <i class="n">13</i>;
+<i class="f">render</i>(<i class="s">"panel"</i>, age);
+<i class="k">return</i> ok<span class="cur"></span></pre></div>
 <div id="app">
   <div class="pv-banner">PREVIEW ONLY &middot; dummy cards &middot; nothing is sent anywhere</div>
   <div class="topbar"><div class="container"><span class="tagline">Keep Rebella safe, fun and cool</span><span class="lockbtn" aria-hidden="true">&#128274; Lock</span></div></div>
-  <header class="masthead"><div class="container"><div class="brand"><div class="wordmark small"><span class="script">rebel</span><span class="serif">la</span></div><span class="mod-pill">Moderation</span></div></div></header>
+  <header class="masthead"><div class="container"><div class="brand"><div class="wordmark small"><span class="script">rebel</span><span class="serif">la</span></div><span class="mod-pill">Moderation</span></div><span class="cr-live" aria-hidden="true"><span class="dot"></span><svg viewBox="0 0 46 14"><path class="ecg-base" d="M0 9H46"/><path class="ecg" d="M0 9H10L12 7L14 9H17L19 2L21 13L23 9H26L28 4L30 11L32 9H46"/></svg><span class="lbl">LIVE</span></span></div></header>
   <main class="container" id="main">
     <section class="agedial" id="agedial" aria-labelledby="agedial-label">
       <div class="ad-row">
-        <span class="ad-label" id="agedial-label">Age dial: <strong id="ad-age">13</strong></span>
+        <span class="ad-label" id="agedial-label">Age dial: <strong id="ad-age" aria-label="13"><span class="ad-win" aria-hidden="true"><span class="ad-d">13</span></span></strong></span>
         <span class="ad-btns"><button type="button" class="ad-btn" id="ad-down" aria-label="Turn the age dial down one year">&minus;</button><button type="button" class="ad-btn" id="ad-up" aria-label="Turn the age dial up one year">+</button></span>
-        <span class="ad-status" id="ad-status" aria-live="polite"></span>
+        <span class="ad-limit" id="ad-limit" aria-live="polite"></span><span class="ad-status" id="ad-status" aria-live="polite"></span>
       </div>
+      <div class="ad-vis"><div class="ad-gauge" aria-hidden="true"><span>10</span><span class="ad-track"><span class="ad-fill" id="ad-fill"></span></span><span>16</span></div><svg class="ad-family" viewBox="0 0 160 64" aria-hidden="true" focusable="false"><line class="fm-floor" x1="2" y1="62.5" x2="158" y2="62.5"/><g class="fm-p"><circle cx="20" cy="9" r="6"/><path d="M12 19Q20 15 28 19L27 39H24V62H20.8V42H19.2V62H16V39H13Z"/></g><g class="fm-k" id="ad-kid-b"><circle cx="63" cy="9" r="6.5"/><path d="M55.5 20Q63 16 70.5 20L69.5 40H67V62H63.8V43H62.2V62H59V40H56.5Z"/></g><g class="fm-k" id="ad-kid-g"><circle cx="98" cy="10" r="6"/><path d="M102 6Q109 8 107 17Q105 12 102 10Z"/><path d="M92.5 20Q98 17 103.5 20L107 45H89Z"/><rect x="93.5" y="44" width="3" height="18" rx="1"/><rect x="99.5" y="44" width="3" height="18" rx="1"/></g><g class="fm-p"><circle cx="140" cy="10" r="5.5"/><circle cx="144" cy="6" r="3"/><path d="M134 19Q140 16 146 19L150 46H130Z"/><rect x="135" y="45" width="3" height="17" rx="1"/><rect x="142" y="45" width="3" height="17" rx="1"/></g></svg></div>
       <p class="ad-note">Content is written for a reader of this age (10&ndash;16).</p>
     </section>
     <div class="notice dots-mustard"><span class="example">Preview</span> Placeholder moderation cards with dummy text. The buttons here only change this page.</div>
@@ -451,11 +521,29 @@ rx = <i class="f">filter</i>(rx, <i class="s">&#x27;noise&#x27;</i>);
 (function(){ function f(){ document.documentElement.classList.toggle("cr-paused", document.hidden); }
   document.addEventListener("visibilitychange", f); f(); })();
 
-/* preview-only age dial: changes the number on this page, sends nothing */
-(function(){ var v=13, a=document.getElementById("ad-age"), d=document.getElementById("ad-down"), u=document.getElementById("ad-up"), s=document.getElementById("ad-status");
-  function r(){ a.textContent=v; d.disabled=v<=10; u.disabled=v>=16; }
-  d.addEventListener("click",function(){ v=Math.max(10,v-1); r(); s.textContent="Preview only (not saved)"; });
-  u.addEventListener("click",function(){ v=Math.min(16,v+1); r(); s.textContent="Preview only (not saved)"; });
+/* preview-only age dial: changes the number on this page, sends nothing (no network, no pop-ups) */
+(function(){ var v=13, a=document.getElementById("ad-age"), w=a.querySelector(".ad-win"), d=document.getElementById("ad-down"), u=document.getElementById("ad-up"),
+    s=document.getElementById("ad-status"), lim=document.getElementById("ad-limit"), fill=document.getElementById("ad-fill"), limT, flashT, kb=document.getElementById("ad-kid-b"), kg=document.getElementById("ad-kid-g"),
+    rm=window.matchMedia?window.matchMedia("(prefers-reduced-motion: reduce)"):{matches:false};
+  function replay(el,c){ el.classList.remove(c); void el.offsetWidth; el.classList.add(c); }
+  function r(){ a.setAttribute("aria-label",String(v)); d.setAttribute("aria-disabled",v<=10?"true":"false"); u.setAttribute("aria-disabled",v>=16?"true":"false");
+    fill.style.transform="scaleX("+((v-10)/6)+")"; var k="scale("+(0.55+(v-10)/6*0.37).toFixed(3)+")"; kb.style.transform=k; kg.style.transform=k; }
+  function roll(dir){ /* dir: "up" for +, "down" for - */
+    w.querySelectorAll(".ad-d.gone").forEach(function(n){ n.remove(); });
+    var old=w.querySelector(".ad-d");
+    if(rm.matches){ old.textContent=v; clearTimeout(flashT); a.classList.add("flash"); flashT=setTimeout(function(){ a.classList.remove("flash"); },600); return; }
+    var nu=document.createElement("span"); nu.className="ad-d in-"+dir; nu.textContent=v;
+    old.className="ad-d gone out-"+dir; old.addEventListener("animationend",function(){ old.remove(); },{once:true});
+    w.appendChild(nu); replay(a,"glow"); }
+  function step(btn,delta){
+    var nv=v+delta;
+    if(nv<10||nv>16){ if(!rm.matches) replay(btn,"shake");
+      lim.textContent=delta>0?"max 16":"min 10"; lim.classList.add("show"); clearTimeout(limT); limT=setTimeout(function(){ lim.classList.remove("show"); },1600); return; }
+    v=nv; replay(btn,"ring"); clearTimeout(btn._rt); btn._rt=setTimeout(function(){ btn.classList.remove("ring"); },500); roll(delta>0?"up":"down"); r(); s.textContent="Preview only (not saved)";
+    lim.classList.remove("show"); }
+  ["animationend"].forEach(function(e){ [d,u].forEach(function(b){ b.addEventListener(e,function(ev){ if(ev.target===b){ b.classList.remove("shake"); } }); }); });
+  d.addEventListener("click",function(){ step(d,-1); });
+  u.addEventListener("click",function(){ step(u,1); });
   document.querySelectorAll("[data-dummy]").forEach(function(b){ b.addEventListener("click",function(){ b.closest(".item").querySelector(".status").textContent = b.classList.contains("btn-approve") ? "approved (dummy)" : "rejected (dummy)"; }); });
   r(); })();
 </script>
