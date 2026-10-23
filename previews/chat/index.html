@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#F8CFDB">
+<meta name="theme-color" content="#000000">
 <title>Preview for Dad: Chat with Simmie</title>
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,10 @@
 <link rel="stylesheet" href="css/tty-box.css?v=1">
 <link rel="stylesheet" href="css/weather-chip.css?v=1">
 <link rel="stylesheet" href="css/ask-dad.css?v=1">
-<link rel="stylesheet" href="css/preview.css?v=1">
+<link rel="stylesheet" href="css/preview.css?v=2">
+<link rel="stylesheet" href="css/ticker.css?v=1">
+<link rel="stylesheet" href="css/fact-band.css?v=1">
+<link rel="stylesheet" href="css/fact-send.css?v=1">
 </head>
 <body>
 <main id="app">
@@ -30,8 +33,8 @@
       </div>
       <span id="wx" class="wx" role="img" hidden></span>
       <button id="lock-btn" class="ghost" type="button" title="Lock (off in this preview)" aria-label="Lock (off in this preview)" disabled>🔒<span class="lock-word"> Lock</span></button>
-      <button id="dad-chip" class="dad-chip" type="button" hidden><span class="dad-chip-from">From Dad:</span> <span id="dad-chip-q" class="dad-chip-q"></span> <span id="dad-chip-more" class="dad-chip-more" hidden></span> <span class="dad-chip-arrow" aria-hidden="true">↓</span></button>
     </header>
+    <div id="ft-live" class="tty-sr" aria-live="polite"></div>
     <div id="lane-h" class="il-lane" aria-hidden="true"></div>
     <div id="log" class="log" aria-live="polite" aria-label="Messages"></div>
     <div id="typing" class="typing" hidden><span class="dots"><i></i><i></i><i></i></span> <span id="typing-text">Waiting for Simmie…</span></div>
@@ -41,13 +44,21 @@
       <textarea id="msg" rows="1" maxlength="1500" placeholder="Type a message…" aria-label="Message"></textarea>
       <button id="send-btn" class="send" type="submit" aria-label="Send">➤</button>
     </form>
+    <section class="fact-ticker" id="fact-ticker" aria-label="Simmie feed: fun facts and updates" hidden data-facts="../../facts.json" data-age="../../age-dial.json">
+      <div class="ft-row"><div class="ft-window"><div class="ft-track"></div></div>
+      <a class="ft-chat" id="ft-chat" href="https://edgerequals.github.io/simmie-chat/" hidden>Chat →</a>
+      <button class="ft-btn ft-pause" type="button" aria-pressed="false" aria-label="Pause the fun facts">&#10074;&#10074;</button>
+      <button class="ft-btn ft-next" type="button" aria-label="Next fact">&rarr;</button></div>
+    </section>
   </section>
 
 </main>
 <script src="js/weather-chip.js?v=1"></script>
 <script src="js/tty-box.js?v=1"></script>
 <script src="js/ask-dad.js?v=1"></script>
-<script src="js/app-preview.js?v=1"></script>
+<script src="js/app-preview.js?v=2"></script>
 <script src="js/interludes.js?v=1"></script>
+<script src="js/fact-ticker.js?v=1"></script>
+<script src="js/fact-send.js?v=1"></script>
 </body>
 </html>

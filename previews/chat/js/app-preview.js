@@ -43,7 +43,7 @@
   }
   async function answerQuestion(q, opt, comment) {
     if (answerFor(q) !== null) return;
-    if (q.from === 'dad') mlog('dad question ' + ([...msgs.values()].sort((a, b) => a.ts - b.ts).filter(isDadQuestion).findIndex((m) => m.id === q.id) + 1) + ' answered');
+    if (q.from === 'dad') mlog('dad question answered');
     const m = { id: 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8), ts: Date.now(), from: 'daughter',
       text: '[Answer to ' + senderName(q.from) + ': "' + q.text + '"] ' + (comment ? opt + ': ' + comment : opt), reply_to: q.id, answer: opt };
     if (comment) m.comment = comment;
@@ -110,7 +110,6 @@
       meta.textContent = label;
       if (false) { const r = document.createElement('button'); r.className = 'retry'; r.type = 'button'; r.textContent = 'Try again'; r.onclick = () => deliver(m); meta.appendChild(r); }
       b.appendChild(meta); log.appendChild(b);
-      if (jump.id === m.id && Date.now() < jump.until) { b.classList.add('jump-hl'); b.tabIndex = -1; }
     }
     // typing hint: shown while her latest message is newer than Simmie's latest reply (for up to 20 min)
     const lastMine = list.filter((m) => m.from === 'daughter' && m.state !== 'failed' && m.state !== 'preview' && m.type !== 'ask-dad').pop();
@@ -120,47 +119,11 @@
     $('typing-text').textContent = typing ? 'Simmie is typing…' : 'Waiting for Simmie… replies usually take under a minute';
     $('typing').classList.toggle('active', typing);
     $('typing').hidden = !waiting;
-    dadChip(list);
     ttySync(false, list);
     const box = askOpen && document.querySelector('.ask-box textarea');
     if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); box.scrollIntoView({ block: 'nearest' }); }
-    else if (jump.id && Date.now() < jump.until) {   // keep a just-jumped-to question in view (and focused) across re-renders
-      const t = log.querySelector('.msg[data-id="' + CSS.escape(jump.id) + '"]');
-      if (t) { t.scrollIntoView({ block: 'center' }); if (jump.refocus && document.activeElement === document.body) (t.querySelector('.choice:not(:disabled)') || t).focus({ preventScroll: true }); }
-    }
     else log.scrollTop = log.scrollHeight;
   }
-
-  // ---------- Dad's question jump (header chip) ----------
-  // A Dad message counts as a question if it has buttons (kind 'question', from chat.py ask) or its text ends with '?'.
-  // Unanswered: button questions -> answerFor(q) is null (no reply of hers with reply_to = its id, and no
-  // '[Answer to Dad: "..."]' message); plain '?' messages -> she hasn't sent any (non-failed) message after it.
-  const isDadQuestion = (m) => m.from === 'dad' && (m.kind === 'question' || /\?[\s"'”’)\]\p{Extended_Pictographic}\uFE0F]*$/u.test(m.text));
-  function unansweredDad(list) {
-    const lastMine = list.filter((m) => m.from === 'daughter' && m.state !== 'failed').reduce((t, m) => Math.max(t, m.ts), 0);
-    return list.filter((m) => isDadQuestion(m) && (m.kind === 'question' ? answerFor(m) === null : lastMine <= m.ts));
-  }
-  let jump = { id: '', until: 0, refocus: false };
-  function dadChip(list) {
-    const chip = $('dad-chip'), open = unansweredDad(list), q = open[open.length - 1];
-    chip.hidden = !q; if (!q) { chip.dataset.id = ''; return; }
-    chip.dataset.id = q.id;
-    const short = q.text.replace(/\s+/g, ' ').trim();
-    $('dad-chip-q').textContent = short.length > 60 ? short.slice(0, 58).trimEnd() + '…' : short;
-    $('dad-chip-more').textContent = open.length > 1 ? '+' + (open.length - 1) : '';
-    $('dad-chip-more').hidden = open.length < 2;
-    chip.setAttribute('aria-label', 'From Dad: ' + short + (open.length > 1 ? '. Plus ' + (open.length - 1) + ' more unanswered.' : '') + ' Jump to the question.');
-  }
-  $('dad-chip').addEventListener('click', () => {
-    const id = $('dad-chip').dataset.id; if (!id) return;
-    const t = $('log').querySelector('.msg[data-id="' + CSS.escape(id) + '"]'); if (!t) return;
-    mlog('dad question ' + ([...msgs.values()].sort((a, b) => a.ts - b.ts).filter(isDadQuestion).findIndex((m) => m.id === id) + 1) + ' jumped to');
-    jump = { id, until: Date.now() + 2200, refocus: true };
-    t.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' });
-    t.classList.remove('jump-hl'); void t.offsetWidth; t.classList.add('jump-hl'); t.tabIndex = -1;
-    (t.querySelector('.choice:not(:disabled)') || t).focus({ preventScroll: true });
-    setTimeout(() => { jump.refocus = false; const x = $('log').querySelector('.msg.jump-hl'); if (x && Date.now() >= jump.until) x.classList.remove('jump-hl'); }, 2300);
-  });
 
   // ---------- simmie — tty box (shown once Dad has messaged; sits as a dock above the composer) ----------
   let tty = null;
@@ -178,6 +141,9 @@
   // On a small phone, fold the dock away while she types in the main composer (keyboard up = little room).
   ta.addEventListener('focus', () => { if (window.matchMedia('(max-width:480px)').matches) $('screen-chat').classList.add('composing'); });
   ta.addEventListener('blur', () => $('screen-chat').classList.remove('composing'));
+  // Phones: fold the footer feed away while any text box has the keyboard up, so it never jumps over the text box.
+  document.addEventListener('focusin', (e) => { if (window.matchMedia('(pointer:coarse)').matches && e.target.matches && e.target.matches('#msg, .tty-input')) $('screen-chat').classList.add('kb'); });
+  document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!(a && a.matches && a.matches('#msg, .tty-input'))) $('screen-chat').classList.remove('kb'); }, 50));
   // Yes / No (+ "Ask more" -> small text box). Locked once answered; the answered state comes from the log.
   let askOpen = '', askDraft = '';
   function questionControls(m) {
@@ -223,5 +189,19 @@
     { id: 'pv-d2', ts: now - 40 * M, from: 'dad', text: 'Proud of how hard you worked on your project this week.' },
     { id: 'pv-p1', ts: now - 20 * M, from: 'dad', text: 'Which would you like for dinner tomorrow, soup or a stir-fry?' },
   ].forEach((m) => addMsg(m, 'logged'));
+  // PREVIEW hooks: a mock Simmie reply after a preview send, and the feed's 'Chat →' jump.
+  window.SimmiePreview = {
+    simmieSays(text) {
+      const id = 'pv-s-' + Date.now().toString(36);
+      addMsg({ id, ts: Date.now(), from: 'simmie', text }, 'logged'); render();
+      window.dispatchEvent(new CustomEvent('simmie:reply', { detail: { id, text } }));
+    },
+  };
+  window.addEventListener('ft:open-chat', (e) => {
+    const id = e.detail && e.detail.id, t = id && $('log').querySelector('.msg[data-id="' + CSS.escape(id) + '"]');
+    if (t) { t.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' }); t.classList.remove('ft-hl'); void t.offsetWidth; t.classList.add('ft-hl'); setTimeout(() => t.classList.remove('ft-hl'), 2600); }
+    $('msg').focus({ preventScroll: true });
+    mlog('jumped to simmie reply');
+  });
   show('chat'); render(); ttySync(true); mlog('preview thread loaded · ' + msgs.size + ' msgs');
 })();
