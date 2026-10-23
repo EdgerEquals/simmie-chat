@@ -1,0 +1,27 @@
+/* Bonnie's sounds controls (bonnie-sound.js): one slim row with the on/off switch and the flavour radios. */
+.bs-row{display:flex;align-items:center;gap:8px;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap;
+  padding:3px 10px;font:600 .74rem/1.1 "Alegreya Sans",system-ui,sans-serif;color:#F6EBD9;flex:0 0 auto}
+.bs-row::-webkit-scrollbar{display:none}
+.bs-toggle{flex:none;min-height:28px;padding:.15rem .6rem;border-radius:999px;border:1.5px solid #D6ECEF;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.bs-toggle[aria-pressed="true"]{border-color:#F2A541;color:#F2A541}
+.bs-toggle:disabled{opacity:.55;cursor:default}
+.bs-toggle:focus-visible{outline:3px solid #F2A541;outline-offset:2px}
+.bs-flav{display:flex;align-items:center;gap:4px;margin:0;padding:0;border:0;min-width:0;flex:none}
+.bs-flav legend{float:left;margin-right:4px;padding:0;color:#BFD9DD;font-weight:400}
+.bs-flav label{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.bs-flav input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.bs-flav span{display:inline-block;padding:.22rem .55rem;border-radius:999px;border:1px solid rgba(214,236,239,.45);color:#D6ECEF}
+.bs-flav input:checked + span{background:#F2A541;border-color:#F2A541;color:#24292E}
+.bs-flav input:focus-visible + span{outline:3px solid #F2A541;outline-offset:2px}
+/* chat: a slim row between the typing box and the fact feed; inside the landscape strip it's one more segment */
+.bs-chat{border-top:1px solid rgba(214,236,239,.12)}
+.ls-strip .bs-row{border-top:0;padding:0 6px}
+/* dashboard: portrait -> its own full-width line in the footer; short landscape -> one more item in the scroll row */
+.bs-dash{order:6;flex:1 0 100%;padding:1px 2px;font-size:.68rem}
+html.bs-ready #wx-foot{flex-wrap:wrap;row-gap:1px}
+.bs-dash .bs-toggle{min-height:24px}
+@media (orientation:landscape) and (max-height:500px){
+  .ft-row .bs-dash{order:9;flex:none;padding:0}
+  .ft-row .bs-dash .bs-toggle{min-height:18px;padding:0 .45rem}
+  .ft-row .bs-dash .bs-flav span{padding:0 .4rem}
+}

@@ -1,0 +1,63 @@
+/* Bonnie's music mini-player (see bonnie-music.js). Separate file; the only hooks are one <link> and one <script>.
+   The player iframe is always 200x200 (YouTube's documented minimum) and the panel sits on the page's top layer,
+   so nothing (header, footer, glows, emoji lanes, Ask Dad, biplane) is ever drawn over it. */
+.bm{display:inline-flex;align-items:center;flex:0 0 auto}
+.bm-pill{display:inline-flex;align-items:center;gap:.35em;min-height:36px;padding:.3rem .7rem;border-radius:999px;cursor:pointer;
+  font:600 .82rem/1.1 "Alegreya Sans",system-ui,sans-serif;letter-spacing:.01em;white-space:nowrap;
+  background:#0A3F4C;color:#F6EBD9;border:1.5px solid #F2A541;box-shadow:0 0 0 2px rgba(242,165,65,.14)}
+.bm-pill:hover{background:#0F5C6E}
+.bm-pill:focus-visible{outline:3px solid #F2A541;outline-offset:2px}
+.bm-pill-ico{font-size:1.05em;color:#F2A541}
+.bm[data-state="unset"] .bm-pill{opacity:.7;border-style:dashed;cursor:help}
+.bm[data-state="playing"] .bm-pill-ico{animation:bm-note 3.4s ease-in-out infinite}
+.bm.bm-remembered[data-state="idle"] .bm-pill{animation:bm-nudge 5.39s ease-in-out infinite}
+@keyframes bm-note{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes bm-nudge{0%,100%{box-shadow:0 0 0 2px rgba(242,165,65,.14)}50%{box-shadow:0 0 0 5px rgba(242,165,65,.32)}}
+@media (max-width:480px){.bm-chat .bm-pill-txt,.bm-dash .bm-pill-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .bm-chat .bm-pill,.bm-dash .bm-pill{padding:.3rem .55rem;min-width:36px;justify-content:center}
+  .bm-remembered[data-state="idle"] .bm-pill-txt,.bm[data-state="blocked"] .bm-pill-txt{position:static;width:auto;height:auto;clip:auto}}
+
+/* the panel */
+.bm-panel{box-sizing:border-box;z-index:2147483000;display:flex;gap:10px;align-items:stretch;padding:8px;border-radius:14px;
+  background:linear-gradient(160deg,#0A3F4C,#06262E);color:#F6EBD9;border:1.5px solid rgba(242,165,65,.75);
+  box-shadow:0 10px 28px rgba(0,0,0,.45);font:14px/1.3 "Alegreya Sans",system-ui,sans-serif;isolation:isolate}
+.bm-panel[hidden]{display:none!important}
+.bm-frame{flex:0 0 200px;width:200px;height:200px;min-width:200px;min-height:200px;border-radius:6px;overflow:hidden;background:#000}
+.bm-yt{display:block;width:200px!important;height:200px!important;border:0}
+.bm-side{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 auto;max-width:200px}
+.bm-panel[data-mode="gutter"] .bm-side,.bm-panel[data-mode="side"] .bm-side{max-width:none}
+.bm-panel[data-mode="dock"],.bm-panel[data-mode="sticky"]{width:max-content;max-width:calc(100vw - 16px)}
+.bm-title{margin:0;font:700 1rem/1.1 "Alegreya Sans",system-ui,sans-serif;color:#F2A541}
+.bm-status{margin:0;font-size:.82rem;color:#D6ECEF;min-height:1.1em}
+.bm-ctl{display:flex;gap:6px;flex-wrap:wrap}
+.bm-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid #D6ECEF;background:transparent;color:#F6EBD9;cursor:pointer;font-size:1rem;line-height:1;display:inline-grid;place-items:center;padding:0}
+.bm-btn:hover{background:rgba(214,236,239,.14)}
+.bm-btn:focus-visible{outline:3px solid #F2A541;outline-offset:2px}
+.bm-off{border-color:#F2A541;color:#F2A541}
+.bm-legal{margin:auto 0 0;font-size:.7rem;line-height:1.35;color:#BFD9DD}
+.bm-legal a{color:#F6EBD9;text-decoration:underline;text-underline-offset:2px}
+
+/* placements */
+.bm-panel[data-mode="gutter"]{position:fixed;right:max(4px,calc((100vw - 640px) / 2 - 232px));bottom:var(--bm-bottom,16px);flex-direction:column;width:214px;padding:6px}
+.bm-panel.bm-p-dash[data-mode="gutter"]{right:4px}
+.bm-panel[data-mode="dock"]{position:fixed;left:8px;bottom:var(--bm-bottom,80px);max-width:calc(100vw - 16px)}
+.bm-panel[data-mode="side"]{position:fixed;right:8px;top:var(--bm-top,8px);flex-direction:column;width:218px;gap:6px;padding:7px}
+.bm-panel[data-mode="side"] .bm-title,.bm-panel[data-mode="side"] .bm-status{display:none}
+.bm-panel[data-mode="side"] .bm-side{gap:4px}
+.bm-panel[data-mode="side"] .bm-legal{margin:0;font-size:.64rem}
+.bm-panel[data-mode="flow"]{position:relative;margin:6px 10px;flex:0 0 auto}
+.bm-panel[data-mode="sticky"]{position:sticky;top:var(--bm-sticky-top,30px);margin:10px 0 12px}
+.bm-chat-room,.chat.bm-side-room{padding-right:234px;box-sizing:border-box}
+@media (max-width:380px){.bm-panel[data-mode="flow"],.bm-panel[data-mode="sticky"]{gap:8px;padding:7px}
+  .bm-panel[data-mode="flow"] .bm-title,.bm-panel[data-mode="sticky"] .bm-title{font-size:.92rem}}
+
+/* Rebella palette (Bonnie's side): blush/plum instead of Dad's ocean */
+.bm-rebella .bm-pill{background:#F8CFDB;color:#2A1424;border-color:#E58AA6;box-shadow:none}
+.bm-rebella .bm-pill:hover{background:#FBE0E8}
+.bm-rebella .bm-pill-ico{color:#B0416A}
+.bm-rebella{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.bm-rebella .bm-panel{background:linear-gradient(160deg,#2A1424,#14555A);border-color:#E58AA6}
+.bm-rebella .bm-title{color:#F8CFDB}
+
+@media (prefers-reduced-motion:reduce){.bm-pill,.bm-pill-ico{animation:none!important;transition:none!important}}
+.bm.bm-still .bm-pill,.bm.bm-still .bm-pill-ico{animation:none!important}

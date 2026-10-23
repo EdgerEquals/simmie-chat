@@ -24,6 +24,7 @@
       if (rec.options.length < 2) rec.options = ['Yes', 'No'];
     }
     if (from === 'daughter' && m.type === 'ask-dad') rec.type = 'ask-dad';   // sent from the Ask Dad panel
+    if (from === 'dad' && /^(calm|warm|proud|playful|excited|serious)$/.test(m.mood || '')) rec.mood = m.mood;   // mood tag only (rule 10); the page never reads the text for it
     if (from === 'daughter' && m.reply_to) { rec.reply_to = String(m.reply_to); rec.answer = String(m.answer || ''); if (m.comment) rec.comment = String(m.comment); }
     msgs.set(m.id, rec);
   }
@@ -96,6 +97,7 @@
       const mine = m.from === 'daughter';
       b.dataset.id = m.id;
       b.className = 'msg ' + (mine ? 'me' : 'them') + (m.from === 'dad' ? ' dad' : '') + (m.reply_to ? ' answer' : '') + (m.state === 'pending' ? ' pending' : '') + (m.state === 'failed' ? ' failed' : '');
+      if (m.mood) b.dataset.mood = m.mood;   // for Dad's auto-DJ (../shared/dad-dj.js)
       if (m.from === 'dad') { const w = document.createElement('span'); w.className = 'sender'; w.textContent = 'Dad'; b.appendChild(w); }
       if (m.type === 'ask-dad') { const q = document.createElement('span'); q.className = 'quote'; q.textContent = 'To Dad'; b.appendChild(q); }
       if (m.reply_to) {
@@ -210,10 +212,10 @@
   [
     { id: 'pv-s1', ts: now - 95 * M, from: 'simmie', text: 'Hi Bonnie! This is a preview of your chat page. How has your day been?' },
     { id: 'pv-d1', ts: now - 90 * M, from: 'daughter', text: 'Pretty good, thanks!' },
-    { id: 'pv-q1', ts: now - 70 * M, from: 'dad', text: 'Would you like to go for a walk by the river on Sunday morning?', kind: 'question', options: ['Yes', 'No'] },
+    { id: 'pv-q1', ts: now - 70 * M, from: 'dad', text: 'Would you like to go for a walk by the river on Sunday morning?', kind: 'question', options: ['Yes', 'No'], mood: 'warm' },
     { id: 'pv-s2', ts: now - 65 * M, from: 'simmie', text: 'A river walk sounds lovely. Maybe you will spot some black swans.' },
-    { id: 'pv-d2', ts: now - 40 * M, from: 'dad', text: 'Proud of how hard you worked on your project this week.' },
-    { id: 'pv-p1', ts: now - 20 * M, from: 'dad', text: 'Which would you like for dinner tomorrow, soup or a stir-fry?' },
+    { id: 'pv-d2', ts: now - 40 * M, from: 'dad', text: 'Proud of how hard you worked on your project this week.', mood: 'proud' },
+    { id: 'pv-p1', ts: now - 20 * M, from: 'dad', text: 'Which would you like for dinner tomorrow, soup or a stir-fry?', mood: 'playful' },
   ].forEach((m) => addMsg(m, 'logged'));
   // PREVIEW hooks: a mock Simmie reply after a preview send, and the feed's 'Chat →' jump.
   window.SimmiePreview = {
