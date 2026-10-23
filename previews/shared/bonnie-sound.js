@@ -1,7 +1,8 @@
 /* Bonnie's sounds: a generated sound layer (Web Audio, synthesised in the browser: no audio files, no fetches).
    Fully separate from the YouTube player (bonnie-music.js): its own gain node and on/off switch, it never calls the
    player. It only watches <html data-bm="..."> and ducks itself to 30% while the YouTube player is playing.
-   Cues: the press model / meters, the message-status glow, Ask Dad open/close, plus a soft ambient bed.
+   Cues: the press model / meters, the message-status glow, Ask Dad open/close, plus a soft ambient bed; and simmie
+   (FM chime), send-whoosh, biplane-buzz, passcode-tick + unlock + nope, dial-click, approve / reject.
    Timing follows /home/box/.config/phi-timing-rules.md: every repeat is PHI^n s (swept by the weather when the page has
    PhiTiming), first ticks at golden-angle offsets, Simmie-palette sounds 1.5 steps faster (x PHI^-1.5).
    Nothing sounds until the first tap or key press (autoplay rules). Choices are saved in localStorage (preview keys).
@@ -52,7 +53,7 @@
     var l = document.createElement('label'), i = document.createElement('input'), s = document.createElement('span');
     i.type = 'radio'; i.name = 'bs-flavour-' + PAGE; i.value = id; i.checked = id === flavour;
     s.textContent = FLAV[id].label; l.appendChild(i); l.appendChild(s); fs.appendChild(l);
-    i.addEventListener('change', function () { if (!i.checked) return; flavour = id; store(K_FLAV, id); rebuildBed(); cue('press', 0.55); });
+    i.addEventListener('change', function () { if (!i.checked) return; flavour = id; store(K_FLAV, id); rebuildBed(); cue('dial-click', 0.55); });
   });
   row.appendChild(tog); row.appendChild(fs);
   function paintToggle() {
@@ -102,11 +103,14 @@
     o.start(t); o.stop(t + a + d + r + 0.05);
   }
   function trace(kind) { try { document.dispatchEvent(new CustomEvent('bonnie-sound:cue', { detail: { kind: kind } })); } catch (e) {} }
+  var gest = false;                                   // nothing sounds (or is even built) before her first tap / key press
   function cue(kind, level) {
-    if (!ensure() || !on) return;
+    if (!gest || !ensure() || !on) return;
     var now = performance.now();
     if (kind === 'press' && now - lastCue < per(-3) * 1000) return;    // PHI^-3 s between press cues
-    lastCue = now; trace(kind);
+    var gap = GAP[kind]; if (gap != null && lastBy[kind] && now - lastBy[kind] < Math.pow(PHI, gap[0] + (gap[1] ? SIMMIE : 0)) * 1000) return;   // per-cue rate limit (fixed, not swept)
+    lastBy[kind] = now; lastCue = now; trace(kind);
+    if (NEW[kind]) { NEW[kind](Math.max(0, Math.min(1, level == null ? 0.5 : level))); return; }
     var lv = Math.max(0, Math.min(1.25, level || 0.4)), L = FLAV[flavour].scale.length, sp = per(-4, kind === 'askdad');
     if (kind === 'press') note(Math.round(lv * (L * 2 - 1)), 0.25 + 0.5 * Math.min(1, lv));
     else if (kind === 'peak') { note(L * 2, 0.5); note(L * 2 + 2, 0.35, sp); }
@@ -118,6 +122,60 @@
     else if (kind === 'askdad-close') { note(L + 2, 0.35); note(L - 1, 0.3, sp); }
     else if (kind === 'sparkle') note(L * 2 + Math.floor(Math.random() * L), 0.12, 0, { chirp: flavour === 'nature' });
   }
+
+  // ---------- the newer cues (all synthesised, quiet, short) ----------
+  // per-cue minimum gap: [phi exponent, simmie palette]
+  var lastBy = {}, GAP = { simmie: [1, true], 'send-whoosh': [-1, false], 'biplane-buzz': [2, false], 'passcode-tick': [-5, false],
+    unlock: [1, false], nope: [0, false], 'dial-click': [-4.5, false], approve: [-1.5, false], reject: [-1.5, false],
+    dad: [-1, false], new: [-1, false], askdad: [-2, true], 'askdad-close': [-2, true], urgent: [0, false], peak: [-2.5, false] };
+  function semi(n) { return FLAV[flavour].root * Math.pow(2, n / 12); }
+  function inScale(n) { return FLAV[flavour].scale.indexOf(((n % 12) + 12) % 12) >= 0; }
+  function env(g, t, peak, a, len) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + len); }
+  // soft FM bell (sine carrier, sine modulator at 2x with a decaying index)
+  function bell(hz, vel, when, len) {
+    var t = ctx.currentTime + (when || 0), c = ctx.createOscillator(), m = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
+    c.type = 'sine'; m.type = 'sine'; c.frequency.value = hz; m.frequency.value = hz * 2;
+    mg.gain.setValueAtTime(hz * 1.2, t); mg.gain.exponentialRampToValueAtTime(hz * 0.05, t + len);
+    m.connect(mg); mg.connect(c.frequency); c.connect(g); g.connect(cueBus); env(g, t, 0.16 * vel, 0.006, len);
+    c.start(t); m.start(t); c.stop(t + len + 0.05); m.stop(t + len + 0.05);
+  }
+  // a plain soft tone (sine or triangle) for the passcode / decision notes
+  function tone(hz, vel, when, len, type, glide) {
+    var t = ctx.currentTime + (when || 0), o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(hz, t); if (glide) o.frequency.exponentialRampToValueAtTime(hz * glide, t + len);
+    f.type = 'lowpass'; f.frequency.value = 2400; f.Q.value = 0.5;
+    o.connect(f); f.connect(g); g.connect(cueBus); env(g, t, 0.18 * vel, 0.01, len); o.start(t); o.stop(t + len + 0.05);
+  }
+  function noise(sec, when, filt, f0, f1, q, peak, a) {
+    var t = ctx.currentTime + (when || 0), src = ctx.createBufferSource(), bf = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = noiseBuf(sec + 0.02); bf.type = filt; bf.frequency.setValueAtTime(f0, t); if (f1) bf.frequency.exponentialRampToValueAtTime(f1, t + sec); bf.Q.value = q;
+    src.connect(bf); bf.connect(g); g.connect(cueBus); env(g, t, peak, a, Math.max(0.001, sec - a)); src.start(t); src.stop(t + sec + 0.02);
+  }
+  var NEW = {
+    // Simmie chime: two soft FM bells rising a major sixth (a fifth when the scale has no sixth), Simmie-palette spacing
+    simmie: function (v) { var up = inScale(9) ? 9 : 7, sp = per(-3, true); bell(semi(12), 0.5 + 0.4 * v, 0, 0.5); bell(semi(12 + up), 0.45 + 0.4 * v, sp, 0.7); },
+    // send whoosh: white noise through a bandpass sweeping 400 Hz -> 4 kHz over PHI^-1.8 s (0.42 s)
+    'send-whoosh': function (v) { noise(per(-1.8), 0, 'bandpass', 400, 4000, 1.1, 0.10 + 0.08 * v, per(-1.8) * 0.45); },
+    // biplane buzz: 110 Hz sawtooth, 18 Hz tremolo, lowpassed, pitch bends down (doppler-ish) and fades as it flies away, ~1.6 s
+    'biplane-buzz': function (v) {
+      var t = ctx.currentTime, L = per(1), o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), trem = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(118, t); o.frequency.linearRampToValueAtTime(112, t + L * 0.35); o.frequency.exponentialRampToValueAtTime(96, t + L);
+      lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(420, t + L); lp.Q.value = 0.8;
+      lfo.frequency.value = 18; lg.gain.value = 0.45; trem.gain.value = 0.55; lfo.connect(lg); lg.connect(trem.gain);
+      o.connect(lp); lp.connect(trem); trem.connect(g); g.connect(cueBus);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06 + 0.03 * v, t + 0.12); g.gain.setTargetAtTime(0.0001, t + L * 0.3, L * 0.22);
+      o.start(t); lfo.start(t); o.stop(t + L + 0.1); lfo.stop(t + L + 0.1);
+    },
+    // passcode tick: a 2 ms noise burst through a 3.5 kHz highpass; identical for every key (the key is never read)
+    'passcode-tick': function () { noise(0.002, 0, 'highpass', 3500, 0, 0.7, 0.16, 0.0004); },
+    unlock: function () { var sp = per(-3); tone(semi(12), 0.6, 0, 0.35); tone(semi(19), 0.6, sp, 0.5); },
+    nope: function () { tone(semi(-12), 0.7, 0, 0.32, 'triangle', 0.94); },
+    // dial click: a tiny bandpassed click plus a short resonant tick (a mechanical detent)
+    'dial-click': function (v) { noise(0.004, 0, 'bandpass', 2600, 0, 3.5, 0.12 + 0.08 * v, 0.0005); tone(1700 + 300 * v, 0.35, 0.002, 0.03, 'sine'); },
+    // approve: bright rising root -> fifth; reject: soft falling minor third (in scale), never harsh
+    approve: function () { var sp = per(-2.5); tone(semi(12), 0.7, 0, 0.28, 'triangle'); tone(semi(19), 0.7, sp, 0.42, 'triangle'); },
+    reject: function () { var sp = per(-2), hi = inScale(3) ? 3 : 7; tone(semi(hi), 0.45, 0, 0.3, 'sine'); tone(semi(hi - 3), 0.4, sp, 0.42, 'sine'); }
+  };
 
   // ambient bed: a quiet pad (or wind for Nature) that breathes on PHI^8 s (slow drift slot), swept by the weather
   function startBed() {
@@ -160,6 +218,7 @@
 
   // ---------- inputs ----------
   function firstGesture() {
+    gest = true;
     if (!on || ctx) return;
     if (ensure()) { try { ctx.resume && ctx.resume(); } catch (e) {} startBed(); }
   }
@@ -169,15 +228,33 @@
   // press model / meters: the chat preview reports levels as 'simmie:meter'; the dashboard gets a light local model
   var meterSeen = 0;
   window.addEventListener('simmie:meter', function (e) {
-    meterSeen = performance.now(); var lv = +(e && e.detail && e.detail.level) || 0;
+    meterSeen = performance.now(); if (dialBusy()) return; var lv = +(e && e.detail && e.detail.level) || 0;
     cue(lv > 1 ? 'peak' : 'press', lv);
   });
+  // dials and radios: detent clicks instead of the generic press note
+  var dialHeld = false, dialKey = 0, DIAL_SEL = '.pl-dial, .bs-flav input, input[type="radio"]';
+  function dialBusy() { return dialHeld || performance.now() - dialKey < 200; }
+  document.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('.pl-dial')) dialHeld = true; }, true);
+  ['pointerup', 'pointercancel'].forEach(function (k) { document.addEventListener(k, function () { if (dialHeld) setTimeout(function () { dialHeld = false; }, 120); }, true); });
+  document.addEventListener('keydown', function (e) { if (e.target.closest && e.target.closest('.pl-dial')) dialKey = performance.now(); }, true);
+  document.addEventListener('change', function (e) { var t = e.target; if (t && t.type === 'radio' && !(t.closest && t.closest('.bs-flav'))) cue('dial-click', 0.5); }, true);
+  var dialStep = new WeakMap();
+  function watchDials() {
+    Array.prototype.forEach.call(document.querySelectorAll('.pl-dial'), function (d) {
+      if (d._bs) return; d._bs = true; dialStep.set(d, Math.floor((+d.getAttribute('aria-valuenow') || 0) / 10));
+      new MutationObserver(function () {
+        var st = Math.floor((+d.getAttribute('aria-valuenow') || 0) / 10); if (st === dialStep.get(d)) return;
+        dialStep.set(d, st); cue('dial-click', st / 10);                // one detent per 10 units
+      }).observe(d, { attributes: true, attributeFilter: ['aria-valuenow'] });
+    });
+  }
   var downAt = new WeakMap();
   var PRESS_SEL = PAGE === 'dash' ? '#app button, #ask-dad, #app .btn, .pl-play input, .pl-play [role="slider"]'
     : PAGE === 'quiz' ? 'button:not(.tile):not(.bs-toggle)' : 'button, .ft-chat, #play input';
   document.addEventListener('pointerdown', function (e) { var b = e.target.closest && e.target.closest(PRESS_SEL); if (b) downAt.set(b, { t: performance.now(), p: e.pressure }); }, true);
   document.addEventListener('pointerup', function (e) {
     var b = e.target.closest && e.target.closest(PRESS_SEL); var d = b && downAt.get(b); if (!d) return; downAt.delete(b);
+    if (b.closest(DIAL_SEL) || b.closest('#passcode')) return;   // dials click; the passcode field ticks
     setTimeout(function () {
       if (performance.now() - meterSeen < 120) return;      // the page's own meter already reported this press
       var held = (performance.now() - d.t) / 1000, x = d.p && d.p !== 0.5 ? d.p : Math.min(1, held / per(1));
@@ -196,6 +273,45 @@
   window.addEventListener('simmie:msgpulse', function (e) { setStatus(e && e.detail && e.detail.state); });
   if (PAGE === 'dash') every(3, false, 3, function () { try { var T = window.PhiTiming; if (T && T.msg) setStatus(T.msg(), status === null); } catch (e) {} });
   else setStatus(document.documentElement.dataset.msg || window.SimmieMsgStatus, true);
+
+  // passcode field: one identical tick per edit (never reads, logs, stores or varies by the key); unlock / wrong passcode
+  document.addEventListener('input', function (e) { if (e.target && e.target.id === 'passcode') cue('passcode-tick'); }, true);
+  function watchGate() {
+    var msg = document.getElementById('gate-msg');
+    if (msg && !msg._bs) { msg._bs = true; new MutationObserver(function () { if (/didn.t work/i.test(msg.textContent)) cue('nope'); }).observe(msg, { childList: true, characterData: true, subtree: true }); }
+    if (PAGE === 'dash' && !document.body._bsLock) {
+      document.body._bsLock = true; var wasLocked = document.body.classList.contains('locked');
+      new MutationObserver(function () { var l = document.body.classList.contains('locked'); if (wasLocked && !l) cue('unlock'); wasLocked = l; })
+        .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+  // Approve / Reject decisions
+  document.addEventListener('rebella:decision', function (e) {
+    var st = String((e && e.detail && e.detail.status) || '');
+    if (/^approv/i.test(st)) cue('approve'); else if (/^reject/i.test(st)) cue('reject');
+  });
+  // send whoosh: Bonnie sends a message or transmits to Dad (any form submit with text, except the passcode gate);
+  // capture phase, so it runs before the page clears the box. Only checks the box isn't empty.
+  function hasText(f) { return Array.prototype.some.call(f.querySelectorAll('textarea, input[type="text"], input:not([type])'), function (x) { return x.value && x.value.trim(); }); }
+  document.addEventListener('submit', function (e) { var f = e.target; if (!f || f.id === 'gate-form' || (f.querySelector && f.querySelector('#passcode'))) return; if (hasText(f)) cue('send-whoosh', 0.6); }, true);
+  document.addEventListener('keydown', function (e) {
+    var t = e.target; if (e.key !== 'Enter' || e.shiftKey || e.isComposing || !t || !t.closest) return;
+    if (t.closest('form')) return;                                   // forms are covered by submit
+    if (t.closest('.tty, .tty-dock, .sct, [class*="tty"]') && t.value && t.value.trim()) cue('send-whoosh', 0.5);
+  }, true);
+  // biplane buzz: synced to the dashboard's biplane send animation (the plane element is added to <body> as it takes off)
+  // Simmie chime: a new Simmie bubble in the chat list (after the page has drawn its starting messages)
+  var bootAt = 0, seenSim = {};
+  function onAdded(muts) {
+    for (var i = 0; i < muts.length; i++) for (var j = 0; j < muts[i].addedNodes.length; j++) {
+      var n = muts[i].addedNodes[j]; if (n.nodeType !== 1) continue;
+      if (n.classList.contains('biplane') || (n.querySelector && n.querySelector(':scope > svg.biplane'))) cue('biplane-buzz', 0.6);
+      else if (n.classList.contains('msg') && n.classList.contains('them') && !n.classList.contains('dad')) {
+        var id = n.getAttribute('data-id') || n.textContent.slice(0, 40); if (seenSim[id]) continue; seenSim[id] = 1;   // re-renders don't chime again
+        if (performance.now() - bootAt > 1500) cue('simmie', 0.5);
+      }
+    }
+  }
 
   // Ask Dad: watch aria-expanded on its button
   function watchAskDad() {
@@ -233,9 +349,10 @@
     paintToggle(); placeRow(); watchAskDad();
     var scr = document.getElementById('screen-chat');
     if (scr) new MutationObserver(placeRow).observe(scr, { attributes: true, attributeFilter: ['class'] });
-    new MutationObserver(watchAskDad).observe(document.body, { childList: true, subtree: true });
+    bootAt = performance.now(); watchGate(); watchDials();
+    new MutationObserver(function (m) { watchAskDad(); watchDials(); onAdded(m); }).observe(document.body, { childList: true, subtree: true });
     document.documentElement.classList.add('bs-ready');
-    window.BonnieSound = { cue: cue, get flavour() { return flavour; }, get on() { return on; }, get running() { return !!(ctx && ctx.state === 'running'); }, FLAVOURS: ORDER.slice(), CUES: ['press', 'peak', 'idle', 'new', 'dad', 'urgent', 'askdad', 'askdad-close', 'sparkle'] };
+    window.BonnieSound = { cue: cue, get flavour() { return flavour; }, get on() { return on; }, get running() { return !!(ctx && ctx.state === 'running'); }, FLAVOURS: ORDER.slice(), CUES: ['press', 'peak', 'idle', 'new', 'dad', 'urgent', 'askdad', 'askdad-close', 'sparkle', 'simmie', 'send-whoosh', 'biplane-buzz', 'passcode-tick', 'unlock', 'nope', 'dial-click', 'approve', 'reject'] };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
