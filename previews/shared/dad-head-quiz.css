@@ -1,0 +1,14 @@
+/* PREVIEW ONLY (questionnaire preview): Dad's header, Danny 2026-10-24 02:01 AWST.
+   Same pattern as the Bonnie's Dashboard preview masthead (previews/bonnies-dashboard/css/dad-mark.css + mod.css .brand/.mod-pill):
+   Dad's world mark (original previews/dad-mark/dad-mark.svg, 32 px, decorative) left of the title, then a pill.
+   Dad palette only: charcoal #24292E bar, ocean #0F5C6E rule, mist #D6ECEF title (12.0:1), sand #F6EBD9 line (12.4:1),
+   amber #F2A541 pill with charcoal text (7.2:1). No animation of its own; the mark's own slow orbit is inside the SVG
+   and stops under prefers-reduced-motion. Not sticky, not fixed: it scrolls with the page. */
+.dad-head{position:relative;z-index:1;background:#24292E;border-bottom:3px solid #0F5C6E;color:#F6EBD9}
+.dad-head .dh-in{max-width:860px;margin:0 auto;padding:.6rem 18px .55rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.25rem 1rem}
+.dad-head .dh-brand{display:flex;align-items:center;min-width:0}
+.dad-head .dad-mark{flex:0 0 auto;width:32px;height:32px;margin-right:.55rem;display:block}
+.dad-head .dh-title{font-family:var(--f-serif,"Lora",Georgia,serif);font-weight:500;font-size:1.2rem;line-height:1.2;color:#D6ECEF}
+.dad-head .dh-pill{font-family:var(--f-hand,"Gochi Hand",cursive);text-transform:uppercase;letter-spacing:2px;background:#F2A541;color:#24292E;padding:.2rem .7rem .1rem;border-radius:999px;font-size:.9rem;line-height:1.2;margin-left:.65rem;white-space:nowrap}
+.dad-head .dh-sub{margin:0;font-size:.92rem;line-height:1.3;color:#F6EBD9}
+@media(max-width:480px){.dad-head .dh-in{padding:.5rem 14px .45rem}.dad-head .dh-title{font-size:1.05rem}.dad-head .dh-pill{font-size:.8rem;letter-spacing:1.5px;padding:.15rem .55rem .05rem;margin-left:.5rem}.dad-head .dh-sub{font-size:.85rem}}
