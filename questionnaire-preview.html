@@ -459,6 +459,19 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 .bgloop-still{display:none;background:url("media/space-loop-poster.webp") center/cover no-repeat}
 @media(prefers-reduced-motion:reduce){.bgloop{display:none}.bgloop-still{display:block}}
 </style>
+<link rel="stylesheet" href="previews/shared/bonnie-sound.css?v=2">
+<style>
+/* inline volume note (not a pop-up): first thing on the page; the sound switch lives inside it */
+.vol-note{margin:0 0 .8rem;padding:.55rem .8rem .5rem;background:#0A3F4C;color:#F6EBD9;border:1px solid rgba(242,165,65,.45);border-radius:12px;line-height:1.3}
+.vol-note .vn-top{margin:0;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.45rem}
+.vol-note .vn-spk{color:#F2A541;display:inline-block;font-size:1.15rem;animation:vnBreathe 4.236s ease-in-out infinite}  /* PHI^3 s */
+.vol-note .vn-sub{margin:.1rem 0 .3rem;font-size:.86rem;color:#BFD9DD}
+.vol-note .bs-row{padding:2px 0;font-size:.76rem}
+@keyframes vnBreathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:1}}
+@media(prefers-reduced-motion:reduce){.vol-note .vn-spk{animation:none}}
+</style>
+<script src="previews/shared/bonnie-sound.js?v=2" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
+<script src="previews/shared/bonnie-sound-quiz.js?v=1" defer></script>
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -466,6 +479,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
 <main class="wrap">
+  <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><p class="vn-sub">Tap the sound switch to hear them.</p><div id="vol-sound"></div></aside>
   <header class="tick" id="tick" aria-label="Fun facts from Dad">
     <span class="tag" id="ttag">From Dad &middot; age 13</span>
     <span class="wx" id="wx" hidden><span id="wxIcon"></span> <span id="wxText"></span></span>

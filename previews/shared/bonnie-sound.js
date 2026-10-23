@@ -5,13 +5,17 @@
    Timing follows /home/box/.config/phi-timing-rules.md: every repeat is PHI^n s (swept by the weather when the page has
    PhiTiming), first ticks at golden-angle offsets, Simmie-palette sounds 1.5 steps faster (x PHI^-1.5).
    Nothing sounds until the first tap or key press (autoplay rules). Choices are saved in localStorage (preview keys).
-   Hook: <link rel="stylesheet" href=".../bonnie-sound.css"> + <script src=".../bonnie-sound.js" data-page="chat|dash"></script> */
+   Hook: <link rel="stylesheet" href=".../bonnie-sound.css"> + <script src=".../bonnie-sound.js" data-page="chat|dash|quiz"></script>
+   data-default="off" (questionnaire): off until the first tap on the switch, remembered under its own key.
+   data-slot="#id": put the switch row inside that element. Test hook: every played cue dispatches
+   'bonnie-sound:cue' on document with {kind} only (never any typed text). */
 (function () {
   'use strict';
   var PHI = 1.6180339887, G = 0.6180339887, SIMMIE = -1.5;
   var me = document.currentScript || document.querySelector('script[src*="bonnie-sound.js"]');
   var PAGE = (me && me.getAttribute('data-page')) || 'chat';
-  var K_ON = 'preview.bonnieSound.on', K_FLAV = 'preview.bonnieSound.flavour';
+  var DEF_OFF = !!(me && me.getAttribute('data-default') === 'off'), SLOT = me && me.getAttribute('data-slot');
+  var K_ON = 'preview.bonnieSound.on' + (DEF_OFF ? '.' + PAGE : ''), K_FLAV = 'preview.bonnieSound.flavour';
   function store(k, v) { try { if (v != null) localStorage.setItem(k, v); return localStorage.getItem(k); } catch (e) { return null; } }
   function sweep() { try { var T = window.PhiTiming; var s = T && T.sweep ? +T.sweep() : 0; return isFinite(s) ? s : 0; } catch (e) { return 0; } }
   function per(n, simmie) { return Math.pow(PHI, n + (simmie ? SIMMIE : 0) + sweep()); }      // seconds
@@ -32,7 +36,7 @@
   };
   var ORDER = ['lofi', 'chip', 'ambient', 'pop', 'nature'];
   var flavour = FLAV[store(K_FLAV)] ? store(K_FLAV) : 'lofi';
-  var on = store(K_ON) !== '0';                       // default on, but silent until the first tap
+  var on = DEF_OFF ? store(K_ON) === '1' : store(K_ON) !== '0';   // chat/dash: default on, silent until the first tap; quiz: off until the switch
   var AC = window.AudioContext || window.webkitAudioContext;
   var ctx = null, master = null, duck = null, cueBus = null, bedBus = null, bed = null, stops = [], lastCue = 0;
 
@@ -97,11 +101,12 @@
     o.connect(f); f.connect(g); g.connect(cueBus);
     o.start(t); o.stop(t + a + d + r + 0.05);
   }
+  function trace(kind) { try { document.dispatchEvent(new CustomEvent('bonnie-sound:cue', { detail: { kind: kind } })); } catch (e) {} }
   function cue(kind, level) {
     if (!ensure() || !on) return;
     var now = performance.now();
     if (kind === 'press' && now - lastCue < per(-3) * 1000) return;    // PHI^-3 s between press cues
-    lastCue = now;
+    lastCue = now; trace(kind);
     var lv = Math.max(0, Math.min(1.25, level || 0.4)), L = FLAV[flavour].scale.length, sp = per(-4, kind === 'askdad');
     if (kind === 'press') note(Math.round(lv * (L * 2 - 1)), 0.25 + 0.5 * Math.min(1, lv));
     else if (kind === 'peak') { note(L * 2, 0.5); note(L * 2 + 2, 0.35, sp); }
@@ -168,7 +173,8 @@
     cue(lv > 1 ? 'peak' : 'press', lv);
   });
   var downAt = new WeakMap();
-  var PRESS_SEL = PAGE === 'dash' ? '#app button, #ask-dad, #app .btn, .pl-play input, .pl-play [role="slider"]' : 'button, .ft-chat, #play input';
+  var PRESS_SEL = PAGE === 'dash' ? '#app button, #ask-dad, #app .btn, .pl-play input, .pl-play [role="slider"]'
+    : PAGE === 'quiz' ? 'button:not(.tile):not(.bs-toggle)' : 'button, .ft-chat, #play input';
   document.addEventListener('pointerdown', function (e) { var b = e.target.closest && e.target.closest(PRESS_SEL); if (b) downAt.set(b, { t: performance.now(), p: e.pressure }); }, true);
   document.addEventListener('pointerup', function (e) {
     var b = e.target.closest && e.target.closest(PRESS_SEL); var d = b && downAt.get(b); if (!d) return; downAt.delete(b);
@@ -212,6 +218,8 @@
 
   // ---------- placement: with the footer controls; in the landscape scroll row when that row exists ----------
   function placeRow() {
+    var slot = SLOT && document.querySelector(SLOT);
+    if (slot) { if (row.parentNode !== slot) slot.appendChild(row); return; }
     if (PAGE === 'chat') {
       var strip = document.getElementById('ls-strip'), ft = document.getElementById('fact-ticker'), scr = document.getElementById('screen-chat');
       if (strip && strip.isConnected) { if (row.parentNode !== strip) { row.classList.add('ls-seg'); strip.appendChild(row); } }
@@ -227,7 +235,7 @@
     if (scr) new MutationObserver(placeRow).observe(scr, { attributes: true, attributeFilter: ['class'] });
     new MutationObserver(watchAskDad).observe(document.body, { childList: true, subtree: true });
     document.documentElement.classList.add('bs-ready');
-    window.BonnieSound = { cue: cue, get flavour() { return flavour; }, get on() { return on; }, get running() { return !!(ctx && ctx.state === 'running'); }, FLAVOURS: ORDER.slice() };
+    window.BonnieSound = { cue: cue, get flavour() { return flavour; }, get on() { return on; }, get running() { return !!(ctx && ctx.state === 'running'); }, FLAVOURS: ORDER.slice(), CUES: ['press', 'peak', 'idle', 'new', 'dad', 'urgent', 'askdad', 'askdad-close', 'sparkle'] };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
