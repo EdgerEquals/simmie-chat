@@ -13,6 +13,13 @@ window.QUIZ_COPY = {
   start: "Start questionnaire",
   progress: "Question {n} of {total}",
   label: "Which one would you prefer?",
+  weatherQ: "Do you want a weather icon up the top that reflects the weather locally for the person who's viewing the website?",
+  yes: "Yes",
+  no: "No",
+  weatherSum: "Weather icon up the top",
+  ageNote: "Hey Bonnie, we've set up an age dial for your page. Right now it's on 13, so everything is written for someone your age. If things ever feel too babyish or too grown-up, just ask Simmie to turn the age dial up or down by one or two years. You can change it any time.",
+  ageQ: "Would you like this?",
+  ageSum: "Age dial for your page",
   reroll: "\uD83C\uDFB2 Reroll",
   ask: "\uD83D\uDCAC Ask more",
   askLabel: "Type a question or comment",
@@ -145,6 +152,10 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .sum .note{display:block;font-size:.98rem;margin-top:.2rem;background:rgba(255,255,255,.7);border-radius:6px;padding:.2rem .5rem}
 .foot{position:fixed;left:0;right:0;bottom:0;text-align:center;font-size:.9rem;font-weight:700;color:var(--ink);background:rgba(255,255,255,.94);padding:.45rem;border-top:2px dashed var(--blush);z-index:5}
 [hidden]{display:none!important}
+.agenote{background:var(--butter);border-left:8px solid #E9C25A;border-radius:12px;padding:1rem 1.2rem;margin:0 auto 1.2rem;max-width:640px;font-size:1.15rem;line-height:1.55}
+.yn .reroll,.yn .askrow,.yn .askbox{display:none!important}
+.yn .qlabel{font-size:1.6rem;line-height:1.3;max-width:640px;margin-left:auto;margin-right:auto}
+@media(max-width:600px){.yn .qlabel{font-size:1.3rem}}
 @media(max-width:600px){
   .panel{padding:1.2rem 1rem 1.1rem}
   h1{font-size:1.75rem}
@@ -172,6 +183,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
   <section class="panel" id="quiz" hidden aria-live="polite">
     <div class="stars" id="stars" aria-hidden="true"></div>
     <p class="count" id="count"></p>
+    <p class="agenote" id="agenote" hidden></p>
     <h2 class="qlabel" data-copy="label">Which one would you prefer?</h2>
     <div class="choices">
       <div class="choice"><button class="tile" id="t0"><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="emo" aria-hidden="true"></span><span class="txt"></span></button><button class="btn reroll" data-i="0" data-copy="reroll">&#x1F3B2; Reroll</button></div>
@@ -215,7 +227,9 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
     [O('Stories about real people you look up to','\uD83C\uDF1F','#F8C8D5','people'),O('Big questions about how the world works','\uD83C\uDF0D','#B5E3E0','bigq'),'people'],
     [O('History and how people lived long ago','\uD83D\uDCDC','#FCD5B5','history'),O('Science and new discoveries','\uD83D\uDD2C','#C6E9D2','science'),'history'],
     [O('Dinosaurs and fossils','\uD83E\uDD95','#FBE6A2','dino'),O('The cosmos','\uD83E\uDE90','#DCD0F2','cosmos'),'cosmos'],
-    [O('New content every day','\u2600\uFE0F','#FBE6A2','daily'),O('A big batch once a week','\uD83D\uDCE6','#DCD0F2','weekly'),'daily']
+    [O('New content every day','\u2600\uFE0F','#FBE6A2','daily'),O('A big batch once a week','\uD83D\uDCE6','#DCD0F2','weekly'),'daily'],
+    {yn:'weather'}, // Q11: plain Yes / No (no Reroll, no Ask more)
+    {yn:'age'}      // Q12: age dial note + Yes / No
   ];
   var POOL=[
     O('Parenting','\uD83D\uDC6A','#F8C8D5','family'),O('Strategies for dealing with school','\uD83C\uDF92','#B5E3E0','school'),
@@ -255,7 +269,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
     quick:['\u26A1\uD83D\uDCC4\u23F1\uFE0F','drift'], deep:['\uD83D\uDCDA\uD83D\uDD0D\uD83D\uDCD6','float'], video:['\uD83C\uDFAC\u25B6\uFE0F\uD83C\uDF7F','drift'],
     photo:['\uD83D\uDCF7\uD83D\uDDBC\uFE0F\uD83C\uDF1E','float'], quiz:['\u2753\u2705\u2754','rise'], challenge:['\uD83C\uDFC6\uD83C\uDFAF\uD83E\uDD47','bob'],
     people:['\uD83C\uDF1F\u2B50\uD83D\uDCAB','twinkle'], bigq:['\uD83C\uDF0D\u2754\uD83C\uDF00','drift'], science:['\uD83D\uDD2C\uD83E\uDDEA\u269B\uFE0F\uD83E\uDDEC','float'],
-    dino:['\uD83E\uDD95\uD83E\uDD96\uD83E\uDDB4\uD83C\uDF0B','drift'], weekly:['\uD83D\uDCE6\uD83D\uDDD3\uFE0F\uD83C\uDF81','fall'],
+    dino:['\uD83E\uDD95\uD83E\uDD96\uD83E\uDDB4\uD83C\uDF0B','drift'], weather:['\uD83C\uDF24\uFE0F\u2601\uFE0F\uD83C\uDF27\uFE0F\u2744\uFE0F\uD83C\uDF08','float'], weekly:['\uD83D\uDCE6\uD83D\uDDD3\uFE0F\uD83C\uDF81','fall'],
     family:['\uD83D\uDC6A\uD83C\uDFE1\uD83D\uDC9E','float'], school:['\uD83C\uDF92\u270F\uFE0F\uD83D\uDCD0\uD83D\uDCDA','fall'], friends:['\uD83E\uDD1D\uD83D\uDCAC\uD83D\uDC9B','rise'],
     giants:['\uD83D\uDC63\u26F0\uFE0F\uD83C\uDFF0','drift'], whales:['\uD83D\uDC0B\uD83C\uDFB5\uD83E\uDEE7','rise'], electric:['\u26A1\uD83D\uDCA1\uD83D\uDD0B','twinkle'],
     web:['\uD83D\uDCBB\uD83D\uDDB1\uFE0F\u2728','float'], music:['\uD83C\uDFB5\uD83C\uDFB6\uD83C\uDFB8','rise'], pop:['\uD83C\uDFA4\uD83D\uDCBF\u2728','bob'],
@@ -296,12 +310,15 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
   // ---- Quiz state (memory only) ----
   var $=function(id){return document.getElementById(id);};
   var state,qi;
-  function reset(){state=PAIRS.map(function(p){return {opts:[p[0],p[1]],theme:p[2],pick:null,notes:[]};});qi=0;}
+  function reset(){state=PAIRS.map(function(p){var th=p.yn==='age'?'teen':'weather';return p.yn?{yn:p.yn,opts:[O(C.yes,'\uD83D\uDC4D','#C6E9D2',th),O(C.no,'\uD83D\uDC4E','#F8C8D5',th)],theme:th,pick:null,notes:[]}:{opts:[p[0],p[1]],theme:p[2],pick:null,notes:[]};});qi=0;}
   function show(id){['start','quiz','summary'].forEach(function(s){$(s).hidden=(s!==id);});window.scrollTo(0,0);}
   function render(){
     var s=state[qi];
     $('stars').innerHTML=state.map(function(x,i){return '<i class="'+(i<qi?'done':i===qi?'now':'')+'"></i>';}).join('');
     $('count').textContent=fmt('progress',{n:qi+1,total:state.length});
+    document.querySelector('.qlabel').textContent=s.yn==='weather'?C.weatherQ:s.yn==='age'?C.ageQ:C.label;
+    var an=$('agenote');an.hidden=s.yn!=='age';an.textContent=C.ageNote;
+    document.getElementById('quiz').classList.toggle('yn',!!s.yn);
     [0,1].forEach(function(i){var t=$('t'+i),o=s.opts[i];t.querySelector('.emo').textContent=o.e;t.querySelector('.txt').textContent=o.t;t.style.setProperty('--c',o.c);t.classList.toggle('picked',s.pick===i);t.setAttribute('aria-pressed',String(s.pick===i));});
     $('askbox').classList.remove('open');$('ask').setAttribute('aria-expanded','false');$('saved').textContent='';$('note').value='';
     $('notes').innerHTML=s.notes.map(function(n){return '<li></li>';}).join('');
@@ -320,7 +337,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
       li.innerHTML='<span class="n"></span><span class="e" aria-hidden="true"></span><span class="b"><strong></strong><span class="vs"></span></span>';
       li.querySelector('.n').textContent=i+1;li.querySelector('.e').textContent=p?p.e:'\u23ED\uFE0F';
       li.querySelector('strong').textContent=p?p.t:C.skipped;
-      li.querySelector('.vs').textContent=p?fmt('over',{x:o.t}):fmt('either',{a:s.opts[0].t,b:s.opts[1].t});
+      li.querySelector('.vs').textContent=s.yn==='weather'?C.weatherSum:s.yn==='age'?C.ageSum:(p?fmt('over',{x:o.t}):fmt('either',{a:s.opts[0].t,b:s.opts[1].t}));
       s.notes.forEach(function(n){var d=document.createElement('span');d.className='note';d.textContent='\u2709\uFE0F '+n;li.querySelector('.b').appendChild(d);});
       ol.appendChild(li);
     });
