@@ -7,6 +7,7 @@
 (function () {
   'use strict';
   const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const T = window.PhiTiming;   // golden-ratio timing
   const h = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const mlog = (t) => window.dispatchEvent(new CustomEvent('simmie:log', { detail: t }));
   const dlg = h('dialog', 'fs-dlg'); dlg.setAttribute('aria-labelledby', 'fs-h1');
@@ -41,7 +42,7 @@
     if (reduce()) { from.hidden = true; to.hidden = false; focusEl && focusEl.focus(); return; }
     from.classList.add('fs-out');
     setTimeout(() => { from.hidden = true; from.classList.remove('fs-out'); to.hidden = false; to.classList.add('fs-in');
-      focusEl && focusEl.focus(); setTimeout(() => to.classList.remove('fs-in'), 320); }, 200);
+      focusEl && focusEl.focus(); setTimeout(() => to.classList.remove('fs-in'), T.ms(-2)); }, T.ms(-3));
   }
   function open(f) {
     fact = f; clearTimeout(closeT);
@@ -56,9 +57,9 @@
     // Preview: nothing is sent. Real build would send 'About this fact: ' + fact.text + (note ? '\n\n' + note : '').
     x.hidden = true; win.classList.add('is-sent'); swap(s2, s3, s3);
     mlog('fact sent to Simmie (preview)');
-    closeT = setTimeout(() => { if (dlg.open) dlg.close(); }, reduce() ? 1800 : 1700);
+    closeT = setTimeout(() => { if (dlg.open) dlg.close(); }, T.ms(1));
     const venus = /venus/i.test(sentFact ? sentFact.text : '');
-    setTimeout(() => { if (window.SimmiePreview) window.SimmiePreview.simmieSays(venus ? 'Ooh, good pick! Venus spins backwards too. Want more? (preview)' : 'Ooh, good pick! I love that one. Want more like it? (preview)'); }, 4000);
+    setTimeout(() => { if (window.SimmiePreview) window.SimmiePreview.simmieSays(venus ? 'Ooh, good pick! Venus spins backwards too. Want more? (preview)' : 'Ooh, good pick! I love that one. Want more like it? (preview)'); }, T.ms(3));
   }
   s2.addEventListener('submit', (e) => { e.preventDefault(); fire(); });
   just.addEventListener('click', () => { note.value = ''; fire(); });

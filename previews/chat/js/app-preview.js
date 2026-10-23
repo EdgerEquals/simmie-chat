@@ -72,7 +72,7 @@
   // PREVIEW: nothing is encrypted or sent. The bubble shows 'sending…', then 'preview, not sent'.
   async function deliver(m) {
     const rec = msgs.get(m.id); rec.state = 'pending'; render();
-    await new Promise((r) => setTimeout(r, reduceMotion() ? 300 : 1100));
+    await new Promise((r) => setTimeout(r, reduceMotion() ? window.PhiTiming.ms(-3) : window.PhiTiming.ms(0)));
     rec.state = 'preview'; mlog('preview: not sent'); render();
   }
 
@@ -120,11 +120,37 @@
     $('typing').classList.toggle('active', typing);
     $('typing').hidden = !waiting;
     ttySync(false, list);
+    emitStatus(list);
     const box = askOpen && document.querySelector('.ask-box textarea');
     if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); box.scrollIntoView({ block: 'nearest' }); }
     else log.scrollTop = log.scrollHeight;
   }
 
+  // Unanswered (same rule as the side copy): button questions -> no answer yet; plain '?' -> she hasn't sent anything after it.
+  const isDadQuestion = (m) => m.from === 'dad' && (m.kind === 'question' || /\?[\s"'”’)\]\p{Extended_Pictographic}\uFE0F]*$/u.test(m.text));
+  function unansweredDad(list) {
+    const lastMine = list.filter((m) => m.from === 'daughter' && m.state !== 'failed').reduce((t, m) => Math.max(t, m.ts), 0);
+    return list.filter((m) => isDadQuestion(m) && (m.kind === 'question' ? answerFor(m) === null : lastMine <= m.ts));
+  }
+  // ---------- message status for the pulse layer (rule 7): the page works out a state word and hands only that over ----------
+  let seenTs = Date.now(), seenT = null, lastStatus = '';
+  function markSeenSoon() {   // seen = page visible and the log at the bottom for PHI^3 4.236 s
+    clearTimeout(seenT);
+    const log = $('log'); if (document.hidden || !log || log.scrollHeight - log.scrollTop - log.clientHeight > 40) return;
+    seenT = setTimeout(() => { seenTs = Date.now(); emitStatus(); }, window.PhiTiming.ms(3));
+  }
+  function emitStatus(list) {
+    list = list || [...msgs.values()].sort((a, b) => a.ts - b.ts);
+    const lastAsk = list.filter((m) => m.from === 'daughter' && m.type === 'ask-dad' && m.state !== 'failed').pop();
+    const askWaiting = !!lastAsk && !list.some((m) => m.from === 'dad' && m.ts > lastAsk.ts);
+    const unseen = list.filter((m) => m.from !== 'daughter' && m.ts > seenTs);
+    const st = unansweredDad(list).length || askWaiting ? 'urgent' : unseen.some((m) => m.from === 'dad') ? 'dad' : unseen.length ? 'new' : 'idle';
+    window.SimmieMsgStatus = st;
+    if (st !== lastStatus) { lastStatus = st; window.dispatchEvent(new CustomEvent('simmie:msgstatus', { detail: { state: st } })); }
+    if (unseen.length) markSeenSoon();
+  }
+  document.addEventListener('visibilitychange', () => markSeenSoon());
+  document.addEventListener('DOMContentLoaded', () => { const l = $('log'); if (l) l.addEventListener('scroll', () => markSeenSoon(), { passive: true }); });
   // ---------- simmie — tty box (shown once Dad has messaged; sits as a dock above the composer) ----------
   let tty = null;
   function ttySync(initial, list) {
@@ -176,7 +202,7 @@
     return wrap;
   }
   // The answer as the page knows it: "Yes" / "No" / "Ask more: <text>"
-  setInterval(() => { if (!askOpen) render(); }, 30000);
+  setInterval(() => { if (!askOpen) render(); }, window.PhiTiming.ms(7));
 
   if (window.SimmieWeather) window.SimmieWeather.mount($('wx'));
   // ---------- PREVIEW boot: built-in sample thread (written for this preview; not real chat content) ----------
@@ -199,7 +225,7 @@
   };
   window.addEventListener('ft:open-chat', (e) => {
     const id = e.detail && e.detail.id, t = id && $('log').querySelector('.msg[data-id="' + CSS.escape(id) + '"]');
-    if (t) { t.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' }); t.classList.remove('ft-hl'); void t.offsetWidth; t.classList.add('ft-hl'); setTimeout(() => t.classList.remove('ft-hl'), 2600); }
+    if (t) { t.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'center' }); t.classList.remove('ft-hl'); void t.offsetWidth; t.classList.add('ft-hl'); setTimeout(() => t.classList.remove('ft-hl'), window.PhiTiming.ms(2)); }
     $('msg').focus({ preventScroll: true });
     mlog('jumped to simmie reply');
   });

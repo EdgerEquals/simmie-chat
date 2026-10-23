@@ -50,8 +50,21 @@
     function scrolling(){
       box.classList.remove('is-static'); track.innerHTML='';
       track.appendChild(list(facts,false)); track.appendChild(list(facts,true)); /* two copies = seamless loop */
-      var w=track.scrollWidth/2; track.style.setProperty('--ft-dur',Math.max(40,Math.round(w/38))+'s'); /* about 38px a second */
+      phiTrack(); /* golden-ratio timing: each item gets PHI^4 6.854 s (Bonnie's facts slot), swept by the weather (rule 6) */
     }
+    var T=window.PhiTiming, trackSw=null;
+    function phiTrack(){
+      var n=track.querySelector('.ft-list').querySelectorAll('.ft-item').length||1, per=T.sws(4), dur=n*per;
+      track.style.setProperty('--ft-dur',dur.toFixed(3)+'s');
+      track.style.animationDelay=(-(per*T.frac(T.K.feed))).toFixed(3)+'s'; trackSw=T.sweep();
+    }
+    if(T) T.onSweep(function(){   /* new sweep: re-time at the loop seam, never mid-scroll */
+      if(box.classList.contains('is-static')) return;
+      track.addEventListener('animationiteration',function once(){ track.removeEventListener('animationiteration',once);
+        if(trackSw===T.sweep()) return; var n=track.querySelector('.ft-list').querySelectorAll('.ft-item').length||1;
+        track.style.setProperty('--ft-dur',(n*T.sws(4)).toFixed(3)+'s'); track.style.animationDelay='0s'; trackSw=T.sweep();
+        getComputedStyle(track).animationDuration; track.getAnimations().forEach(function(a){a.currentTime=0;}); });
+    });
     function single(){
       box.classList.add('is-static'); track.innerHTML='';
       var ul=document.createElement('ul'); ul.className='ft-list'; ul.appendChild(item(facts[idx],idx,false)); track.appendChild(ul);
@@ -70,12 +83,13 @@
       for(var j=0;j<items.length;j++){var it=items[(k+j)%items.length];if(it._fact&&!it._fact.status)return it._fact;}
       return null;
     }
-    /* ---- Simmie replies interrupt the feed: one standout amber-gold line with the cloud, scrolls through twice ---- */
+    /* ---- Simmie replies interrupt the feed: one standout amber-gold line with the cloud. It is Simmie's, so it holds
+       PHI^5 x PHI^-1.5 = 5.388 s (swept): starts readable at the left, pans once to the end if it is longer than the window ---- */
     var chat=document.getElementById('ft-chat'), live=document.getElementById('ft-live'), reply=null, replyAnim=null, chatT=null, replyEndT=null;
     function endReply(){
       clearTimeout(replyEndT); if(replyAnim){replyAnim.cancel();replyAnim=null;}
       if(reply){reply.remove();reply=null;} box.classList.remove('is-reply');
-      clearTimeout(chatT); chatT=setTimeout(function(){chat.hidden=true;},60000);   // Chat → stays a while after
+      clearTimeout(chatT); chatT=setTimeout(function(){chat.hidden=true;},T.ms(8));   // Chat → stays PHI^8 46.98 s after (functional, fixed)
       if(box.classList.contains('is-static')) single();
     }
     function showReply(d){
@@ -88,9 +102,11 @@
       reply.appendChild(inner); win.appendChild(reply); box.classList.add('is-reply');
       chat.hidden=false; chat.dataset.id=d.id||'';
       if(live) live.textContent='Simmie replied: '+d.text;
-      if(rm.matches){ replyEndT=setTimeout(endReply,15000); return; }   // reduced motion: still line; the next arrow moves on
+      var hold=T.ssms(5);
+      if(rm.matches){ replyEndT=setTimeout(endReply,T.ms(3.5)); return; }   // reduced motion: still line for 5.388 s (no sweep)
       var ww=win.clientWidth, iw=inner.scrollWidth;
-      replyAnim=inner.animate([{transform:'translateX('+ww+'px)'},{transform:'translateX('+(-iw)+'px)'}],{duration:Math.max(6000,Math.round((ww+iw)/60*1000)),iterations:2,easing:'linear'});
+      var over=Math.max(0,iw-ww+12);
+      replyAnim=inner.animate([{transform:'translateX(0)'},{transform:'translateX(0)',offset:.236},{transform:'translateX('+(-over)+'px)',offset:.854},{transform:'translateX('+(-over)+'px)'}],{duration:hold,iterations:1,easing:'ease-in-out'});
       replyAnim.onfinish=endReply;
       if(userPaused) replyAnim.pause();
     }

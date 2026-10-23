@@ -51,7 +51,7 @@
       const ok = await opts.send(text);
       if (!ok) { send.disabled = false; err.textContent = "Didn't send. Check your connection and try again."; err.hidden = false; return; }
       win.classList.add('is-sent'); form.hidden = true; sent.hidden = false; sent.focus && sent.setAttribute('tabindex', '-1'); sent.focus();
-      closeT = setTimeout(() => { if (dlg.open) dlg.close(); }, reduce() ? 1800 : 1500);
+      closeT = setTimeout(() => { if (dlg.open) dlg.close(); }, g.PhiTiming.ms(1));
     });
   }
   g.SimmieAskDad = { mount };

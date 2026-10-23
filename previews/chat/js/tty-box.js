@@ -9,7 +9,8 @@
   const PERTH = { lat: -31.95, lon: 115.86 };
   const REBELLA = 'https://edgerequals.github.io/rebella/';
   const SPIN = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';
-  const THINK_AFTER = 20000, READY_FOR = 30000, IDLE_GAP = 3800, CHAR_MS = 38;
+  const T = g.PhiTiming;   // golden-ratio timing (see js/phi-timing.js); Simmie rhythms = Bonnie slot x PHI^-1.5
+  const THINK_AFTER = T.ms(6), READY_FOR = T.ms(7), CHAR_MS = T.ms(-7);
   const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -87,7 +88,7 @@
   // ---------- mission log: short timestamped STATUS lines about real on-page events ----------
   // Display only: never message text, chat content or passwords; nothing here is sent anywhere.
   // Other scripts on the page add lines with window.dispatchEvent(new CustomEvent('simmie:log', { detail: 'status text' })).
-  const MLOG_GAP = 1500, MLOG_KEEP = 4, HEARTBEAT = 8000;
+  const MLOG_GAP = T.ms(-1), MLOG_KEEP = 4;   // real events log right away (0.618 s spacing); the ambient heartbeat at most every PHI^5 x PHI^-1.5 = 5.388 s
   let mlogPane = null, mlogQ = [], mlogBusy = false, mlogLast = 0, mlogBeat = null;
   const stamp = () => new Date().toLocaleTimeString('en-AU', { timeZone: 'Australia/Perth', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   function mlog(text) { mlogQ.push(String(text).slice(0, 48)); pumpLog(); }
@@ -103,12 +104,12 @@
       while (mlogPane.children.length > MLOG_KEEP) mlogPane.firstChild.remove();
       [...mlogPane.children].forEach((c, i, a) => { c.style.opacity = String(1 - (a.length - 1 - i) * 0.22); });
       if (reduce() || document.hidden) t.textContent = text;
-      else for (let i = 1; i <= text.length; i++) { t.textContent = text.slice(0, i); await sleep(16); }
+      else for (let i = 1; i <= text.length; i++) { t.textContent = text.slice(0, i); await sleep(T.ms(-9)); }
       mlogLast = Date.now();
     }
     mlogBusy = false; armBeat();
   }
-  function armBeat() { clearTimeout(mlogBeat); mlogBeat = setTimeout(() => { if (!document.hidden) mlog('· all systems nominal'); else armBeat(); }, HEARTBEAT); }
+  function armBeat() { clearTimeout(mlogBeat); mlogBeat = setTimeout(() => { if (!document.hidden) mlog('· all systems nominal'); else armBeat(); }, T.ssms(5)); }   // mission-log ambient: Simmie, slot PHI^5 -> PHI^3.5 5.388s, swept
   window.addEventListener('simmie:log', (e) => { if (e && typeof e.detail === 'string') mlog(e.detail); });
   document.addEventListener('visibilitychange', () => mlog(document.hidden ? 'tab hidden — holding' : 'tab visible — resuming'));
   const orient = window.matchMedia('(orientation: landscape)');
@@ -172,7 +173,7 @@
           for (let i = 1; i <= part.length; i++) { if (my !== token) { root.classList.remove('talking'); c.remove(); return false; } t.textContent = part.slice(0, i); await sleep(CHAR_MS); }
           c.remove(); root.classList.remove('talking');
         }
-        await sleep(reduce() ? 1200 : 450);
+        await sleep(reduce() ? T.ms(0) : T.ms(-2));
       }
       return my === token;
     }
@@ -190,7 +191,7 @@
         screen.innerHTML = ''; row('simmie>', w ? `PERTH ${w.t}°C · ${w.word} ${w.icon}` : 'HELLO BONNIE'); return;
       }
       while (my === token) {
-        if (document.hidden) { await sleep(2000); continue; }
+        if (document.hidden) { await sleep(T.ms(1)); continue; }
         cycle++;
         let lines = null;
         if (cycle % 4 === 0) lines = await report();
@@ -201,7 +202,7 @@
           lines = [s];
         }
         for (const l of lines) { if (!(await type(l, my))) return; }
-        await sleep(IDLE_GAP);
+        await sleep(T.ssms(3));   // idle gap: Simmie, slot PHI^3 -> PHI^1.5 2.058s, swept by the weather
       }
     }
 
@@ -219,7 +220,7 @@
         if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); submit(); }
         else if (e.key === 'Escape') { input.value = ''; input.blur(); idle(); }
       });
-      input.addEventListener('blur', () => { setTimeout(() => { if (mode === 'input' && input && !input.value && document.activeElement !== input) idle(); }, 1500); });
+      input.addEventListener('blur', () => { setTimeout(() => { if (mode === 'input' && input && !input.value && document.activeElement !== input) idle(); }, T.ms(1)); });
       body.setAttribute('aria-label', 'Simmie terminal');
       if (focus) input.focus({ preventScroll: true }); place();
     }
@@ -242,7 +243,7 @@
           return;
         }
         if (!reduce()) t.textContent = SPIN[++i % SPIN.length];
-      }, 110);
+      }, T.ms(-5));
     }
     async function playReplies() {
       stopAll(); mode = 'reply'; const my = token;
@@ -270,7 +271,7 @@
       if (mode === 'waiting') {
         const mine = list.filter((m) => myIds.has(m.id));
         if (opts.preview && mine.length && mine.every((m) => m.state === 'preview')) {   // PREVIEW: spinner, then say so
-          myIds.clear(); const my = token, left = Math.max(0, 1800 - (Date.now() - waitingSince));
+          myIds.clear(); const my = token, left = Math.max(0, T.ms(1) - (Date.now() - waitingSince));
           setTimeout(() => { if (my !== token) return; stopAll(); mode = 'reply'; const my2 = token;
             live.textContent = 'Preview, not sent.'; type('PREVIEW, NOT SENT', my2, 'dim').then((ok) => { if (ok) ready(); }); }, left);
           return;

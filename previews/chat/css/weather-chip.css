@@ -4,24 +4,25 @@
 .wx-label{font-weight:700;color:var(--dad-amber,#F2A541)}
 .wx-place{color:var(--dad-sand,#F6EBD9);font-weight:400}
 .wx-stage{position:relative;display:inline-flex;align-items:center;height:26px;font-size:15px;line-height:1}
-.wx-sway{display:inline-block;width:19px;text-align:center;animation:wx-sway calc(3s + var(--i) * .25s) ease-in-out calc(var(--i) * -.45s) infinite alternate}
+.wx-sway{display:inline-block;width:19px;text-align:center;animation:wx-sway calc(var(--phi7) / 2) ease-in-out var(--sway-d,0s) infinite alternate}   /* one full sway = PHI^7 29.03s */
 .wx-sway:has(.wx-face){width:21px}
 .wx-face,.wx-gift{display:inline-block;will-change:transform,opacity}
+.wx-face{transition:opacity var(--phim3)}.wx-face.wx-fade{opacity:0}   /* face crossfade on the PHI^2 / PHI^3 / PHI^4 beats */
 .wx-gift{position:relative;z-index:1;opacity:0}
 .wx-icon{position:relative;z-index:2;display:inline-block;margin-left:2px;font-size:17px}
 @keyframes wx-sway{from{transform:translateX(-4px)}to{transform:translateX(4px)}}  /* each emoji ±4px (6–8 s full cycle, offset phases) + the group ±4px = up to ±8px */
-.wx-stage{animation:wx-sway-all 3.5s ease-in-out infinite alternate}
+.wx-stage{animation:wx-sway-all calc(var(--phi7) / 2) ease-in-out -5.236s infinite alternate}
 @keyframes wx-sway-all{from{transform:translateX(-4px)}to{transform:translateX(4px)}}
 /* Story (11 s loop): turn away (rotateY + squish + lean + drift away from the icon), turn back over ~400 ms
    and glide toward it while the offerings are handed over one by one; hold; soft reset. */
-.wx-face{animation:wx-face 11s ease-in-out infinite}
+.wx-face{animation:wx-face var(--phi6) ease-in-out var(--wx-face-d,0s) infinite}   /* offering story PHI^6 17.94s */
 @keyframes wx-face{
   0%{transform:perspective(60px) rotateY(0) rotate(0) translateX(0) scaleX(1)}
   9%,20%{transform:perspective(60px) rotateY(50deg) rotate(-9deg) translateX(-4px) scaleX(.86)}
   23.6%{transform:perspective(60px) rotateY(0) rotate(4deg) translateX(5px) scaleX(1)}
   26%,78%{transform:perspective(60px) rotateY(0) rotate(0) translateX(6px) scaleX(1)}
   92%,100%{transform:perspective(60px) rotateY(0) rotate(0) translateX(0) scaleX(1)}}
-.wx-gift{animation-duration:7s;animation-timing-function:ease-out;animation-fill-mode:both;animation-iteration-count:1;animation-delay:calc(2.6s + var(--n) * .38s)}
+.wx-gift{animation-duration:var(--phi5);animation-timing-function:ease-out;animation-fill-mode:both;animation-iteration-count:1;animation-delay:calc(var(--phi3) + var(--n) * var(--phim1) - var(--wx-off,0s))}
 .wx-drop .wx-gift{animation-name:wx-drop}
 .wx-peek .wx-gift{animation-name:wx-peek}
 .wx-spin .wx-gift{animation-name:wx-spin}
