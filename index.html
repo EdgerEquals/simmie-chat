@@ -13,8 +13,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/dad-palette.css?v=1">
 <link rel="stylesheet" href="css/chat.css?v=5">
+<link rel="stylesheet" href="css/chat-dashlayout.css?v=1">
 </head>
 <body>
+<!-- static background (texture only, chat page colours; nothing moves): css/chat-dashlayout.css -->
+<div class="chat-bg" aria-hidden="true"><div class="chat-bg-dots"></div><div class="chat-bg-code"></div></div>
 <main id="app">
 
   <section id="screen-loading" class="screen card center">
@@ -42,19 +45,30 @@
   </section>
 
   <section id="screen-chat" class="screen chat" hidden>
-    <header class="chat-head">
-      <div class="who">
-        <div class="avatar" aria-hidden="true">S</div>
-        <div><div class="name">Simmie</div><div id="status" class="status">Replies usually take under a minute</div></div>
-      </div>
-      <button id="lock-btn" class="ghost" type="button" title="Lock this chat">🔒 Lock</button>
+    <!-- header: same structure as Bonnie's Dashboard (top bar with logo left + keys right, info row, tagline on its own line
+         under the header); chat page colours unchanged (Danny 24 Oct 2026 02:48 AWST). css/chat-dashlayout.css -->
+    <header class="chat-head dash-head" id="chat-head">
+      <div class="topbar"><div class="container">
+        <div class="who">
+          <div class="avatar" aria-hidden="true">S</div>
+          <div class="name">Simmie</div>
+        </div>
+        <span class="tb-right"><button id="lock-btn" class="ghost lockbtn" type="button" title="Lock this chat">🔒 Lock</button></span>
+      </div></div>
+      <div class="hud"><div class="container"><div id="status" class="status">Replies usually take under a minute</div></div></div>
     </header>
+    <div class="tagline-line"><div class="container"><span class="tagline">Your private chat with Simmie</span></div></div>
     <div id="log" class="log" aria-live="polite" aria-label="Messages"></div>
-    <div id="typing" class="typing" hidden><span class="dots"><i></i><i></i><i></i></span> <span id="typing-text">Waiting for Simmie…</span></div>
-    <form id="send-form" class="composer" autocomplete="off">
-      <textarea id="msg" rows="1" maxlength="1500" placeholder="Type a message…" aria-label="Message"></textarea>
-      <button id="send-btn" class="send" type="submit" aria-label="Send">➤</button>
-    </form>
+    <!-- footer: locked to the bottom like the dashboard's (status line just above the bar, bar = the message box taking the
+         remaining width + Send); safe-area aware; the log scrolls between header and footer, so nothing hides behind it. -->
+    <div id="chat-foot" class="chat-foot">
+      <div id="typing" class="typing" hidden><span class="dots"><i></i><i></i><i></i></span> <span id="typing-text">Waiting for Simmie…</span></div>
+      <footer class="footer" id="app-foot"><div class="container"><span>Messages are encrypted and sent securely to Simmie</span></div></footer>
+      <form id="send-form" class="composer" autocomplete="off"><div class="container">
+        <textarea id="msg" rows="1" maxlength="1500" placeholder="Type a message…" aria-label="Message"></textarea>
+        <button id="send-btn" class="send" type="submit" aria-label="Send">➤</button>
+      </div></form>
+    </div>
   </section>
 
 </main>
