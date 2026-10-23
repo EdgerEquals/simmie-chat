@@ -145,3 +145,4 @@ html #app .topbar .tb-right{display:flex;align-items:center;gap:.6rem;margin-lef
 html #app .ask-dad{position:relative;left:auto;top:auto;transform:none;visibility:visible;cursor:pointer;touch-action:manipulation;z-index:2;flex:none}
 html #app .topbar .container{padding-top:3px;padding-bottom:3px}
 @media(max-width:575px){html #app .topbar .tb-right{gap:.4rem}}
+html #app .topbar .ask-dad{margin-right:6px}   /* room for the orbiting satellite at the screen edge */
