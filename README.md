@@ -112,7 +112,7 @@ An open page notices on its next poll (nothing in the log opens any more) and as
 ## Dad palette
 
 Everything that comes from Dad uses its own palette, defined once in `css/dad-palette.css` as `--dad-` CSS custom properties.
-It is deliberately separate from Rebella's pastels (Florence's palette, which lives in the rebella repo and is not changed here).
+It is deliberately separate from Rebella's pastels (Bonnie's palette, which lives in the rebella repo and is not changed here).
 
 | Variable | Hex | Used for |
 |---|---|---|
