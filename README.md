@@ -106,3 +106,23 @@ An open page notices on its next poll (nothing in the log opens any more) and as
   15 s up to 10 min, 20 s otherwise; paused while the tab is hidden, and when it becomes visible again the live connection
   reopens with `?since=<last id>` and the log is polled at once; raw.githubusercontent can lag a few minutes behind a push).
 * Password-based encryption: a weak password could be brute-forced offline from the public files. Use a long one.
+
+## Dad palette
+
+Everything that comes from Dad uses its own palette, defined once in `css/dad-palette.css` as `--dad-` CSS custom properties.
+It is deliberately separate from Rebella's pastels (Florence's palette, which lives in the rebella repo and is not changed here).
+
+| Variable | Hex | Used for |
+|---|---|---|
+| `--dad-ocean` | `#0F5C6E` | main: panel frames, Dad bubble border, "From Dad"/"Dad" label, Start button, Yes/No borders |
+| `--dad-ocean-deep` | `#0A3F4C` | headings and button text on light Dad surfaces, button shadows |
+| `--dad-amber` | `#F2A541` | accent: Send button, the picked answer, current-question star |
+| `--dad-sand` | `#F6EBD9` | surface: Dad's chat bubble, the start/greeting panel, Back buttons, "No" tile |
+| `--dad-sky` | `#D6ECEF` | soft secondary: Skip button, "Yes" tile, hover on Dad's question buttons |
+| `--dad-charcoal` | `#24292E` | body text on Dad surfaces (always used on amber, never white) |
+
+WCAG AA (4.5:1) contrast for the pairs in use: white on ocean 7.6, ocean on sand 6.4, ocean-deep on sand 9.7, ocean-deep on sky 9.4,
+charcoal on amber 7.2, charcoal on sand 12.4, charcoal on sky 12.0, ocean-deep on white 11.5.
+
+Used by `questionnaire-preview.html` (greeting/start screen, question panel frame and heading, Start/Send/Skip/Back/Yes/No)
+and by the chat page for messages with `from=dad` (`.msg.dad` in `css/chat.css`). Simmie's and Bonnie's messages are unchanged.

@@ -71,3 +71,12 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 .choice.open{background:#FBE7B0}
 .ask-box{display:flex;gap:8px;align-items:flex-end;margin-top:8px;white-space:normal}
 .ask-box textarea{font-size:1rem;resize:none;border-radius:14px;padding:.45rem .7rem;min-width:0}
+
+/* Dad's messages + question cards use the Dad palette (css/dad-palette.css). Simmie's and Bonnie's messages unchanged. */
+.msg.dad{background:var(--dad-sand,#F6EBD9);border:2px solid var(--dad-ocean,#0F5C6E);color:var(--dad-charcoal,#24292E)}
+.msg.dad .sender{color:var(--dad-ocean,#0F5C6E);font-weight:700}
+.msg.dad .meta{color:var(--dad-ocean-deep,#0A3F4C)}
+.msg.dad .choice{border-color:var(--dad-ocean,#0F5C6E);background:#fff;color:var(--dad-ocean-deep,#0A3F4C)}
+.msg.dad .choice:not(:disabled):hover,.msg.dad .choice.open{background:var(--dad-sky,#D6ECEF)}
+.msg.dad .choices.done .choice.picked{background:var(--dad-amber,#F2A541);border-color:var(--dad-amber,#F2A541);color:var(--dad-charcoal,#24292E)}
+.msg.dad .ask-box textarea{border-color:var(--dad-ocean,#0F5C6E)}

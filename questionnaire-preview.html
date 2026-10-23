@@ -9,7 +9,7 @@ window.QUIZ_COPY = {
   pageTitle: "Questionnaire preview for Bonnie",
   intro: "Hey Bonnie, here's a questionnaire I prepared for you,",
   from: "from Dad",
-  instruction: "Pick the one you like better, tap Reroll under a choice to swap in a different topic, or tap Ask more to type a question or comment.",
+  instruction: "Pick the one you like better, tap Reroll under a choice to swap in a different topic, or type a question or comment in the box under each one.",
   start: "Start questionnaire",
   progress: "Question {n} of {total}",
   label: "Which one would you prefer?",
@@ -44,6 +44,7 @@ window.QUIZ_COPY = {
 <title>Questionnaire preview for Bonnie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
+<link rel="stylesheet" href="css/dad-palette.css?v=1">
 <style>
 /* PREVIEW ONLY. Nothing on this page is sent anywhere: no fetch, no forms, no storage. Answers live in page memory and vanish on reload. */
 :root{--blush:#F8CFDB;--peach:#FCD9C0;--butter:#FBE7B0;--mint:#C8EBD5;--aqua:#B5E3E0;--lavender:#DCD0F2;--bg:#FFF8F4;--ink:#3A2B35;--heading:#5B3A50;--accent:#B4436C;--deep:#7A2448;
@@ -152,6 +153,26 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .sum .note{display:block;font-size:.98rem;margin-top:.2rem;background:rgba(255,255,255,.7);border-radius:6px;padding:.2rem .5rem}
 .foot{position:fixed;left:0;right:0;bottom:0;text-align:center;font-size:.9rem;font-weight:700;color:var(--ink);background:rgba(255,255,255,.94);padding:.45rem;border-top:2px dashed var(--blush);z-index:5}
 [hidden]{display:none!important}
+/* ---- Dad palette for the "from Dad" parts (css/dad-palette.css); Bonnie's pastel tiles and themed backgrounds stay ---- */
+#start.panel,#quiz.panel,#summary.panel{border-top:8px solid var(--dad-ocean);}
+#start.panel{background:var(--dad-sand)}
+#start h1,.sum h2{color:var(--dad-ocean-deep)}
+#start .from{color:var(--dad-ocean)}
+#start .lead{color:var(--dad-charcoal)}
+.qlabel,.count{color:var(--dad-ocean-deep)}
+.stars i.done{background:var(--dad-ocean)}.stars i.now{background:var(--dad-amber)}
+.big{background:var(--dad-ocean);color:#fff;box-shadow:0 6px 0 var(--dad-ocean-deep)}
+.big:active{box-shadow:0 3px 0 var(--dad-ocean-deep)}
+.btnrow .btn.send{background:var(--dad-amber);color:var(--dad-charcoal)}
+.btnrow .btn.skip{background:var(--dad-sky);color:var(--dad-ocean-deep)}
+.btnrow .bk{background:var(--dad-sand);color:var(--dad-ocean-deep);box-shadow:inset 0 0 0 2px var(--dad-ocean)}
+.askbox label{color:var(--dad-ocean-deep)}
+textarea{border-color:#BFD9DD}
+.yn .tile{color:var(--dad-charcoal)}
+.yn #t0{background:var(--dad-sky)!important;border-color:var(--dad-ocean)}
+.yn #t1{background:var(--dad-sand)!important;border-color:var(--dad-amber)}
+.yn .tile.picked{box-shadow:0 0 0 4px #fff,0 0 0 7px var(--dad-ocean)}
+.btn:focus-visible,.tile:focus-visible,textarea:focus-visible{outline-color:var(--dad-ocean)}
 .agenote{background:var(--butter);border-left:8px solid #E9C25A;border-radius:12px;padding:1rem 1.2rem;margin:0 auto 1.2rem;max-width:640px;font-size:1.15rem;line-height:1.55}
 .yn .reroll{display:none!important}
 .yn .qlabel{font-size:1.6rem;line-height:1.3;max-width:640px;margin-left:auto;margin-right:auto}
@@ -176,7 +197,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 
   <section class="panel" id="start">
     <h1><span data-copy="intro">Hey Bonnie, here's a questionnaire I prepared for you,</span> <span class="from" data-copy="from">from Dad</span></h1>
-    <p class="lead" data-copy="instruction">Pick the one you like better, tap Reroll under a choice to swap in a different topic, or tap Ask more to type a question or comment.</p>
+    <p class="lead" data-copy="instruction">Pick the one you like better, tap Reroll under a choice to swap in a different topic, or type a question or comment in the box under each one.</p>
     <button class="btn big" id="go" data-copy="start">Start questionnaire</button>
   </section>
 
@@ -227,7 +248,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
     [O('History and how people lived long ago','\uD83D\uDCDC','#FCD5B5','history'),O('Science and new discoveries','\uD83D\uDD2C','#C6E9D2','science'),'history'],
     [O('Dinosaurs and fossils','\uD83E\uDD95','#FBE6A2','dino'),O('The cosmos','\uD83E\uDE90','#DCD0F2','cosmos'),'cosmos'],
     [O('New content every day','\u2600\uFE0F','#FBE6A2','daily'),O('A big batch once a week','\uD83D\uDCE6','#DCD0F2','weekly'),'daily'],
-    {yn:'weather'}, // Q11: plain Yes / No (no Reroll, no Ask more)
+    {yn:'weather'}, // Q11: plain Yes / No (no Reroll)
     {yn:'age'}      // Q12: age dial note + Yes / No
   ];
   var POOL=[
