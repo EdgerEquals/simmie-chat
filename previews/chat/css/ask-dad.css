@@ -64,3 +64,10 @@
   .ad-win *,.ad-win{animation:none!important}
   .ad-ripple{display:none}
 }
+/* PREVIEW: Ask Dad reminder pulse on the key, PHI^4.75 = 9.83 s (fixed, not swept), golden-angle start (k=60: 0.082 x 9.83 = -0.81 s).
+   Rests most of the cycle, swells to 1.08 with a soft amber ring, eases back. Replaces nothing else; off for reduced motion. */
+.ad-key{animation:ad-remind 9.833s ease-in-out -0.807s infinite}
+.ad-key::after{content:"";position:absolute;inset:0;border-radius:5px;pointer-events:none;animation:ad-remind-ring 9.833s ease-out -0.807s infinite}
+@keyframes ad-remind{0%,62%,100%{scale:1}76%{scale:1.08}92%{scale:1}}
+@keyframes ad-remind-ring{0%,62%{box-shadow:0 0 0 0 rgba(242,165,65,0)}76%{box-shadow:0 0 0 4px rgba(242,165,65,.38),0 0 12px 3px rgba(242,165,65,.45)}96%,100%{box-shadow:0 0 0 8px rgba(242,165,65,0),0 0 0 0 rgba(242,165,65,0)}}
+@media (prefers-reduced-motion:reduce){.ad-key,.ad-key::after{animation:none}}

@@ -125,21 +125,27 @@ html #app .dad-panel.sent .dp-ripple,html #app .dad-panel.sent .dp-sat{animation
 .bp-puff{position:absolute;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle,rgba(243,234,240,.95),rgba(220,208,242,.55) 60%,rgba(220,208,242,0) 72%);will-change:transform,opacity}
 /* ---------- iPhone SE: keep the top bar readable next to Lock + the Ask Dad spot ---------- */
 @media(max-width:575px){html #app .topbar .tagline{font-size:.78rem;letter-spacing:1px} .ad-spot{width:96px;margin-right:.35rem}}
-@media(prefers-reduced-motion:reduce){html #app .ask-dad{animation:none}}
+@media(prefers-reduced-motion:reduce){html #app .ask-dad,html #app .ask-dad::after{animation:none}}
 /* header band on true black (was: top bar #08070D, ticker band linear-gradient(90deg,#08070D,#14555A), masthead rgba(23,20,37,.97));
    borders, positioning and text colours unchanged (all light text, contrast only goes up on #000) */
 html #app .topbar,html #app .wx-hud,html #app .masthead{background:#000}
-/* Ask Dad as a true circle (was a ~92x30 oblong): 54x54, icon over a compact label; tap target 54px (>= 44).
-   Slow breathing on the CSS `scale` property (separate from the drag transform), PHI^3.5 = 5.39 s, golden-angle start. */
-html #app .ad-spot{width:54px;height:30px}
-html #app .ask-dad{width:54px;height:54px;padding:0;border-radius:50%;flex-direction:column;justify-content:center;gap:2px;
-  font:700 9px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:0;white-space:nowrap;text-align:center;
-  animation:ad-glow var(--phi-askdad-glow) ease-in-out var(--phi-askdad-glow-d) infinite,ad-breathe var(--phi-askdad-breathe) ease-in-out var(--phi-askdad-breathe-d) infinite}
-html #app .ask-dad .ad-ico{font-size:14px;line-height:1}
-html #app .ask-dad .ad-orbit>.ad-sat{left:31px;top:-5px;font-size:9px}   /* orbits just outside the 27px radius */
-@keyframes ad-breathe{0%,100%{scale:1}50%{scale:1.06}}
+/* Ask Dad as a true circle, PREVIEW: 43x43 (was 54, -20%), text only: "Ask" over "Dad", 13.5px bold, #24292E on amber.
+   Reminder pulse instead of the 5.39 s breathing: PHI^4.75 = 9.83 s (unswept, so it stays ~10 s at night), golden-angle start;
+   rests most of the cycle, swells to 1.08 with a soft amber ring, eases back. On the CSS `scale` property (separate from transform).
+   The right margin keeps the orbit's edge room (the paper plane orbit in ../common/ad-plane.js scales with the button). */
+html #app .ad-spot{width:43px;height:30px}
+html #app .ask-dad{width:43px;height:43px;padding:0;border-radius:50%;flex-direction:column;justify-content:center;align-items:center;gap:0;
+  font:700 13.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:-.4px;white-space:nowrap;text-align:center;color:#24292E;background:#F2A541;
+  animation:ad-glow var(--phi-askdad-glow) ease-in-out var(--phi-askdad-glow-d) infinite,ad-remind var(--phi-askdad-remind,9.833s) ease-in-out var(--phi-askdad-remind-d,0s) infinite}
+html #app .ask-dad .ad-w{display:block;line-height:1;margin:0}
+html #app .ask-dad .ad-w+.ad-w{margin-top:-1px}
+html #app .ask-dad::after{display:block;content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  box-shadow:0 0 0 0 rgba(242,165,65,0);animation:ad-remind-ring var(--phi-askdad-remind,9.833s) ease-out var(--phi-askdad-remind-d,0s) infinite}
+html #app .ask-dad .ad-orbit>.ad-sat{left:25px;top:-5px;font-size:8px}   /* orbits just outside the 21.5px radius */
+@keyframes ad-remind{0%,62%,100%{scale:1}76%{scale:1.08}92%{scale:1}}
+@keyframes ad-remind-ring{0%,62%{box-shadow:0 0 0 0 rgba(242,165,65,0)}76%{box-shadow:0 0 0 5px rgba(242,165,65,.38),0 0 14px 4px rgba(242,165,65,.45)}96%,100%{box-shadow:0 0 0 9px rgba(242,165,65,0),0 0 0 0 rgba(242,165,65,0)}}
 html #app .ask-dad.dragging{animation:none}
-@media(prefers-reduced-motion:reduce){html #app .ask-dad{animation:none}}
+@media(prefers-reduced-motion:reduce){html #app .ask-dad,html #app .ask-dad::after{animation:none}}
 /* Ask Dad pinned at the top-right of the header (no longer floating or draggable): normal flow, Lock just to its left */
 html #app .topbar .tb-right{display:flex;align-items:center;gap:.6rem;margin-left:auto;flex:none}
 html #app .ask-dad{position:relative;left:auto;top:auto;transform:none;visibility:visible;cursor:pointer;touch-action:manipulation;z-index:2;flex:none}

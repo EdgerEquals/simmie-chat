@@ -41,7 +41,8 @@
     // questionnaire preview
     ["offer-cycle",2,0,1],["cloud-wobble",4,1],["beacon",2,1],["beacon-chk",1,1],["beacon-down",0,1],
     ["bg-fall",6,0],["bg-float",5,0],["bg-sail",7,0],["bg-twinkle",2,0],["bg-cross",6,0],["bg-spin",8,0],["bg-bob",2,0],["bg-pulse",5,0],
-    ["rain",5,0],["code-panel",9,1]
+    ["rain",5,0],["code-panel",9,1],
+    ["askdad-remind",4.75,0,1]   // Ask Dad reminder pulse (preview): PHI^4.75 = 9.83 s, fixed (not swept) so it stays ~10 s
   ];
   var T = {}, list = [];
   E.forEach(function(e, i){
