@@ -263,58 +263,29 @@
     });
   }
 
-  // ---------- Ask Dad: ONE floating, draggable amber button + a small non-modal transmission window ----------
-  // Starts in the header beside Lock; drag (pointer events, > 6 px) to move it; clamped to the screen and re-clamped on
-  // resize/rotation; position remembered in localStorage. Tap opens the window next to it. The plain message is tagged
-  // type:"ask-dad" and goes the same encrypted relay path as the talk box (in the preview copy nothing is sent).
+  // ---------- Ask Dad: ONE amber circle pinned at the top-right of the header + a small non-modal transmission window ----------
+  // In normal header flow (Lock sits just to its left); not draggable. Tap/Enter/Space opens the window just below it,
+  // kept on screen. The plain message is tagged type:"ask-dad" and goes the same encrypted relay path as the talk box
+  // (in the preview copy nothing is sent).
   function dadWire(){
     var btn = $("#ask-dad"), panel = $("#dad-panel"), ta = $("#dp-text"), st = $("#dp-status"), keyRow = $("#dp-keyrow"), key = $("#dp-key");
     if(!btn || !panel) return;
-    var POS = PREVIEW ? "preview-askdad-pos" : "bd-askdad-pos", closeT = null, pos = null, drag = null;
+    var closeT = null;
+    try{ localStorage.removeItem("preview-askdad-pos"); localStorage.removeItem("bd-askdad-pos"); }catch(e){}   // old floating-button position
     function topMin(){ var b = document.querySelector(".preview-band"); return b ? Math.ceil(b.getBoundingClientRect().bottom) + 4 : 6; }
-    function clamp(p){
-      var w = btn.offsetWidth || 90, h = btn.offsetHeight || 30;
-      return {x:Math.min(Math.max(6, p.x), innerWidth - w - 6), y:Math.min(Math.max(topMin(), p.y), innerHeight - h - 6)};
-    }
-    function home(){   // the reserved spot beside Lock in the top bar
-      var s = $("#ad-spot"), r = s ? s.getBoundingClientRect() : null, h = btn.offsetHeight || 30;
-      return r && r.width ? {x:r.left, y:r.top + (r.height - h)/2} : {x:innerWidth - (btn.offsetWidth || 90) - 110, y:topMin()};
-    }
-    function place(p){ pos = clamp(p); btn.style.transform = "translate(" + Math.round(pos.x) + "px," + Math.round(pos.y) + "px)"; if(!panel.hidden) placePanel(); }
-    function load(){ try{ var p = JSON.parse(localStorage.getItem(POS)); if(p && isFinite(p.x) && isFinite(p.y)) return p; }catch(e){} return null; }
-    function start(){ place(load() || home()); btn.classList.add("ready"); }
-    function placePanel(){   // next to the button, fully on screen: below if it fits, else above; clamped sideways
+    function placePanel(){   // just below the button, fully on screen (above only if it can't fit below); clamped sideways
       var r = btn.getBoundingClientRect(), pw = panel.offsetWidth, ph = panel.offsetHeight, m = 8;
       var y = r.bottom + m; if(y + ph > innerHeight - m) y = Math.max(topMin(), r.top - ph - m);
       if(y + ph > innerHeight - m) y = Math.max(topMin(), innerHeight - ph - m);
       var x = Math.min(Math.max(m, r.right - pw), innerWidth - pw - m);
       panel.style.left = Math.round(x) + "px"; panel.style.top = Math.round(y) + "px";
     }
-    var rT = null; function reclamp(){ clearTimeout(rT); rT = setTimeout(function(){ if(pos) place(pos); }, 120); }
-    window.addEventListener("resize", reclamp); window.addEventListener("orientationchange", function(){ setTimeout(reclamp, 350); });
-    btn.addEventListener("pointerdown", function(e){
-      if(e.button > 0) return; drag = {id:e.pointerId, sx:e.clientX, sy:e.clientY, ox:pos.x, oy:pos.y, moving:false};
-      try{ btn.setPointerCapture(e.pointerId); }catch(err){}
-    });
-    btn.addEventListener("pointermove", function(e){
-      if(!drag || e.pointerId !== drag.id) return;
-      var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-      if(!drag.moving && Math.hypot(dx, dy) > 6){ drag.moving = true; btn.classList.add("dragging"); }
-      if(drag.moving){ e.preventDefault(); place({x:drag.ox + dx, y:drag.oy + dy}); }
-    });
-    function endDrag(e){
-      if(!drag || (e && e.pointerId !== drag.id)) return;
-      if(drag.moving){ btn.classList.remove("dragging"); try{ localStorage.setItem(POS, JSON.stringify(pos)); }catch(err){} LOG("ask dad moved"); }
-      else if(e && e.type === "pointerup") toggle();   // a tap (no drag) opens/closes; touch browsers don't always follow a drag with a click
-      drag = null;
-    }
-    btn.addEventListener("pointerup", endDrag); btn.addEventListener("pointercancel", endDrag);
+    var rT = null; function replace(){ clearTimeout(rT); rT = setTimeout(function(){ if(!panel.hidden) placePanel(); }, 120); }
+    window.addEventListener("resize", replace); window.addEventListener("orientationchange", function(){ setTimeout(replace, 350); });
+    window.addEventListener("scroll", function(){ if(!panel.hidden) placePanel(); }, {passive:true});
     function toggle(){ panel.hidden ? open() : close(); }
-    btn.addEventListener("click", function(e){ if(e.detail === 0) toggle(); });   // keyboard (Enter/Space) only; pointers use pointerup
-    btn.addEventListener("keydown", function(e){   // arrow keys move it too
-      var k = {ArrowLeft:[-16,0], ArrowRight:[16,0], ArrowUp:[0,-16], ArrowDown:[0,16]}[e.key]; if(!k || !pos) return;
-      e.preventDefault(); place({x:pos.x + k[0], y:pos.y + k[1]}); try{ localStorage.setItem(POS, JSON.stringify(pos)); }catch(err){}
-    });
+    btn.addEventListener("click", toggle);
+    btn.classList.add("ready");
     function open(){
       clearTimeout(closeT); panel.hidden = false; panel.classList.remove("sent","closing"); placePanel(); void panel.offsetWidth; panel.classList.add("opening");
       btn.setAttribute("aria-expanded","true"); st.textContent = "";
@@ -380,7 +351,7 @@
       finally{ sendBtn.disabled = false; }
     });
     document.addEventListener("rebella:locked", close);
-    requestAnimationFrame(start);
+    // (pinned in the header: nothing to place)
   }
 
   document.addEventListener("visibilitychange", function(){ if(!document.hidden && job && !timer && job.step) timer = setTimeout(job.step, 200); });

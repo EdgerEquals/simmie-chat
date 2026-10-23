@@ -126,3 +126,22 @@ html #app .dad-panel.sent .dp-ripple,html #app .dad-panel.sent .dp-sat{animation
 /* ---------- iPhone SE: keep the top bar readable next to Lock + the Ask Dad spot ---------- */
 @media(max-width:575px){html #app .topbar .tagline{font-size:.78rem;letter-spacing:1px} .ad-spot{width:96px;margin-right:.35rem}}
 @media(prefers-reduced-motion:reduce){html #app .ask-dad{animation:none}}
+/* header band on true black (was: top bar #08070D, ticker band linear-gradient(90deg,#08070D,#14555A), masthead rgba(23,20,37,.97));
+   borders, positioning and text colours unchanged (all light text, contrast only goes up on #000) */
+html #app .topbar,html #app .wx-hud,html #app .masthead{background:#000}
+/* Ask Dad as a true circle (was a ~92x30 oblong): 54x54, icon over a compact label; tap target 54px (>= 44).
+   Slow breathing on the CSS `scale` property (separate from the drag transform), PHI^3.5 = 5.39 s, golden-angle start. */
+html #app .ad-spot{width:54px;height:30px}
+html #app .ask-dad{width:54px;height:54px;padding:0;border-radius:50%;flex-direction:column;justify-content:center;gap:2px;
+  font:700 9px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:0;white-space:nowrap;text-align:center;
+  animation:ad-glow var(--phi-askdad-glow) ease-in-out var(--phi-askdad-glow-d) infinite,ad-breathe var(--phi-askdad-breathe) ease-in-out var(--phi-askdad-breathe-d) infinite}
+html #app .ask-dad .ad-ico{font-size:14px;line-height:1}
+html #app .ask-dad .ad-orbit>.ad-sat{left:31px;top:-5px;font-size:9px}   /* orbits just outside the 27px radius */
+@keyframes ad-breathe{0%,100%{scale:1}50%{scale:1.06}}
+html #app .ask-dad.dragging{animation:none}
+@media(prefers-reduced-motion:reduce){html #app .ask-dad{animation:none}}
+/* Ask Dad pinned at the top-right of the header (no longer floating or draggable): normal flow, Lock just to its left */
+html #app .topbar .tb-right{display:flex;align-items:center;gap:.6rem;margin-left:auto;flex:none}
+html #app .ask-dad{position:relative;left:auto;top:auto;transform:none;visibility:visible;cursor:pointer;touch-action:manipulation;z-index:2;flex:none}
+html #app .topbar .container{padding-top:3px;padding-bottom:3px}
+@media(max-width:575px){html #app .topbar .tb-right{gap:.4rem}}

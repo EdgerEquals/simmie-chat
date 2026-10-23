@@ -11,14 +11,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,700;1,400&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
 <link rel="stylesheet" href="css/mod.css?v=5">
 <link rel="stylesheet" href="css/hud.css?v=2">
-<link rel="stylesheet" href="css/night.css?v=2">
+<link rel="stylesheet" href="css/night.css?v=4">
 <link rel="stylesheet" href="css/play.css?v=1">
 <script src="js/phi-timing.js?v=1"></script>
 <script src="js/config.js?v=2"></script>
 <script src="js/crypto.js?v=3"></script>
 <script src="js/mlog.js?v=2" defer></script>
 <script src="js/hud.js?v=2" defer></script>
-<script src="js/talk.js?v=3" defer></script>
+<script src="js/talk.js?v=4" defer></script>
 <script src="js/interludes.js?v=2" defer></script>
 <script src="js/play.js?v=1" defer></script>
 <script src="js/app.js?v=7" defer></script>
@@ -52,8 +52,9 @@
   </div>
   <div class="topbar"><div class="container">
     <span class="tagline">Keep Rebella safe, fun and cool</span>
-    <span id="ad-spot" class="ad-spot" aria-hidden="true"></span>
-    <button id="lock" class="lockbtn" type="button" aria-label="Lock dashboard">&#128274; Lock</button>
+    <span class="tb-right"><button id="lock" class="lockbtn" type="button" aria-label="Lock dashboard">&#128274; Lock</button>
+    <!-- Ask Dad: amber circle pinned top-right of the header, Lock just to its left -->
+    <button id="ask-dad" class="ask-dad" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="dad-panel" aria-label="Ask Dad"><span class="ad-orbit" aria-hidden="true"><span class="ad-sat">🛰️</span></span><span class="ad-ico" aria-hidden="true">📡</span> Ask Dad</button></span>
   </div></div>
   <!-- weather chip + age-linked fun-fact ticker -->
   <div class="wx-hud"><div id="il-head" class="il-lane il-head" aria-hidden="true"></div><div class="container">
@@ -99,8 +100,6 @@
     <span>Bonnie's Dashboard</span><span>Decisions are sent securely to Simmie's publisher</span>
   </div></footer>
 
-  <!-- Ask Dad: one floating, draggable button (starts beside Lock; drag to move; arrow keys too) -->
-  <button id="ask-dad" class="ask-dad" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="dad-panel" aria-label="Ask Dad (drag to move)"><span class="ad-orbit" aria-hidden="true"><span class="ad-sat">🛰️</span></span><span class="ad-ico" aria-hidden="true">📡</span> Ask Dad</button>
   <template id="biplane-tpl"><svg class="biplane" viewBox="0 0 48 30" width="64" height="40" aria-hidden="true" focusable="false">
     <g stroke="#2A9D9F" stroke-width="1.2" stroke-linejoin="round">
       <rect x="9" y="3" width="28" height="4" rx="2" fill="#F8CFDB"/>

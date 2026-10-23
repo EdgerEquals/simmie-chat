@@ -36,7 +36,8 @@
     ["gait-trot",-2,0],["gait-hop",-1,0],["gait-dog",2,0],["gait-fly",0,0],["gait-glow",0,0],["animal-cross",4,0],
     ["space-cross",5,1],["space-ring",3,1],["space-ring-slow",4,1],["space-spark",2,1],
     ["tty-hold",4,1],["tty-hold-multi",3,1],["tty-gap",1,1],["mlog-pace",2,1],
-    ["band-sway",7,0,1]
+    ["band-sway",7,0,1],
+    ["askdad-breathe",5,1]   // Ask Dad circle breathing: Simmie slot PHI^5 * PHI^-1.5 = 5.39 s (swept)
   ];
   var T = {}, list = [];
   E.forEach(function(e, i){
