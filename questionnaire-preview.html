@@ -466,6 +466,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="previews/shared/command-centre.css?v=1">
 <link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=2">
 <link rel="stylesheet" href="previews/shared/dad-head-quiz.css?v=2">
+<link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=1">
 <style>
 /* inline volume note (not a pop-up): first thing on the page; the sound switch lives inside it */
 /* radiant sapphire (Danny 02:17 AWST): the one questionnaire box allowed translucency + glow */
@@ -479,6 +480,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 </style>
 <script src="previews/shared/bonnie-sound.js?v=3" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
 <script src="previews/shared/bonnie-sound-quiz.js?v=2" defer></script>
+<script src="previews/shared/dad-autodj-quiz.js?v=1" defer></script>
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -489,6 +491,15 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <header class="dad-head"><div class="dh-in">
   <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=2" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
   <p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p>
+  <!-- Dad's auto-DJ (phi rule 10): generated in the browser, plays only after a tap; the sound switch below is the master mute -->
+  <section class="dad-dj" id="dad-dj" data-guard="dad-dj" aria-label="Dad's music">
+    <div class="dj-row">
+      <button type="button" class="dj-play" id="dj-play" aria-pressed="false"><span class="dj-led" aria-hidden="true"></span><span class="dj-lbl">Dad&rsquo;s DJ</span></button>
+      <label class="dj-vol"><span>music vol</span><input type="range" id="dj-vol" min="0" max="100" step="1" value="80"></label>
+      <output class="dj-read" id="dj-read" aria-live="off"></output>
+    </div>
+    <details class="dj-demo"><summary>try the pumps</summary><p class="dj-pumps" id="dj-pumps"></p><div class="dj-chips" id="dj-chips"></div></details>
+  </section>
 </div></header>
 <main class="wrap">
   <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><div id="vol-sound"></div></aside>
