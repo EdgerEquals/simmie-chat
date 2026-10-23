@@ -99,7 +99,7 @@ html #app .wx-code{opacity:.12;filter:none}
 .ad-spot{flex:none;width:98px;height:30px;margin-left:auto;margin-right:.5rem}
 html #app .ask-dad{position:fixed;left:0;top:0;z-index:45;margin:0;visibility:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;
   display:inline-flex;align-items:center;gap:4px;font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.3px;color:#24292E;
-  background:var(--nt-amber);border:0;border-radius:999px;padding:7px 11px 7px 9px;box-shadow:0 0 0 1px rgba(42,157,159,.7),0 0 10px rgba(242,165,65,.6);animation:ad-glow 2.6s ease-in-out infinite;will-change:transform}
+  background:var(--nt-amber);border:0;border-radius:999px;padding:7px 11px 7px 9px;box-shadow:0 0 0 1px rgba(42,157,159,.7),0 0 10px rgba(242,165,65,.6);animation:ad-glow var(--phi-askdad-glow) ease-in-out var(--phi-askdad-glow-d) infinite;will-change:transform}
 html #app .ask-dad.ready{visibility:visible}
 html #app .ask-dad.dragging{cursor:grabbing;animation:none;box-shadow:0 0 0 2px var(--nt-line),0 6px 18px rgba(0,0,0,.5)}
 html #app .ask-dad::after{display:none}

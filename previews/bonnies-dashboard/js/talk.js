@@ -111,7 +111,7 @@
     else if(cycle % 8 === 0 && (lines = factLine())) lines = [lines];
     else { var s = scripts(); lines = [s[cycle % s.length]]; }
     setIdleLabel(lines.join(". "));
-    typeLines(lines, function(){ out().textContent = ""; timer = setTimeout(function(){ if(mode === "idle") idle(); }, 700); }, lines.length > 1 ? 1600 : 2400);
+    typeLines(lines, function(){ out().textContent = ""; timer = setTimeout(function(){ if(mode === "idle") idle(); }, window.PhiTiming.ms("tty-gap")); }, window.PhiTiming.ms(lines.length > 1 ? "tty-hold-multi" : "tty-hold"));
   }
   function setIdleLabel(t){ var b = $("#tty-open"); if(b) b.setAttribute("aria-label", "Simmie says: " + t + ". Tap to talk to Simmie"); }
 

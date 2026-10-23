@@ -14,7 +14,8 @@
   var $ = function(s){ return document.querySelector(s); };
   var LOG = function(t){ if(window.RebellaLog) window.RebellaLog(t); };
   var qs = (function(){ try{ return new URLSearchParams(location.search); }catch(e){ return {get:function(){return null;}}; } })();
-  // faces: three emotions per weather, cycling on 2 s / 3 s / 5 s (a polyrhythm); gifts are handed to the weather icon
+  var PT = window.PhiTiming;   // js/phi-timing.js: every period below comes from there (rules in its header)
+  // faces: three emotions per weather, cycling on PHI^2 / PHI^3 / PHI^4 s (2.618 / 4.236 / 6.854; was 2/3/5); gifts are handed to the weather icon
   var SETS = {
     sun:   {icon:"\u2600\uFE0F", label:"Sunny", faces:["\uD83D\uDE04","\uD83E\uDD29","\uD83D\uDE0E"], gifts:["\uD83D\uDD76\uFE0F","\uD83C\uDF66","\uD83C\uDF3B"], msg:"SUNNY - GO GET SOME RAYS"},
     hot:   {icon:"\uD83C\uDF1E", label:"Hot", faces:["\uD83D\uDE04","\uD83E\uDD29","\uD83D\uDE0E"], gifts:["\uD83C\uDFD6\uFE0F","\uD83C\uDF66","\uD83D\uDD76\uFE0F"], msg:"HOT ONE - WATER + SUNSCREEN"},
@@ -69,7 +70,7 @@
   // ---------- weather ----------
   var wx = {state:"idle", key:forced, temp:null, at:null};
   function readCache(){ try{ var c = JSON.parse(localStorage.getItem(CKEY)); if(c && Date.now() - c.t < TTL) return c; }catch(e){} return null; }
-  function applyData(c){ wx.state = "ok"; wx.temp = Math.round(c.temp); wx.at = c.t; wx.key = forced || mood(c.code, c.isDay, c.temp); paintWeather();
+  function applyData(c){ wx.state = "ok"; wx.temp = Math.round(c.temp); wx.at = c.t; wx.key = forced || mood(c.code, c.isDay, c.temp); PT.setWeather(wx.key); paintWeather();
     LOG("wx: " + SETS[mood(c.code, c.isDay, c.temp)].label.toLowerCase() + " " + wx.temp + "\u00B0" + (forced ? " (preview: " + forced + ")" : "")); }
   function loadWeather(){
     var c = readCache(); if(c){ applyData(c); return; }
@@ -80,7 +81,7 @@
         var d = {t:Date.now(), code:cur.weather_code, temp:cur.temperature_2m, isDay:cur.is_day};
         try{ localStorage.setItem(CKEY, JSON.stringify(d)); }catch(e){}
         applyData(d);
-      }).catch(function(){ wx.state = "fail"; paintWeather(); LOG("wx: offline" + (forced ? ", preview " + forced : ", chip hidden")); });
+      }).catch(function(){ wx.state = "fail"; PT.setWeather(forced); paintWeather(); LOG("wx: offline" + (forced ? ", preview " + forced : ", chip hidden")); });
   }
   function paintWeather(){
     var s = wx.key && SETS[wx.key], chip = $("#wx-chip"), seq = $("#wx-seq");
@@ -117,19 +118,20 @@
     var seq = $("#wx-seq"); if(!seq) return;
     if(ST.key === wx.key && seq.childNodes.length) return;   // same weather: keep the running story
     stClear(); ST.key = wx.key; seq.textContent = "";
-    function slot(cls, i){ var d = el("span","wx-drift " + cls); d.style.animationDelay = (-i*0.9) + "s"; seq.appendChild(d); return d; }
+    function slot(cls, i){ var d = el("span","wx-drift " + cls); d.style.animationDelay = (-(PT.off("chip-drift") + i * PT.s("chip-drift") * 0.0618)).toFixed(3) + "s"; seq.appendChild(d); return d; }
     var faceSlot = slot("wx-face", 0), faces = s.faces.map(function(f, i){ var e = el("span","wx-f" + (i ? "" : " on"), f); faceSlot.appendChild(e); return e; });
     var faceBox = el("span","wx-facebox"); while(faceSlot.firstChild) faceBox.appendChild(faceSlot.firstChild); faceSlot.appendChild(faceBox);
     var gifts = s.gifts.map(function(g, i){ var d = slot("wx-gift", i+1), e = el("span","wx-g",g); d.appendChild(e); return e; });
     var icon = el("span","wx-icon",s.icon); slot("wx-iconslot", s.gifts.length+1).appendChild(icon);
     if(RM.matches){ gifts.forEach(function(g){ g.style.opacity = 1; }); return; }      // static final state
-    // polyrhythm: each emotion takes the slot on its own period (2 s, 3 s, 5 s), offset starts; one is always showing
-    [2000,3000,5000].forEach(function(per, i){
+    // polyrhythm: each emotion takes the slot on its own phi period, starting at its golden-angle offset; one always shows
+    ["face-a","face-b","face-c"].forEach(function(name, i){
       var go = function(){ if(document.hidden) return; faces.forEach(function(f, j){ f.classList.toggle("on", j === i); }); };
-      ST.timers.push(setTimeout(function(){ go(); ST.timers.push(setInterval(go, per)); }, 400 + i*700));
+      ST.timers.push(setTimeout(function(){ go(); ST.timers.push(setInterval(go, PT.ms(name))); }, PT.offMs(name)));
     });
+    var t0 = Date.now() - PT.offMs("loop-effect");
     function loop(){
-      var style = STYLES[ST.loop++ % STYLES.length], t = 0;
+      var style = STYLES[Math.floor((Date.now() - t0) / PT.ms("loop-effect")) % STYLES.length], t = 0;   // effect changes every PHI^5, sampled per story
       gifts.forEach(function(g){ g.style.opacity = 0; });
       // beat 1: turn away (rotateY with perspective squish, lean, drift away)
       anim(faceBox, [{transform:"perspective(60px) rotateY(0) rotate(0) translateX(0)"},{transform:"perspective(60px) rotateY(55deg) scaleX(.8) rotate(-8deg) translateX(-4px)"}], 700);
@@ -150,9 +152,9 @@
         anim(faceBox, [{transform:"perspective(60px) rotate(4deg) translateX(3px)"},{transform:"perspective(60px) rotateY(0) rotate(0) translateX(0)"}], 700);
       }, t);
       t += 1300;
-      later(loop, Math.max(300, 11000 - t));   // loop every ~11 s
+      later(loop, Math.max(300, PT.ms("story") - t));   // offering story every PHI^6 = 17.94 s
     }
-    loop();
+    later(loop, PT.offMs("story") % 4000);   // golden-angle start, capped so the chip is never blank for long
   }
   document.addEventListener("visibilitychange", function(){ var q = $("#wx-seq"); if(q && q.getAnimations) q.getAnimations({subtree:true}).forEach(function(a){ if(a.playState !== "finished"){ if(document.hidden) a.pause(); else a.play(); } }); });
 
@@ -168,9 +170,14 @@
       });
       tr.appendChild(h);
     }
-    tr.style.animationDuration = Math.max(60, list.length * 11) + "s";
+    tickN = list.length; tr.setAttribute("data-phi-js", "");   // one item passes every PHI^4 (swept at the loop boundary)
+    var ta = tr.getAnimations ? tr.getAnimations()[0] : null;
+    if(ta && ta.effect){ PT.retime(ta, tickN * PT.ms("fact")); } else tr.style.animationDuration = (tickN * PT.s("fact")).toFixed(2) + "s";
     $("#wx-ticker").setAttribute("aria-label", "Fun facts for age " + age);
   }
+  var tickN = 0;
+  document.addEventListener("animationiteration", function(ev){ if(ev.target.id === "wx-tick-track" && tickN && ev.target.getAnimations){
+    var ta = ev.target.getAnimations()[0]; if(ta) PT.retime(ta, tickN * PT.ms("fact")); } });
   function loadAgeAndFacts(){
     var q = clampAge(qs.get("age"));
     var ageP = q ? Promise.resolve((ageSrc = "?age", q)) :

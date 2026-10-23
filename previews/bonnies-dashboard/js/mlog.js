@@ -5,7 +5,8 @@
 (function(){
   "use strict";
   var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
-  var MAX = 4, PACE = 1500, HEART = 8000;
+  var PT = window.PhiTiming;   // pacing from js/phi-timing.js: real lines >= mlog-pace apart, ambient line at most every mlog-ambient
+  var MAX = 4;
   var q = [], busy = false, lastAt = 0, hb = null, on = false;
   function ts(){ return new Date().toLocaleTimeString("en-AU", {timeZone:"Australia/Perth", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false}); }
   function box(){ return document.getElementById("wx-mlog"); }
@@ -13,7 +14,7 @@
   function pump(){
     if(busy || !q.length || document.hidden || !box()) return;
     while(q.length > 6){ var k = q.findIndex(function(t){ return /^(turn:|\u00B7)/.test(t); }); if(k < 0) break; q.splice(k, 1); }   // keep up with real events: drop old scenery lines first
-    var fast = q.length > 3, wait = Math.max(0, lastAt + (fast ? 700 : PACE) - Date.now());
+    var fast = q.length > 3, wait = Math.max(0, lastAt + (fast ? 700 : PT.ms("mlog-pace")) - Date.now());
     if(wait){ busy = true; setTimeout(function(){ busy = false; pump(); }, wait); return; }
     busy = true; var text = q.shift(), b = box();
     var line = document.createElement("div"); line.className = "ml-line";
@@ -26,7 +27,7 @@
     if(RM.matches || fast){ m.textContent = text; done(); return; }
     var i = 0; (function type(){ if(document.hidden){ setTimeout(type, 400); return; } m.textContent = text.slice(0, ++i); if(i < text.length) setTimeout(type, 28); else done(); })();
   }
-  function beat(){ clearTimeout(hb); hb = setTimeout(function(){ if(!q.length && !document.hidden){ push("\u00B7 all systems nominal"); } else beat(); }, HEART); }
+  function beat(){ clearTimeout(hb); hb = setTimeout(function(){ if(!q.length && !document.hidden){ push("\u00B7 all systems nominal"); } else beat(); }, PT.ms("mlog-ambient")); }
   window.RebellaLog = push;
 
   // events the page really has
