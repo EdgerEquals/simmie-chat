@@ -522,6 +522,7 @@ rx = <i class="f">filter</i>(rx, <i class="s">&#x27;noise&#x27;</i>);
 
 /* preview-only age dial: changes the number on this page, sends nothing (no network, no pop-ups) */
 (function(){ var v=13, a=document.getElementById("ad-age"), w=a.querySelector(".ad-win"), d=document.getElementById("ad-down"), u=document.getElementById("ad-up"),
+    s=document.getElementById("ad-status"), lim=document.getElementById("ad-limit"), limT, flashT, kb=document.getElementById("ad-kid-b"), kg=document.getElementById("ad-kid-g"),
     rm=window.matchMedia?window.matchMedia("(prefers-reduced-motion: reduce)"):{matches:false};
   /* CDC 2000 stature-for-age 50th percentile, cm, at exact birthdays (https://www.cdc.gov/growthcharts/data/zscore/statage.csv). Dad = male median at 20, mum = female median at 20 (shown at 0.9236 of dad). */
   var DAD=176.85, HB={10:138.62,11:143.52,12:149.05,13:156.09,14:163.84,15:169.94,16:173.51}, HG={10:137.99,11:143.98,12:151.19,13:157.15,14:160.39,15:161.86,16:162.55};
