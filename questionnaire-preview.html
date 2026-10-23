@@ -2,6 +2,140 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
+<script id="phi-timing">
+/* PHI TIMING (shared module; same file on every Bonnie site/preview).
+   Standing rules: /home/box/.config/phi-timing-rules.md (set by Danny, 2026-10-23). Summary, follow it in future builds:
+   1. PHI = 1.6180339887; every timed interval is PHI^n seconds. Fast elements make small moves, slow ones big moves.
+   2. Start offsets: element k (fixed order below) starts at period * frac(k * 0.6180339887), the golden angle.
+      CSS uses a negative animation-delay (var(--phi-NAME-d)) so nothing waits blank on load.
+   3. Bonnie's ladder: blinks PHI^2 2.618 / weather faces PHI^2,3,4 / facts PHI^4 6.854 / loop effect PHI^5 11.09 /
+      animals PHI^5 11.09 / offering story PHI^6 17.94 / sticker sway PHI^7 29.03 / slow drift PHI^8 46.98 s.
+   4. Simmie's palette runs 1.5 phi steps faster: period = Bonnie slot * PHI^-1.5 (~0.486), so the two ladders never
+      share a period and never lock into a repeating alignment (space set 8.72, cloud orbit + space drift 22.84,
+      mission log ambient 5.39, Ask Dad glow 2.06, Ask Dad satellite 3.33, cursor + status blinks 1.27 s).
+   5. New elements: give them a Bonnie slot by role; Simmie's elements get * PHI^-1.5. Respect reduced motion.
+   6. Weather sweep: the weather loop (faces, offering story + loop effect, sticker/chip sway) never changes; the weather
+      state shifts every OTHER element's exponent by s steps: hot -1, sun -0.5, storm 0, cloud 0, rain +0.5, fog +1,
+      clear night +1.5, deep night (00:00-05:00 Perth) +2. Same s for Bonnie and Simmie (still 1.5 steps apart),
+      offsets kept, a new s lands at each element's next cycle boundary, reduced motion ignores it. No weather data: s=0.
+      Preview override: ?weather=hot|sun|storm|cloud|rain|fog|night|deep.
+   7. Message-status layer (separate pump, never changes weather or swept elements): a soft pulse ring on the terminal
+      LED, Chat/Ask Dad buttons and the feed edge: idle PHI^5 11.09, new PHI^3 4.24, unread from Dad PHI^2 2.62,
+      urgent (Ask Dad waiting / unanswered question) PHI^1 1.62 s. Only where messages exist (chat + dashboard
+      previews and side copies), never on Rebella; it never reads or shows message text. Preview: ?msg=idle|new|dad|urgent.
+   Functional timers (network polls, debounces, passcode back-off, one-shot event feedback) are not animations and
+   stay as they were. */
+(function(root){
+  "use strict";
+  var PHI = 1.6180339887, G = 0.6180339887, SIM = Math.pow(PHI, -1.5);
+  // [name, Bonnie-ladder exponent, Simmie palette?]  ORDER IS THE k NUMBERING: append new elements, never reorder.
+  var E = [
+    ["light-queue",2,1],["light-fresh",2,1],["light-link",2,1],["light-sky",2,1],["cursor",2,1],
+    ["face-a",2,0,1],["face-b",3,0,1],["face-c",4,0,1],
+    ["askdad-glow",3,1],["askdad-orbit",4,1],
+    ["fact",4,0],["loop-effect",5,0,1],["mlog-ambient",5,1],["animals",5,0],["space",6,1],["story",6,0,1],
+    ["sway",7,0,1],["cloud-orbit",8,1],["bg-drift",8,1],
+    // other timers found, on the nearest readable step for their role
+    ["cloud-breathe",2,1],["cloud-blink",4,1],["cloud-shine",5,1],["cloud-bob",0,1],
+    ["wave",4,1],["wave-busy",1,1],["marquee",8,0,1],["chip-drift",7,0,1],["panel-dot",2,1],
+    ["gait-trot",-2,0],["gait-hop",-1,0],["gait-dog",2,0],["gait-fly",0,0],["gait-glow",0,0],["animal-cross",4,0],
+    ["space-cross",5,1],["space-ring",3,1],["space-ring-slow",4,1],["space-spark",2,1],
+    ["tty-hold",4,1],["tty-hold-multi",3,1],["tty-gap",1,1],["mlog-pace",2,1],
+    ["band-sway",7,0,1],
+    ["askdad-breathe",5,1],   // Ask Dad circle breathing: Simmie slot PHI^5 * PHI^-1.5 = 5.39 s (swept)
+    // questionnaire preview
+    ["offer-cycle",2,0,1],["cloud-wobble",4,1],["beacon",2,1],["beacon-chk",1,1],["beacon-down",0,1],
+    ["bg-fall",6,0],["bg-float",5,0],["bg-sail",7,0],["bg-twinkle",2,0],["bg-cross",6,0],["bg-spin",8,0],["bg-bob",2,0],["bg-pulse",5,0],
+    ["rain",5,0],["code-panel",9,1]
+  ];
+  var T = {}, list = [];
+  E.forEach(function(e, i){
+    var k = i + 1, n = e[2] ? e[1] - 1.5 : e[1], s = Math.pow(PHI, n), f = (k * G) % 1;
+    T[e[0]] = {k:k, n:n, simmie:!!e[2], weather:!!e[3], base:s, frac:f};
+    list.push(e[0]);
+  });
+  var SWEEP = {hot:-1, sun:-0.5, storm:0, cloud:0, rain:0.5, fog:1, night:1.5, deep:2};
+  var MSG = {idle:5, "new":3, dad:2, urgent:1};
+  var sw = 0, msgState = null, msgForced = null, wxForced = null;
+  var RM = (typeof window !== "undefined" && window.matchMedia) ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
+  try{ var q = new URLSearchParams(location.search); wxForced = q.get("weather"); if(!(wxForced in SWEEP)) wxForced = null;
+    msgForced = q.get("msg"); if(!(msgForced in MSG)) msgForced = null; }catch(e){}
+  function g(name){ var t = T[name]; if(!t) throw new Error("phi-timing: unknown element " + name); return t; }
+  function shift(t){ return (t.weather || RM.matches) ? 0 : sw; }
+  function per(name){ var t = g(name); return t.base * Math.pow(PHI, shift(t)); }
+  function perthHour(){ try{ return +new Date().toLocaleString("en-AU", {timeZone:"Australia/Perth", hour:"2-digit", hour12:false}) % 24; }catch(e){ return new Date().getHours(); } }
+  var weatherKey = null;   // last weather mood the page reported (null = no weather state on this page)
+  function sweepFor(key){ if(wxForced) return SWEEP[wxForced];   // ?weather= preview wins exactly (use ?weather=deep for deep night)
+    if(key == null) return 0; var h = perthHour(); if(h >= 0 && h < 5) key = "deep"; return SWEEP[key] || 0; }
+  var api = {
+    PHI:PHI, list:list, SWEEP:SWEEP, MSG:MSG,
+    s:per, ms:function(n){ return Math.round(per(n) * 1000); },
+    base:function(n){ return g(n).base; },
+    off:function(n){ return per(n) * g(n).frac; }, offMs:function(n){ return Math.round(api.off(n) * 1000); },
+    info:function(n){ var t = g(n); return {k:t.k, n:t.n, simmie:t.simmie, weather:t.weather, base:t.base, s:per(n), off:api.off(n), shift:shift(t)}; },
+    sweep:function(){ return RM.matches ? 0 : sw; },
+    // repeating timer: first tick at the golden-angle offset, then one per period; re-reads the period every cycle,
+    // so a new sweep lands at the next cycle boundary. returns {stop}
+    every:function(n, fn){ var h = {t:null, dead:false};
+      function tick(){ if(h.dead) return; fn(); h.t = setTimeout(tick, api.ms(n)); }
+      h.t = setTimeout(tick, api.offMs(n)); h.stop = function(){ h.dead = true; clearTimeout(h.t); }; return h; },
+    // the page tells the module its weather mood (sun|hot|cloud|fog|rain|storm|night) or null when it has none
+    setWeather:function(key){ weatherKey = key || null; setSweep(sweepFor(weatherKey)); },
+    weatherOverride:function(){ return wxForced; },
+    // message-status layer (rule 7): idle|new|dad|urgent; ?msg= wins
+    setMsg:function(state){ setMsg(state); }, msg:function(){ return msgState; },
+    // for JS-managed animations (mark the element data-phi-js): change the period at a cycle boundary without a jump
+    retime:function(a, ms){ retime(a, ms); }
+  };
+  root.PhiTiming = api;
+
+  // ---------- CSS side ----------
+  var doc = (typeof document !== "undefined") ? document : null, rootStyle = doc && doc.documentElement.style;
+  function writeVars(){ list.forEach(function(n){ var t = T[n]; rootStyle.setProperty("--phi-" + n, per(n).toFixed(3) + "s"); rootStyle.setProperty("--phi-" + n + "-d", (-api.off(n)).toFixed(3) + "s"); }); }
+  // which keyframes belong to the weather loop (never swept) or the message layer (own pump)
+  var FIXED = /^(wx-drift|wx-sway|wx-fadein|wx-blip|bw-|msg-pulse)/;
+  function sweepable(a){ return a && a.animationName && !FIXED.test(a.animationName) && a.effect && a.effect.getTiming().iterations === Infinity &&
+    !(a.effect.target && a.effect.target.closest && a.effect.target.closest(".wx-mq-track,.wx-seq,.wx-icon,#wx-mq-track,.bw-sticker,[data-phi-js]")); }
+  // retime a running CSS animation at an iteration boundary without a visible jump
+  function retime(a, D){ var t = a.effect.getTiming(), ct = a.currentTime; if(ct == null || !t.duration) return;
+    var it = Math.round((ct - t.delay) / t.duration); a.effect.updateTiming({duration:D, delay:t.delay}); a.currentTime = t.delay + it * D; }
+  function setSweep(next){
+    if(RM.matches) next = 0;
+    if(next === sw) return; var f = Math.pow(PHI, next - sw);
+    if(doc && doc.getAnimations){ doc.getAnimations().forEach(function(a){ if(!sweepable(a)) return;
+      var t = a.effect.getTiming(); if(a._phiD == null){ a.effect.updateTiming({duration:t.duration, delay:t.delay}); a._phiD = t.duration; }   // pin to its current period
+      a._phiNext = (a._phiNext || a._phiD) * f; }); }
+    sw = next; if(rootStyle) writeVars();   // new elements start on the new periods
+    if(doc) doc.documentElement.setAttribute("data-phi-sweep", String(sw));
+  }
+  if(doc){
+    writeVars();
+    doc.addEventListener("animationiteration", function(ev){
+      var el = ev.target; if(!el.getAnimations) return;
+      el.getAnimations().forEach(function(a){
+        if(a.animationName !== ev.animationName) return;
+        if(a._phiNext != null){ retime(a, a._phiNext); a._phiD = a._phiNext; a._phiNext = null; }
+        if(a.animationName === "msg-pulse" && a._msgNext != null){ retime(a, a._msgNext); a._msgNext = null; }
+      });
+    }, true);
+    // deep night starts/ends on the Perth clock (functional check once a minute, not an animation)
+    setInterval(function(){ if(weatherKey || wxForced) setSweep(sweepFor(weatherKey)); }, 60000);
+    if(wxForced) setTimeout(function(){ setSweep(sweepFor(null)); }, 0);
+    if(RM.addEventListener) RM.addEventListener("change", function(){ setSweep(sweepFor(weatherKey)); });
+  }
+  // ---------- message-status layer ----------
+  function msgPer(st){ return Math.pow(PHI, MSG[st]); }
+  function setMsg(state){
+    if(msgForced) state = msgForced; if(!(state in MSG)) state = "idle";
+    if(state === msgState || !doc) return; msgState = state; var D = msgPer(state) * 1000;
+    rootStyle.setProperty("--phi-msg", (D/1000).toFixed(3) + "s");
+    doc.documentElement.setAttribute("data-msg", state);
+    if(doc.getAnimations) doc.getAnimations().forEach(function(a){ if(a.animationName === "msg-pulse"){
+      var t = a.effect.getTiming(); if(!a._msgPinned){ a.effect.updateTiming({duration:t.duration, delay:t.delay}); a._msgPinned = true; } a._msgNext = D; } });
+  }
+  if(typeof module !== "undefined") module.exports = api;
+})(typeof window !== "undefined" ? window : this);
+</script>
 <script>
 /* ALL wording for this page lives here. Curated for a reader aged 13 (age dial ~/.config/rebella-age-dial.json, field "age").
    To regenerate older/younger, rewrite these strings only. {n} {total} {a} {b} {x} are filled in by the page. */
@@ -84,7 +218,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .m-cross{animation:cross var(--d,14s) linear var(--del,0s) infinite}
 .m-spin{animation:spin var(--d,30s) linear infinite}
 .m-bob{animation:bob var(--d,3s) ease-in-out var(--del,0s) infinite}
-.maplines{position:absolute;inset:0;width:100%;height:100%;animation:pulse 9s ease-in-out infinite}
+.maplines{position:absolute;inset:0;width:100%;height:100%;animation:pulse var(--phi-bg-pulse) ease-in-out var(--phi-bg-pulse-d) infinite}
 .paused .p,.paused .maplines{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){
   .p,.maplines{animation:none!important;transform:translate3d(var(--x),var(--y,30vh),0)!important}
@@ -94,8 +228,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;ba
 .rain{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
 .rain i{position:absolute;top:0;width:10px;height:46vh;border-radius:10px;background:linear-gradient(to bottom,rgba(214,236,239,0),rgba(214,236,239,.10) 70%,rgba(214,236,239,.18));
   transform:translate3d(0,-60vh,0) rotate(12deg);animation:rain var(--d) linear var(--del) infinite;will-change:transform}
-.rain i:nth-child(1){left:12%;--d:9s;--del:-2s}.rain i:nth-child(2){left:38%;--d:11s;--del:-7s;width:8px}
-.rain i:nth-child(3){left:66%;--d:10s;--del:-4s}.rain i:nth-child(4){left:88%;--d:12s;--del:-9s;width:7px}
+.rain i{--d:var(--phi-rain)}   /* every drop on PHI^5 = 11.09 s; staggered on golden-angle fractions of the period */
+.rain i:nth-child(1){left:12%;--del:calc(var(--phi-rain) * -.618)}.rain i:nth-child(2){left:38%;--del:calc(var(--phi-rain) * -.236);width:8px}
+.rain i:nth-child(3){left:66%;--del:calc(var(--phi-rain) * -.854)}.rain i:nth-child(4){left:88%;--del:calc(var(--phi-rain) * -.472);width:7px}
 @keyframes rain{from{transform:translate3d(0,-60vh,0) rotate(12deg)}to{transform:translate3d(-14vw,130vh,0) rotate(12deg)}}
 .paused .rain i{animation-play-state:paused}
 /* Sparkle burst on tiles: nothing at rest; short burst on hover (mouse) or tap */
@@ -161,7 +296,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .foot a{color:var(--dad-amber)}
 .foot .strip{display:flex;align-items:center;gap:8px;font:700 9.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.4px;color:#A9C3C8;white-space:nowrap;overflow:hidden;max-width:860px;width:100%;margin:0 auto}
 .foot .lt{display:inline-flex;align-items:center;gap:3px}.foot .lt b{color:var(--dad-sand)}
-.foot .lt i{width:6px;height:6px;border-radius:50%;background:var(--lc,#3FD3C0);box-shadow:0 0 5px var(--lc,#3FD3C0);animation:lblink var(--lp,3s) ease-in-out infinite}
+.foot .lt i{width:6px;height:6px;border-radius:50%;background:var(--lc,#3FD3C0);box-shadow:0 0 5px var(--lc,#3FD3C0);animation:lblink var(--lp,1.272s) ease-in-out var(--ld,0s) infinite}
 .foot .lt.warn{--lc:#F2A541}.foot .lt.bad{--lc:#E5484D}.foot .lt.idle{--lc:#5C7378}
 .foot .lt.blip i{animation:lblip .6s ease-out 1}
 @keyframes lblink{0%,100%{opacity:1}50%{opacity:.35}}
@@ -179,10 +314,10 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 .tin{display:flex;align-items:center;gap:6px;cursor:text}
 .tfield{position:relative;flex:1;min-width:0;display:flex;align-items:center}
 .tin input{flex:1;min-width:0;width:100%;border:0;outline:0;background:transparent;color:#5EE6C0;font:inherit;padding:0;caret-color:transparent}
-.tin .blk{position:absolute;left:var(--cx,0);top:50%;width:.6em;height:1.1em;margin-top:-.55em;background:#5EE6C0;animation:cblink 1.06s steps(1) infinite;pointer-events:none}
+.tin .blk{position:absolute;left:var(--cx,0);top:50%;width:.6em;height:1.1em;margin-top:-.55em;background:#5EE6C0;animation:cblink var(--phi-cursor) steps(1) var(--phi-cursor-d) infinite;pointer-events:none}
 @keyframes cblink{50%{opacity:0}}
 .tin:focus-within{box-shadow:0 1px 0 0 var(--dad-amber)}
-.simmie.talk{animation:sTalk .45s ease-in-out infinite}
+.simmie.talk{animation:sTalk var(--phi-cloud-bob) ease-in-out infinite}
 @keyframes sTalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-8%)}}
 .foot .note{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:.78rem;white-space:nowrap}
 .foot .note .dot{opacity:.6}
@@ -206,7 +341,7 @@ body.paused .foot .lt i,body.paused .tin .blk,body.paused .simmie.talk{animation
 .wxr .on,.fwx .on{opacity:1!important}
 .tick .wxr{font-size:15px}
 .tick .tview{flex:1 1 auto;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
-.ttrack{display:inline-flex;will-change:transform;animation:tickmove var(--td,120s) linear infinite}
+.ttrack{display:inline-flex;will-change:transform;animation:tickmove var(--td,82.25s) linear var(--tdl,0s) infinite}
 .ttrack>span{padding-right:2.5em}
 @keyframes tickmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .tk{color:#6CC6D4}.tc{color:#8FA9AE}.ts{color:#E8DCC8}.tp{color:#E0A251}
@@ -219,9 +354,9 @@ body.paused .ttrack{animation-play-state:paused}
 /* REBELLA status beacon (right end of the ticker). Live = teal breathing, checking/slow = amber, down = red faster. */
 .beacon{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;margin-left:2px;font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.4px;color:var(--dad-sand);background:#0E1A1F;border:1px solid var(--bc,#2A8FA3);border-radius:999px;padding:4px 7px 4px 6px;cursor:pointer;box-shadow:0 0 8px -2px var(--bc,#2A8FA3)}
 .beacon i{position:relative;width:8px;height:8px;border-radius:50%;background:var(--bc);box-shadow:0 0 6px var(--bc)}
-.beacon i::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--bc);opacity:0;animation:bring var(--bp,2.6s) ease-out infinite}
-.beacon i{animation:bdot var(--bp,2.6s) ease-in-out infinite}
-.beacon.live{--bc:#3FD3C0;--bp:2.8s}.beacon.chk{--bc:#F2A541;--bp:1.6s}.beacon.down{--bc:#E5484D;--bp:.9s}
+.beacon i::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--bc);opacity:0;animation:bring var(--bp,1.272s) ease-out infinite}
+.beacon i{animation:bdot var(--bp,1.272s) ease-in-out infinite}
+.beacon.live{--bc:#3FD3C0;--bp:var(--phi-beacon)}.beacon.chk{--bc:#F2A541;--bp:var(--phi-beacon-chk)}.beacon.down{--bc:#E5484D;--bp:var(--phi-beacon-down)}
 @keyframes bdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
 @keyframes bring{0%{opacity:.6;transform:scale(.6)}100%{opacity:0;transform:scale(1.6)}}
 .beacon:focus-visible{outline:2px solid var(--dad-amber);outline-offset:2px}
@@ -255,11 +390,11 @@ body.paused .lane *{animation-play-state:paused}
    transform/opacity only; paused when the tab is hidden; completely still under prefers-reduced-motion. ---- */
 .simmie{display:inline-block;flex:0 0 auto;width:var(--sz,56px);height:calc(var(--sz,56px)*.878);line-height:0;filter:drop-shadow(0 0 5px rgba(246,235,217,.16))}
 .simmie svg{display:block;width:100%;height:100%;overflow:visible}
-.simmie .s-body{transform-box:fill-box;transform-origin:50% 100%;animation:sBreathe 4s ease-in-out infinite}
-.simmie .lobe{transform-box:fill-box;transform-origin:50% 50%;animation:sWob var(--wd,5s) ease-in-out var(--wl,0s) infinite alternate}
+.simmie .s-body{transform-box:fill-box;transform-origin:50% 100%;animation:sBreathe var(--phi-cloud-breathe) ease-in-out var(--phi-cloud-breathe-d) infinite}
+.simmie .lobe{transform-box:fill-box;transform-origin:50% 50%;animation:sWob calc(var(--phi-cloud-wobble) / 2) ease-in-out var(--wl,0s) infinite alternate}
 .simmie .s-eyes{transform-box:fill-box;transform-origin:50% 50%}
 .simmie.blink .s-eyes{animation:sBlink .15s ease-in-out 1}
-.simmie .s-sheen{opacity:0;animation:sSheen 7s ease-in-out 1.5s infinite}
+.simmie .s-sheen{opacity:0;animation:sSheen var(--phi-cloud-shine) ease-in-out var(--phi-cloud-shine-d) infinite}
 .simmie.hop{animation:sHop .5s cubic-bezier(.3,.7,.4,1) 1}
 @keyframes sBreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,1.03)}}
 @keyframes sWob{from{transform:scale(1)}to{transform:scale(1.018)}}
@@ -296,9 +431,9 @@ textarea:focus-visible{border-color:var(--dad-amber);outline:3px solid var(--dad
 #start.panel,#quiz.panel,#summary.panel{--code:var(--code-light);--scrim:rgba(17,48,58,.55)}
 .big{--code:var(--code-light);--scrim:rgba(15,92,110,.35)}
 .btnrow .btn.send{--scrim:rgba(242,165,65,.4)}.btnrow .btn.skip,.yn #t0{--scrim:rgba(214,236,239,.4)}
-#start.panel::before,#quiz.panel::before,#summary.panel::before,.big::before,.btnrow .btn::before,.yn .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(100% + 240px);z-index:-2;pointer-events:none;background:var(--code) 0 0/320px 240px repeat;opacity:.12;animation:codeup 40s linear infinite;will-change:transform}
+#start.panel::before,#quiz.panel::before,#summary.panel::before,.big::before,.btnrow .btn::before,.yn .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(100% + 240px);z-index:-2;pointer-events:none;background:var(--code) 0 0/320px 240px repeat;opacity:.12;animation:codeup var(--phi-code-panel) linear var(--phi-code-panel-d) infinite;will-change:transform}
 #start.panel::before,#quiz.panel::before,#summary.panel::before{opacity:.1}
-.btnrow .btn::before,.big::before,.yn .tile::before{animation-duration:28s;opacity:.14}
+.btnrow .btn::before,.big::before,.yn .tile::before{animation-duration:var(--phi-bg-drift);animation-delay:var(--phi-bg-drift-d);opacity:.14}
 #start.panel::after,#quiz.panel::after,#summary.panel::after,.big::after,.btnrow .btn::after,.yn .tile::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,var(--scrim) 35%,transparent 100%)}
 @keyframes codeup{from{transform:translateY(0)}to{transform:translateY(-240px)}}
 body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #summary.panel::before,body.paused .big::before,body.paused .btnrow .btn::before,body.paused .yn .tile::before{animation-play-state:paused}
@@ -375,10 +510,10 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <div class="foot" id="foot">
   <div class="row1"><div class="lane" id="laneF" aria-hidden="true"></div>
   <div class="strip" aria-label="Page status">
-    <span class="lt" id="ltStep" style="--lp:3.1s"><i></i>STEP <b id="vStep">--</b></span>
-    <span class="lt" id="ltDone" style="--lp:4.3s"><i></i>DONE <b id="vDone">0</b></span>
-    <span class="lt" id="ltSky" style="--lp:5.7s"><i></i>SKY <b id="vSky">&hellip;</b></span>
-    <span class="lt" id="ltLink" style="--lp:2.7s"><i></i>LINK <b id="vLink">&hellip;</b></span>
+    <span class="lt" id="ltStep" style="--lp:var(--phi-light-queue);--ld:var(--phi-light-queue-d)"><i></i>STEP <b id="vStep">--</b></span>
+    <span class="lt" id="ltDone" style="--lp:var(--phi-light-fresh);--ld:var(--phi-light-fresh-d)"><i></i>DONE <b id="vDone">0</b></span>
+    <span class="lt" id="ltSky" style="--lp:var(--phi-light-sky);--ld:var(--phi-light-sky-d)"><i></i>SKY <b id="vSky">&hellip;</b></span>
+    <span class="lt" id="ltLink" style="--lp:var(--phi-light-link);--ld:var(--phi-light-link-d)"><i></i>LINK <b id="vLink">&hellip;</b></span>
     <span class="ro" id="ro" aria-hidden="true"></span>
   </div></div>
   <div class="tty" id="tty">
@@ -482,8 +617,9 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     var a=items(th),h='';
     a.forEach(function(it,i){
       if(it.map){h+=MAP;return;}
-      var d=it.d||({fall:rnd(14,22),rise:rnd(14,22),float:rnd(7,11),drift:rnd(26,40),twinkle:rnd(2.5,5),cross:rnd(14,20),spin:40,bob:rnd(2.5,4)})[it.m];
-      var st='--x:'+rnd(2,92).toFixed(1)+'vw;--y:'+rnd(6,88).toFixed(1)+'vh;--dx:'+rnd(-10,10).toFixed(1)+'vw;--dy:'+rnd(-12,12).toFixed(1)+'vh;--r:'+rnd(-200,200).toFixed(0)+'deg;--s:'+(it.s||34)+'px;--d:'+d.toFixed(1)+'s;--del:'+(it.del!=null?it.del:-rnd(0,d)).toFixed(1)+'s'+(it.o?';--o:'+it.o:'');
+      var PHI_FALLBACK=11.09,PT=window.PhiTiming,nm={fall:'bg-fall',rise:'bg-fall',float:'bg-float',drift:'bg-sail',twinkle:'bg-twinkle',cross:'bg-cross',spin:'bg-spin',bob:'bg-bob'}[it.m];
+      var d=it.d||(nm?PT.s(nm):PHI_FALLBACK);   // every background mover on a PHI^n period (was random 2.5-40 s)
+      var st='--x:'+rnd(2,92).toFixed(1)+'vw;--y:'+rnd(6,88).toFixed(1)+'vh;--dx:'+rnd(-10,10).toFixed(1)+'vw;--dy:'+rnd(-12,12).toFixed(1)+'vh;--r:'+rnd(-200,200).toFixed(0)+'deg;--s:'+(it.s||34)+'px;--d:'+d.toFixed(3)+'s;--del:'+(it.del!=null?it.del:-d*(((PT.info(nm||'bg-float').k+i)*0.6180339887)%1)).toFixed(2)+'s'+(it.o?';--o:'+it.o:'');
       h+='<span class="p m-'+it.m+'" style="'+st+'">'+it.h+'</span>';
     });
     el.innerHTML=h;
@@ -501,7 +637,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   var simN=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   function simmieSVG(){
     var id='simClip'+(++simN),c='',k='';
-    SIM_LOBES.forEach(function(l,i){c+='<circle class="lobe" style="--wd:'+(4.2+i*.7).toFixed(1)+'s;--wl:-'+(i*1.3).toFixed(1)+'s" cx="'+l[0]+'" cy="'+l[1]+'" r="'+l[2]+'"/>';k+='<circle cx="'+l[0]+'" cy="'+l[1]+'" r="'+l[2]+'"/>';});
+    SIM_LOBES.forEach(function(l,i){c+='<circle class="lobe" style="--wl:-'+(window.PhiTiming.s('cloud-wobble')/2*(((window.PhiTiming.info('cloud-wobble').k+i)*0.6180339887)%1)).toFixed(3)+'s" cx="'+l[0]+'" cy="'+l[1]+'" r="'+l[2]+'"/>';k+='<circle cx="'+l[0]+'" cy="'+l[1]+'" r="'+l[2]+'"/>';});
     var e='';SIM_EYES.forEach(function(q){e+='<rect x="'+(q[0]-q[2]/2)+'" y="'+(q[1]-q[3]/2)+'" width="'+q[2]+'" height="'+q[3]+'" rx="'+q[2]/2+'" transform="rotate(-27 '+q[0]+' '+q[1]+')"/>';});
     return '<svg viewBox="0 0 196 172" aria-hidden="true" focusable="false"><defs><clipPath id="'+id+'">'+k+'</clipPath>'+
       '<linearGradient id="'+id+'g" x1="0" x2="1"><stop offset="0" stop-color="#F6EBD9" stop-opacity="0"/><stop offset=".5" stop-color="#F6EBD9" stop-opacity=".22"/><stop offset="1" stop-color="#F6EBD9" stop-opacity="0"/></linearGradient></defs>'+
@@ -511,8 +647,8 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   Array.prototype.forEach.call(document.querySelectorAll('[data-simmie]'),function(el){el.setAttribute('role','img');el.setAttribute('aria-label','Simmie');el.innerHTML=simmieSVG();});
   function simBlinkLoop(){setTimeout(function(){
     if(!document.hidden&&!reduce)Array.prototype.forEach.call(document.querySelectorAll('.simmie'),function(el){if(el.offsetParent===null&&!el.closest('.foot'))return;el.classList.remove('blink');void el.getBoundingClientRect();el.classList.add('blink');setTimeout(function(){el.classList.remove('blink');},200);});
-    simBlinkLoop();},5000+Math.random()*3000);}
-  simBlinkLoop();
+    },0);}
+  window.PhiTiming.every('cloud-blink',simBlinkLoop);   // Simmie's eyes blink every PHI^2.5 = 3.33 s (was 5-8 s random)
   function simHop(){if(reduce||document.hidden)return;var el=$('footSimmie');el.classList.remove('hop');void el.getBoundingClientRect();el.classList.add('hop');}
   document.addEventListener('visibilitychange',function(){document.body.classList.toggle('paused',document.hidden);});
 
@@ -533,13 +669,13 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     if(reduce){ // one static fact, changes every 10 s with a fade
       $('tick').classList.add('static');var i=0;
       var showF=function(){tr.style.opacity=0;setTimeout(function(){tr.innerHTML=factHTML(list[i%list.length],age);$('tsr').textContent=list[i%list.length].text;tr.style.opacity=1;i++;},400);};
-      if(!list.length){tr.innerHTML='';return;}tr.innerHTML=factHTML(list[0],age);$('tsr').textContent=list[0].text;i=1;tickTimer=setInterval(showF,10000);return;
+      if(!list.length){tr.innerHTML='';return;}tr.innerHTML=factHTML(list[0],age);$('tsr').textContent=list[0].text;i=1;tickTimer=setInterval(showF,window.PhiTiming.ms('fact'));return; // reduced motion: one fact per PHI^4 (no sweep)
     }
     var one=list.map(function(f){return factHTML(f,age);}).join('');
     tr.innerHTML=one+one;
     $('tsr').textContent=list.map(function(f){return f.text+' ('+f.source+')';}).join(' ');
     var chars=list.reduce(function(n,f){return n+f.topic.length+f.text.length+f.source.length+22;},0);
-    tr.style.setProperty('--td',Math.round(chars*7.5/28)+'s'); // ~32 px per second
+    tr.style.setProperty('--td',(list.length*window.PhiTiming.s('fact')).toFixed(2)+'s');tr.style.setProperty('--tdl',(-window.PhiTiming.off('fact')).toFixed(3)+'s'); // one fact passes per PHI^4 = 6.854 s (times the weather sweep)
   }
   var urlAge=clampAge(qs.get('age'));tickAge=urlAge||13;
   window.SIM_AGE=function(){return tickAge;};
@@ -549,7 +685,8 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   Promise.all([factsP,ageP]).then(function(v){setTicker(v[1]);});
 
   // ---- Weather chip + caring reaction (fixed Perth coords, Open-Meteo, no geolocation, cached 30 min) ----
-  // Three faces per condition on a 3 s / 4 s / 5 s polyrhythm (realigns every 60 s); offerings hand over one at a time.
+  // Three faces per condition on PHI^2 / PHI^3 / PHI^4 = 2.618 / 4.236 / 6.854 s (irrational ratios: never realign);
+  // offerings hand over one at a time every PHI^2. The weather loop never sweeps (phi rule 6).
   var U=function(c){return String.fromCodePoint(c);};
   var WX={
     sun:  {i:'\u2600\uFE0F',f:['\uD83D\uDE04','\uD83E\uDD29','\uD83D\uDE0E'],o:['\uD83D\uDD76\uFE0F','\uD83C\uDF66','\uD83C\uDF3B'],say:'sunny'},
@@ -578,20 +715,21 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     var faces=el.querySelector('.fs').children,offs=el.querySelector('.os').children;
     faces[0].classList.add('on');offs[0].classList.add('on');
     if(reduce)return;
-    var P=[3000,4000,5000],O=[0,1300,2600],t0=Date.now(),cur=0,k=0;
+    var PT=window.PhiTiming,P=['face-a','face-b','face-c'].map(PT.ms),O=['face-a','face-b','face-c'].map(PT.offMs),t0=Date.now(),cur=0,k=0;
     wxTimers.push(setInterval(function(){ // most recent beat wins: face i beats at O[i] + n*P[i]
       if(document.hidden)return; var t=Date.now()-t0,best=-1,bt=-1;
       for(var i=0;i<3;i++){if(t<O[i])continue;var last=O[i]+Math.floor((t-O[i])/P[i])*P[i];if(last>bt){bt=last;best=i;}}
       if(best>=0&&best!==cur){faces[cur].classList.remove('on');faces[best].classList.add('on');cur=best;}
     },100));
-    wxTimers.push(setInterval(function(){if(document.hidden)return;offs[k].classList.remove('on');k=(k+1)%offs.length;offs[k].classList.add('on');},2600));
+    var oc=PT.every('offer-cycle',function(){if(document.hidden)return;offs[k].classList.remove('on');k=(k+1)%offs.length;offs[k].classList.add('on');});wxTimers.push(oc);
   }
   function showWx(cond,temp){
     var w=WX[cond];if(!w)return;
     window.SIM_WX.cond=cond;window.SIM_WX.temp=temp;window.SIM_WX.say=w.say;
     $('wxIcon').textContent=w.i;$('wxText').innerHTML=esc(C.place)+(temp!=null?' <b>'+Math.round(temp)+'\u00B0</b>':'');
     $('wx').hidden=false;$('wx').setAttribute('aria-label',C.place+' weather'+(temp!=null?' '+Math.round(temp)+' degrees':''));
-    wxTimers.forEach(clearInterval);wxTimers=[];
+    wxTimers.forEach(function(t){if(t&&t.stop)t.stop();else clearInterval(t);});wxTimers=[];
+    window.PhiTiming.setWeather(cond);   // weather state drives the phi sweep for everything outside the weather loop
     reaction($('wxr'),w);reaction($('fwx'),w);
     document.dispatchEvent(new Event('simwx'));
   }
@@ -658,9 +796,9 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     function show(l,done){
       prev.innerHTML=cur.innerHTML;cur.classList.toggle('wrap',l.text.length>44);prev.style.opacity=l.text.length>44?0:'';
       var head=html(l);clearInterval(typing);
-      if(reduce){cur.innerHTML=head+esc(l.text);setTimeout(done,2000);return;}
+      if(reduce){cur.innerHTML=head+esc(l.text);setTimeout(done,window.PhiTiming.ms('tty-hold-multi'));return;}
       var i=0;sim.classList.add('talk');cur.innerHTML=head;var span=document.createElement('span');cur.appendChild(span);
-      typing=setInterval(function(){if(document.hidden)return;i++;span.textContent=l.text.slice(0,i);if(i>=l.text.length){clearInterval(typing);sim.classList.remove('talk');setTimeout(done,Math.max(2000,l.hold||0));}},26);
+      typing=setInterval(function(){if(document.hidden)return;i++;span.textContent=l.text.slice(0,i);if(i>=l.text.length){clearInterval(typing);sim.classList.remove('talk');setTimeout(done,Math.max(window.PhiTiming.ms('tty-hold-multi'),l.hold||0));}},26);
     }
     function pump(){
       if(busy||!q.length||document.hidden)return; busy=true;var l=q.shift();
@@ -694,12 +832,12 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
         L.forEach(function(x){say(x);});
       });
     }
-    // heartbeat: if nothing for ~8 s, a quiet line; every few beats a fact, a calm phrase or the system report
+    // heartbeat: if nothing for PHI^3.5 = 5.39 s, a quiet line; every few beats a fact, a calm phrase or the system report
     setInterval(function(){
-      if(document.hidden||busy||q.length||document.activeElement===inp||Date.now()<holdUntil||Date.now()-lastAt<8000)return;
+      if(document.hidden||busy||q.length||document.activeElement===inp||Date.now()<holdUntil||Date.now()-lastAt<window.PhiTiming.ms('mlog-ambient'))return;   // ambient line at most every PHI^3.5 = 5.39 s (Simmie); real events log at once
       beat++;
       if(beat%8===0){report();return;}
-      if(beat%4===2){var fl=factLine();if(fl){say('FACT \u00B7 '+fl.f.source+': '+fl.f.text,3500);log('fact #'+fl.n+' loaded ('+fl.f.source.toLowerCase()+')');return;}}
+      if(beat%4===2){var fl=factLine();if(fl){say('FACT \u00B7 '+fl.f.source+': '+fl.f.text,window.PhiTiming.ms('tty-hold'));log('fact #'+fl.n+' loaded ('+fl.f.source.toLowerCase()+')');return;}}
       if(beat%4===3){var w=window.SIM_WX||{},pool=IDLE.slice();if(w.status==='ok'&&w.say&&!w.forced)pool.push('perth is '+w.say+'.');say(pool[beat%pool.length]);return;}
       log('\u00B7 all systems nominal');
     },1000);
@@ -716,7 +854,8 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   (function(){var v=$('bgloop'),lt=0,n=0;if(!v)return;v.addEventListener('timeupdate',function(){if(v.currentTime+0.5<lt){n++;if(n%3===1)MLOG.log('space loop wrapped ('+n+')');}lt=v.currentTime;});})();
   (function(){var tr=$('ttrack'),n=0;tr.addEventListener('animationiteration',function(){n++;MLOG.log('ticker loop '+n+' \u00B7 age '+window.SIM_AGE()+' facts');});})();
 
-  // ---- Interludes: Bonnie's animals (every 9 s) vs Simmie's space crew (every 12 s): 3 against 4, meeting every 36 s ----
+  // ---- Interludes: Bonnie's animals every PHI^5 = 11.09 s vs Simmie's space crew every PHI^4.5 = 8.72 s (phi rules 3-4):
+  //      an irrational ratio, so they never settle into a common beat; if both fall due in the same tick they split the bands ----
   (function(){
     if(reduce)return;
     var lanes={header:$('laneH'),footer:$('laneF')},row1=document.querySelector('.row1');
@@ -731,17 +870,17 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       var A=ANIMALS[aN%ANIMALS.length],lane=lanes[band];aN++;dir=-dir;var w=W(lane),from=dir>0?-24:w+8,to=dir>0?w+8:-24,flip=dir>0?-1:1; // emoji face left; flip when moving right
       if(band==='footer')row1.classList.add('swap');
       var d=el(lane,'<span class="g"><span class="fl" style="transform:scaleX('+flip+')">'+A.e+'</span></span>',A.g==='fly'?'bird':'');
-      var g=d.firstChild,jit=0.85+Math.random()*0.3,ms=Math.round((A.g==='fly'?7000:6000)*jit);
+      var PT=window.PhiTiming,g=d.firstChild,ms=PT.ms('animal-cross');   // crossing PHI^4 = 6.854 s (swept); gaits on the ladder too
       if(A.g==='fly'){d.style.bottom='3px';run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
-        g.animate([{transform:'translateY(0) scaleY(1)'},{transform:'translateY(-3px) scaleY(.8)',offset:.25},{transform:'translateY(0) scaleY(1)',offset:.5},{transform:'translateY(2px) scaleY(.9)',offset:.75},{transform:'translateY(0) scaleY(1)'}],{duration:Math.round(900*jit),iterations:Infinity});}
+        g.animate([{transform:'translateY(0) scaleY(1)'},{transform:'translateY(-3px) scaleY(.8)',offset:.25},{transform:'translateY(0) scaleY(1)',offset:.5},{transform:'translateY(2px) scaleY(.9)',offset:.75},{transform:'translateY(0) scaleY(1)'}],{duration:PT.ms('gait-fly'),iterations:Infinity});}
       else if(A.g==='collie'){ // low trot, a bound, a look-back pause
-        var m=(from+to)/2;run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+(from+(to-from)*.45)+'px)',offset:.4},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.5},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.66},{transform:'translateX('+to+'px)'}],Math.round(ms*1.2));
-        g.animate([{transform:'translateY(1px)'},{transform:'translateY(-1px)'},{transform:'translateY(1px)'}],{duration:Math.round(300*jit),iterations:Infinity});
-        var fl=g.firstChild;setTimeout(function(){if(fl.isConnected)fl.animate([{transform:'scaleX('+flip+')'},{transform:'scaleX('+(-flip)+')',offset:.2},{transform:'scaleX('+(-flip)+')',offset:.8},{transform:'scaleX('+flip+')'}],{duration:900});},Math.round(ms*1.2*.52));}
+        var m=(from+to)/2;run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+(from+(to-from)*.45)+'px)',offset:.4},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.5},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.66},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(1px)'},{transform:'translateY(-1px)'},{transform:'translateY(1px)'}],{duration:PT.ms('gait-trot'),iterations:Infinity});
+        var fl=g.firstChild;setTimeout(function(){if(fl.isConnected)fl.animate([{transform:'scaleX('+flip+')'},{transform:'scaleX('+(-flip)+')',offset:.2},{transform:'scaleX('+(-flip)+')',offset:.8},{transform:'scaleX('+flip+')'}],{duration:900});},Math.round(ms*.52));}
       else if(A.g==='hop'){run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
-        g.animate([{transform:'translateY(0)',easing:'ease-out'},{transform:'translateY(-7px)',offset:.45,easing:'ease-in'},{transform:'translateY(0)',offset:.9},{transform:'translateY(0)'}],{duration:Math.round(560*jit),iterations:Infinity});}
+        g.animate([{transform:'translateY(0)',easing:'ease-out'},{transform:'translateY(-7px)',offset:.45,easing:'ease-in'},{transform:'translateY(0)',offset:.9},{transform:'translateY(0)'}],{duration:PT.ms('gait-hop'),iterations:Infinity});}
       else{run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
-        g.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:Math.round(380*jit),iterations:Infinity});}
+        g.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:PT.ms('gait-trot'),iterations:Infinity});}
       MLOG.log(A.e+' '+A.n+' crossing '+band);
     }
     function space(band){
@@ -749,21 +888,22 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       if(band==='footer')row1.classList.add('swap');
       if(k==='sat'){satN++;var x=Math.round(w*(.3+Math.random()*.4));var p=el(lane,'\uD83E\uDE90');p.style.transform='translateX('+x+'px)';
         var s=el(lane,'\uD83D\uDEF0\uFE0F');s.style.fontSize='10px';var fr=[];for(var i=0;i<=12;i++){var a=i/12*2*Math.PI;fr.push({transform:'translate('+(x+3+Math.cos(a)*16)+'px,'+(-3+Math.sin(a)*4)+'px)'});}
-        var an=s.animate(fr,{duration:2600,iterations:2});an.onfinish=function(){s.remove();p.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){p.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
+        var an=s.animate(fr,{duration:window.PhiTiming.ms('space-ring'),iterations:2});an.onfinish=function(){s.remove();p.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){p.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
         MLOG.log('\uD83D\uDEF0\uFE0F sat orbit '+satN+'/\u221E ('+band+')');}
-      else if(k==='rocket'){var r=el(lane,'\uD83D\uDE80');run(lane,r,[{transform:'translate(-20px,2px) rotate(45deg)'},{transform:'translate('+w/2+'px,-3px) rotate(60deg)'},{transform:'translate('+(w+20)+'px,2px) rotate(80deg)'}],4200);MLOG.log('\uD83D\uDE80 rocket arcing over '+band);}
-      else if(k==='comet'){var c=el(lane,'\u2604\uFE0F<span style="opacity:.6;font-size:9px">\u2728</span>');run(lane,c,[{transform:'translateX('+(w+10)+'px) scaleX(1)',opacity:0},{transform:'translateX('+w*.8+'px)',opacity:1,offset:.1},{transform:'translateX(-40px)',opacity:.9}],4800);MLOG.log('\u2604\uFE0F comet through '+band);}
+      else if(k==='rocket'){var r=el(lane,'\uD83D\uDE80');run(lane,r,[{transform:'translate(-20px,2px) rotate(45deg)'},{transform:'translate('+w/2+'px,-3px) rotate(60deg)'},{transform:'translate('+(w+20)+'px,2px) rotate(80deg)'}],window.PhiTiming.ms('space-cross'));MLOG.log('\uD83D\uDE80 rocket arcing over '+band);}
+      else if(k==='comet'){var c=el(lane,'\u2604\uFE0F<span style="opacity:.6;font-size:9px">\u2728</span>');run(lane,c,[{transform:'translateX('+(w+10)+'px) scaleX(1)',opacity:0},{transform:'translateX('+w*.8+'px)',opacity:1,offset:.1},{transform:'translateX(-40px)',opacity:.9}],window.PhiTiming.ms('space-cross'));MLOG.log('\u2604\uFE0F comet through '+band);}
       else if(k==='moon'){var x2=Math.round(w*(.3+Math.random()*.4));var e=el(lane,'\uD83C\uDF0D');e.style.transform='translateX('+x2+'px)';var mo=el(lane,'\uD83C\uDF19');mo.style.fontSize='9px';var fr2=[];for(var j=0;j<=12;j++){var b2=j/12*2*Math.PI;fr2.push({transform:'translate('+(x2+3+Math.cos(b2)*15)+'px,'+(-3+Math.sin(b2)*4)+'px)'});}
-        var am=mo.animate(fr2,{duration:3000,iterations:2});am.onfinish=function(){mo.remove();e.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){e.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
+        var am=mo.animate(fr2,{duration:window.PhiTiming.ms('space-ring-slow'),iterations:2});am.onfinish=function(){mo.remove();e.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){e.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
         MLOG.log('\uD83C\uDF19 moon circling earth ('+band+')');}
       else{var tok=CLI[Math.floor(sN/SPACE.length)%CLI.length],x3=Math.round(w*(.2+Math.random()*.5)),t=el(lane,'','cli');t.style.transform='translateX('+x3+'px)';var i2=0;
         var ti=setInterval(function(){if(document.hidden)return;i2++;t.textContent=tok.slice(0,i2);if(i2>=tok.length){clearInterval(ti);setTimeout(function(){t.animate([{opacity:1},{opacity:0}],{duration:900}).onfinish=function(){t.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};},1400);}},110);
         MLOG.log('cli: '+tok+' ('+band+')');}
     }
+    var PTI=window.PhiTiming,nextA=t0+PTI.offMs('animals'),nextS=t0+PTI.offMs('space'),ka=0,ks=0;   // golden-angle first entrances
     setInterval(function(){
-      if(document.hidden)return; var t=(Date.now()-t0)/1000,ka=Math.floor(t/9),ks=Math.floor(t/12),fa=ka>lastA&&ka>0,fs=ks>lastS&&ks>0;
-      if(fa)lastA=ka; if(fs)lastS=ks;
-      if(fa&&fs){animal('footer');space('header');return;} // coincide every 36 s: split the bands
+      if(document.hidden)return; var now=Date.now(),fa=now>=nextA,fs=now>=nextS;
+      if(fa){ka++;nextA=now+PTI.ms('animals');} if(fs){ks++;nextS=now+PTI.ms('space');}   // next one after a (possibly swept) period
+      if(fa&&fs){animal('footer');space('header');return;} // both due in the same tick: split the bands
       if(fa)animal(ka%2?'header':'footer');
       if(fs)setTimeout(function(){space(ks%2?'footer':'header');},1000); // header/footer offset ~1 s
     },250);

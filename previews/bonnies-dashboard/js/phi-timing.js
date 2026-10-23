@@ -31,13 +31,17 @@
     ["fact",4,0],["loop-effect",5,0,1],["mlog-ambient",5,1],["animals",5,0],["space",6,1],["story",6,0,1],
     ["sway",7,0,1],["cloud-orbit",8,1],["bg-drift",8,1],
     // other timers found, on the nearest readable step for their role
-    ["cloud-breathe",2,1],["cloud-blink",2,1],["cloud-shine",5,1],["cloud-bob",0,1],
+    ["cloud-breathe",2,1],["cloud-blink",4,1],["cloud-shine",5,1],["cloud-bob",0,1],
     ["wave",4,1],["wave-busy",1,1],["marquee",8,0,1],["chip-drift",7,0,1],["panel-dot",2,1],
     ["gait-trot",-2,0],["gait-hop",-1,0],["gait-dog",2,0],["gait-fly",0,0],["gait-glow",0,0],["animal-cross",4,0],
     ["space-cross",5,1],["space-ring",3,1],["space-ring-slow",4,1],["space-spark",2,1],
     ["tty-hold",4,1],["tty-hold-multi",3,1],["tty-gap",1,1],["mlog-pace",2,1],
     ["band-sway",7,0,1],
-    ["askdad-breathe",5,1]   // Ask Dad circle breathing: Simmie slot PHI^5 * PHI^-1.5 = 5.39 s (swept)
+    ["askdad-breathe",5,1],   // Ask Dad circle breathing: Simmie slot PHI^5 * PHI^-1.5 = 5.39 s (swept)
+    // questionnaire preview
+    ["offer-cycle",2,0,1],["cloud-wobble",4,1],["beacon",2,1],["beacon-chk",1,1],["beacon-down",0,1],
+    ["bg-fall",6,0],["bg-float",5,0],["bg-sail",7,0],["bg-twinkle",2,0],["bg-cross",6,0],["bg-spin",8,0],["bg-bob",2,0],["bg-pulse",5,0],
+    ["rain",5,0],["code-panel",9,1]
   ];
   var T = {}, list = [];
   E.forEach(function(e, i){
