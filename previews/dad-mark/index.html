@@ -25,6 +25,15 @@
   .sizes figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.3rem;font:.8rem ui-monospace,monospace;color:var(--mist)}
   .sizes .chip{background:#000;border-radius:8px;padding:.5rem;display:flex}
   .tab{display:flex;align-items:center;gap:.4rem;background:#3a4047;border-radius:8px 8px 0 0;padding:.35rem .7rem;font:.8rem system-ui;color:#eee}
+  .wm{max-width:960px;margin:0 auto 1rem;padding:0 1rem}
+  .wm h2{font-size:1.1rem;color:var(--mist);margin:.6rem 0}
+  .wm .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+  .wm .t{border-radius:16px;padding:1.2rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;border:1px solid rgba(214,236,239,.18)}
+  .wm .t img{height:72px;width:auto}
+  .on-black{background:#000;color:#FDEEF2} .on-white{background:#fff;color:#5B3A50}
+  .cmp{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;background:#000;border-radius:16px;padding:1rem;color:#FDEEF2}
+  .cmp figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:.4rem;font:.8rem ui-monospace,monospace}
+  .cmp img{height:90px;width:auto}
   footer{max-width:960px;margin:0 auto;padding:1rem;font-size:.85rem;opacity:.85}
   a{color:var(--amber)}
 </style>
@@ -47,6 +56,19 @@
   <figure><img src="dad-mark-favicon.svg" width="16" height="16" alt="">favicon 16 px</figure>
   <figure><span class="tab"><img src="dad-mark-favicon.svg" width="16" height="16" alt="">Dad's world</span>in a browser tab</figure>
 </section>
-<footer>Files: <a href="dad-mark.svg">dad-mark.svg</a> (dark backgrounds), <a href="dad-mark-light.svg">dad-mark-light.svg</a> (light backgrounds), <a href="dad-mark-favicon.svg">dad-mark-favicon.svg</a>. In place: <a href="../bonnies-dashboard/">Bonnie's Dashboard preview</a> header.</footer>
+<section class="wm" aria-label="Rebella wordmark vector">
+  <h2>Rebella wordmark, vector (text turned into outlines)</h2>
+  <div class="row">
+    <div class="t on-black"><img src="rebella-wordmark-dark.svg" alt="rebella wordmark for black backgrounds"><span class="lbl">dark: rebel #F48FB1, la #FDEEF2</span></div>
+    <div class="t on-white"><img src="rebella-wordmark-light.svg" alt="rebella wordmark for white backgrounds"><span class="lbl">light: rebel #B4436C, la #5B3A50</span></div>
+    <div class="t on-dark"><span style="display:flex;align-items:center;gap:.6rem"><img src="dad-mark.svg" alt="" style="height:44px"><img src="rebella-wordmark-dark.svg" alt="" style="height:52px"></span><span class="lbl">next to the Dad mark</span></div>
+  </div>
+  <h2>Side by side with your screenshot</h2>
+  <div class="cmp">
+    <figure><img src="wordmark-screenshot-crop.png" alt="screenshot of the header wordmark">your screenshot (header text)</figure>
+    <figure><img src="rebella-wordmark-dark.svg" alt="vector wordmark" style="height:62px;margin-bottom:14px">vector (dark)</figure>
+  </div>
+</section>
+<footer>Files: <a href="dad-mark.svg">dad-mark.svg</a> (dark backgrounds), <a href="dad-mark-light.svg">dad-mark-light.svg</a> (light backgrounds), <a href="dad-mark-favicon.svg">dad-mark-favicon.svg</a>, <a href="rebella-wordmark-dark.svg">rebella-wordmark-dark.svg</a>, <a href="rebella-wordmark-light.svg">rebella-wordmark-light.svg</a>. In place: <a href="../bonnies-dashboard/">Bonnie's Dashboard preview</a> header.</footer>
 </body>
 </html>
