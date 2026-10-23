@@ -466,7 +466,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="previews/shared/command-centre.css?v=2">
 <link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=3">
 <link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=2">
-<link rel="stylesheet" href="previews/shared/chat-head-quiz.css?v=1">
+<link rel="stylesheet" href="previews/shared/chat-head-quiz.css?v=2">
 <link rel="stylesheet" href="previews/shared/quiz-foot-lock.css?v=1">
 <style>
 /* inline volume note (not a pop-up): first thing on the page; the sound switch lives inside it */
@@ -502,7 +502,8 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
 <!-- Questionnaire header (Danny 24 Oct 2026 02:50 AWST): the live Bonnie's Dashboard header STRUCTURE (rebella 517e809 moderation/:
-     top bar with logo + right-side key, weather chip / fun-fact ticker row, masthead row, tagline line under the header),
+     top bar with logo + right-side key, weather chip / fun-fact ticker row, Dad's DJ, then the bottom masthead row with the mark,
+     title, pill and the tagline (Danny 02:59 AWST: tagline in the bottom row, not a line under the header)),
      recoloured to the live Simmie chat page palette (css/chat.css values). Static: scrolls with the page, no Create button,
      no Lock / Ask Dad keys (they would do nothing here); the only key is the existing REBELLA status beacon.
      Replaces Dad's-palette header 53b7cda (restore from that commit: header.dad-head, previews/shared/dad-head-quiz.css). -->
@@ -521,8 +522,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     </div>
     <div class="lane" id="laneH" aria-hidden="true"></div>
   </div></div>
-  <header class="qh-mast"><div class="qh-c">
-    <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=3" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
+  <div class="qh-dj"><div class="qh-c">
   <!-- Dad's auto-DJ (phi rule 10): generated in the browser, plays only after a tap; the sound switch below is the master mute -->
   <section class="dad-dj" id="dad-dj" data-guard="dad-dj" aria-label="Dad's music">
     <div class="dj-row">
@@ -532,9 +532,13 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     </div>
     <details class="dj-demo"><summary>try the pumps</summary><p class="dj-pumps" id="dj-pumps"></p><div class="dj-chips" id="dj-chips"></div></details>
   </section>
+  </div></div>
+  <!-- bottom row (Danny 02:59 AWST): where the dashboard's masthead carries the mark; the questionnaire's own tagline sits here -->
+  <header class="qh-mast"><div class="qh-c">
+    <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=3" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
+    <p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p>
   </div></header>
 </div>
-<div class="qh-tagline"><div class="qh-c"><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p></div></div>
 <main class="wrap">
   <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><div id="vol-sound"></div></aside>
 
