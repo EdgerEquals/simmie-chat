@@ -55,9 +55,10 @@
         </div>
         <span class="tb-right"><button id="lock-btn" class="ghost lockbtn" type="button" title="Lock this chat">🔒 Lock</button></span>
       </div></div>
-      <div class="hud"><div class="container"><div id="status" class="status">Replies usually take under a minute</div></div></div>
+      <!-- bottom row of the header, where the dashboard's mark row sits: the tagline. Danny 24 Oct 2026 02:59 AWST: tagline in the
+           header's bottom row, not on its own line below. Text = the chat page's existing sub-line (it has no separate tagline). -->
+      <div class="masthead"><div class="container"><div id="status" class="status">Replies usually take under a minute</div></div></div>
     </header>
-    <div class="tagline-line"><div class="container"><span class="tagline">Your private chat with Simmie</span></div></div>
     <div id="log" class="log" aria-live="polite" aria-label="Messages"></div>
     <!-- footer: locked to the bottom like the dashboard's (status line just above the bar, bar = the message box taking the
          remaining width + Send); safe-area aware; the log scrolls between header and footer, so nothing hides behind it. -->

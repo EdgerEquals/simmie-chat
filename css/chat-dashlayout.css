@@ -5,8 +5,8 @@
 
    Dashboard            -> chat page
    top bar: logo | Lock + Ask Dad   -> Simmie avatar + name | Lock  (no Ask Dad on the live chat page)
-   weather/fact row     -> status row ("Replies usually take under a minute")
-   tagline line under header        -> "Your private chat with Simmie"
+   bottom (mark) row of the header  -> the tagline: the page's existing sub-line "Replies usually take under a minute"
+                                       (Danny 02:59 AWST: tagline in the header's bottom row; same font/colour as before)
    #app-foot line fixed above bar   -> #app-foot line just above the message bar
    #wx-foot bar (terminal takes the remaining width) -> message box takes the remaining width + Send
    Header and footer never move: the page is a full-height column and only the message log scrolls between them. */
@@ -26,11 +26,8 @@
 #screen-chat .tb-right{display:flex;align-items:center;gap:8px;flex:none}
 #screen-chat .avatar{width:38px;height:38px;font-size:1.35rem}
 #screen-chat .name{font-size:1.25rem}
-#screen-chat .hud .container{padding-top:0;padding-bottom:6px}
-#screen-chat .hud .status{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#screen-chat .tagline-line{flex:none;background:var(--bg);border-bottom:2px solid var(--line);position:relative;z-index:2}
-#screen-chat .tagline-line .container{padding-top:.3rem;padding-bottom:.3rem}
-#screen-chat .tagline{display:block;font-family:var(--f-hand);font-size:1rem;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#screen-chat .masthead .container{padding-top:0;padding-bottom:6px}
+#screen-chat .masthead .status{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* message log: the only part that scrolls; the .55 white wash sits on the 640px column only */
 #screen-chat .log{padding:16px max(12px,calc((100% - 616px) / 2));
@@ -48,15 +45,12 @@
 #screen-chat .composer .container{display:flex;gap:8px;align-items:flex-end}
 #screen-chat .composer textarea{flex:1 1 0;min-width:0}
 
-/* short landscape phones (iPhone SE sideways 667x375): the status row folds into the top bar so the header stays small */
+/* short landscape phones (iPhone SE sideways 667x375): tighter rows so the header stays small */
 @media (orientation:landscape) and (max-height:500px){
   #screen-chat .topbar .container{min-height:40px;padding-top:3px;padding-bottom:3px}
   #screen-chat .avatar{width:30px;height:30px;font-size:1.1rem}
-  #screen-chat .chat-head .hud{display:none}
-  #screen-chat .tagline-line .container{padding-top:.15rem;padding-bottom:.15rem}
-  #screen-chat .tagline{font-size:.8rem}
+  #screen-chat .masthead .container{padding-bottom:3px}
   #screen-chat #app-foot.footer{height:18px} #screen-chat #app-foot .container{font-size:.6rem}
   #screen-chat .composer{padding-bottom:6px}
   #screen-chat .send{width:42px;height:42px}
 }
-@media (max-width:575px){ #screen-chat .tagline{font-size:.78rem;letter-spacing:1px} }
