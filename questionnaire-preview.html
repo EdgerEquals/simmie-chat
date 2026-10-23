@@ -230,6 +230,26 @@ body.paused .beacon i,body.paused .beacon i::after{animation-play-state:paused}
 /* Narrow phones (iPhone SE): status items on the first line, the ticker gets its own full-width line underneath */
 @media(max-width:480px){.tick{flex-wrap:wrap;height:auto;padding:5px 7px;row-gap:5px}.tick .tview{order:9;flex:1 0 100%;height:18px;display:flex;align-items:center;border-top:1px solid rgba(78,170,190,.22);padding-top:5px}.tick .beacon{margin-left:auto}.tick{gap:4px}.tick .tag{font-size:10px;padding:3px 4px}.tick .wx{font-size:10.5px;padding:2px 5px}.tick.static .tview{height:auto;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.beacon i,.beacon i::after{animation:none}}
+
+/* ---- Interlude lanes: Bonnie's animals and Simmie's space crew take turns (9 s vs 12 s polyrhythm) ---- */
+.lane{position:relative;height:16px;overflow:hidden;pointer-events:none}
+#laneH{margin:-.75rem 0 .35rem}
+.lane .it{position:absolute;left:0;bottom:0;font-size:13px;line-height:1;will-change:transform}
+.lane .g{display:inline-block;will-change:transform}
+.lane .fl{display:inline-block}
+.lane .bird{filter:drop-shadow(0 0 3px rgba(110,170,255,.9))}
+.lane .cli{font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5EE6C0;white-space:pre}
+.row1{position:relative;height:13px}
+.row1 .lane{position:absolute;inset:0;height:13px;opacity:0;transition:opacity .5s}
+.row1 .strip{transition:opacity .5s}
+.row1.swap .lane{opacity:1}.row1.swap .strip{opacity:0}
+.tout{height:2.7em;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.tout .lp,.tout .lc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tout .lp{opacity:.45;transition:opacity .6s}
+.tout .lc.wrap{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tout .ts{color:#C79A55}
+body.paused .lane *{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.lane{display:none}.row1 .lane{display:none}}
 /* ---- Simmie avatar (PREVIEW ONLY): brown cloud traced from Simmie's app avatar. Fill #8C6640, eyes #1E1E1E (sampled).
    Gentle: breathing squash/stretch 4s, tiny lobe wobble, soft sheen sweep ~every 7s, blink every 5-8s, hop on each new step.
    transform/opacity only; paused when the tab is hidden; completely still under prefers-reduced-motion. ---- */
@@ -319,6 +339,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     <span class="sr" id="tsr"></span>
     <button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button>
   </header>
+  <div class="lane" id="laneH" aria-hidden="true"></div>
 
   <section class="panel" id="start">
     <h1><span data-copy="intro">Hey Bonnie, here's a questionnaire I prepared for you,</span> <span class="from" data-copy="from">from Dad</span></h1>
@@ -352,19 +373,20 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   </section>
 </main>
 <div class="foot" id="foot">
+  <div class="row1"><div class="lane" id="laneF" aria-hidden="true"></div>
   <div class="strip" aria-label="Page status">
     <span class="lt" id="ltStep" style="--lp:3.1s"><i></i>STEP <b id="vStep">--</b></span>
     <span class="lt" id="ltDone" style="--lp:4.3s"><i></i>DONE <b id="vDone">0</b></span>
     <span class="lt" id="ltSky" style="--lp:5.7s"><i></i>SKY <b id="vSky">&hellip;</b></span>
     <span class="lt" id="ltLink" style="--lp:2.7s"><i></i>LINK <b id="vLink">&hellip;</b></span>
     <span class="ro" id="ro" aria-hidden="true"></span>
-  </div>
+  </div></div>
   <div class="tty" id="tty">
     <div class="ttybar" aria-hidden="true"><i></i><i></i><i></i><span class="tt">simmie &mdash; tty</span><span class="sat">&#x1F6F0;&#xFE0F;</span></div>
     <div class="ttybody">
       <span class="simmie" data-simmie id="footSimmie"></span>
       <div class="ttyl">
-        <div class="tout" id="tout" aria-live="polite"><span class="pr">simmie&gt;</span> <span id="ttext"></span></div>
+        <div class="tout" id="tout"><div class="lp" id="tprev" aria-hidden="true"></div><div class="lc" id="tcur" aria-live="polite"></div></div>
         <label class="tin"><span class="pr">bonnie$</span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
       </div>
     </div>
@@ -595,7 +617,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     function check(){
       if(busy)return;busy=true;var t0=Date.now(),slow=setTimeout(function(){set('chk','CHECKING','slow, still waiting');},3000);
       set('chk','CHECKING','checking now');
-      var done=function(ok,why){clearTimeout(slow);busy=false;var when='Checked '+stamp();if(ok)set('live','LIVE',when);else set('down','DOWN',when+(why?', '+why:''));};
+      var done=function(ok,why){clearTimeout(slow);busy=false;var when='Checked '+stamp();if(window.MLOG_READY)MLOG.log('link: rebella '+(ok?'up '+(Date.now()-t0)+'ms':'down'+(why?' ('+why+')':'')));if(ok)set('live','LIVE',when);else set('down','DOWN',when+(why?', '+why:''));};
       if(force==='down'){setTimeout(function(){done(false,'preview: forced down');},400);return;}
       var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort();},8000);
       try{fetch('https://edgerequals.github.io/rebella/',{cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){clearTimeout(to);done(r.ok,r.ok?'':'HTTP '+r.status);}).catch(function(){clearTimeout(to);done(false,'no response');});}
@@ -624,32 +646,39 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   document.addEventListener('simwx',function(){SIM_LIGHTS();});
   setInterval(function(){if(!document.hidden)readout();},15000);
 
-  // ---- Simmie terminal (preview only: replies are canned, nothing is sent) ----
-  (function(){
-    var out=$('ttext'),inp=$('tinp'),blk=document.querySelector('.tin .blk'),sim=$('footSimmie');
+  // ---- Simmie terminal + MISSION LOG (display only: nothing is sent; typed text is never logged) ----
+  var MLOG=(function(){
+    var prev=$('tprev'),cur=$('tcur'),inp=$('tinp'),blk=document.querySelector('.tin .blk'),sim=$('footSimmie');
     var SPIN=['\u280B','\u2819','\u2839','\u2838','\u283C','\u2834','\u2826','\u2827','\u2807','\u280F'];
     var REPLIES=['got it. (preview only, not sent)','thanks, Bonnie. this is just a preview, so nothing went anywhere.','noted. in the real version, Dad would see this.','understood. preview mode, so it stays on this page.'];
-    var IDLE=['all quiet on deck.','steady as she goes.','take your time.','proud of you.','no rush. pick whatever feels right.','one question at a time.'];
-    var busy=false,typingT=null,holdUntil=0,cycleN=0,factN=0;
-    function type(text,done){
-      clearInterval(typingT);
-      if(reduce){out.textContent=text;if(done)setTimeout(done,1200);return;}
-      var i=0;out.textContent='';sim.classList.add('talk');
-      typingT=setInterval(function(){if(document.hidden)return;i++;out.textContent=text.slice(0,i);if(i>=text.length){clearInterval(typingT);sim.classList.remove('talk');if(done)setTimeout(done,1600);}},32);
+    var IDLE=['all quiet on deck.','steady as she goes.','take your time.','proud of you.','no rush. pick whatever feels right.'];
+    var q=[],busy=false,typing=null,lastAt=Date.now(),beat=0,factN=0,holdUntil=0;
+    function hms(){try{return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Australia/Perth'});}catch(e){return '';}}
+    function html(l){return l.kind==='sim'?'<span class="pr">simmie&gt;</span> ':'<span class="ts">'+l.t+'</span> ';}
+    function show(l,done){
+      prev.innerHTML=cur.innerHTML;cur.classList.toggle('wrap',l.text.length>44);prev.style.opacity=l.text.length>44?0:'';
+      var head=html(l);clearInterval(typing);
+      if(reduce){cur.innerHTML=head+esc(l.text);setTimeout(done,2000);return;}
+      var i=0;sim.classList.add('talk');cur.innerHTML=head;var span=document.createElement('span');cur.appendChild(span);
+      typing=setInterval(function(){if(document.hidden)return;i++;span.textContent=l.text.slice(0,i);if(i>=l.text.length){clearInterval(typing);sim.classList.remove('talk');setTimeout(done,Math.max(2000,l.hold||0));}},26);
     }
-    function seq(lines,done){var k=0;(function nx(){if(k>=lines.length){if(done)done();return;}type(lines[k++],nx);})();}
-    function measure(){ // keep the block cursor at the end of the typed text
-      var c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(inp).font;blk.style.setProperty('--cx',Math.min(c.measureText(inp.value).width,inp.clientWidth-8)+'px');
+    function pump(){
+      if(busy||!q.length||document.hidden)return; busy=true;var l=q.shift();
+      show(l,function(){busy=false;lastAt=Date.now();pump();});
     }
+    function log(text){q.push({kind:'log',t:hms(),text:text});if(q.length>8)q.splice(0,q.length-8);pump();}
+    function say(text,hold){q.push({kind:'sim',text:text,hold:hold});pump();}
+    // talk box: Enter clears, spinner ~1.5 s, then a canned reply typed out (jumps the queue)
+    function measure(){var c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(inp).font;blk.style.setProperty('--cx',Math.min(c.measureText(inp.value).width,inp.clientWidth-8)+'px');}
     inp.addEventListener('input',measure);
     inp.addEventListener('keydown',function(e){
-      if(e.key!=='Enter')return;e.preventDefault();var v=inp.value.trim();inp.value='';measure();if(!v||busy)return;
-      busy=true;var f=0;clearInterval(typingT);
-      if(reduce){out.textContent='\u2026';}else{sim.classList.add('talk');typingT=setInterval(function(){out.textContent=SPIN[f++%SPIN.length];},90);}
-      setTimeout(function(){clearInterval(typingT);type(REPLIES[Math.floor(Math.random()*REPLIES.length)],function(){busy=false;holdUntil=Date.now()+30000;});},1500);
+      if(e.key!=='Enter')return;e.preventDefault();var v=inp.value.trim();inp.value='';measure();if(!v)return;
+      clearInterval(typing);busy=true;var f=0;prev.innerHTML=cur.innerHTML;cur.classList.remove('wrap');
+      if(reduce){cur.innerHTML='<span class="pr">simmie&gt;</span> \u2026';}else{sim.classList.add('talk');typing=setInterval(function(){cur.innerHTML='<span class="pr">simmie&gt;</span> '+SPIN[f++%SPIN.length];},90);}
+      setTimeout(function(){clearInterval(typing);show({kind:'sim',text:REPLIES[Math.floor(Math.random()*REPLIES.length)]},function(){busy=false;holdUntil=Date.now()+30000;lastAt=Date.now();pump();});},1500);
     });
-    function factLine(){var fs=window.SIM_FACTS?window.SIM_FACTS(window.SIM_AGE()):[];if(!fs.length)return null;var f=fs[(factN++*7)%fs.length];return 'FACT \u00B7 '+f.source+': '+f.text;}
-    function report(done){
+    function factLine(){var fs=window.SIM_FACTS?window.SIM_FACTS(window.SIM_AGE()):[];if(!fs.length)return null;var i=(factN++*7)%fs.length,f=fs[i];return {n:BANK.indexOf(f)+1,f:f};}
+    function report(){
       var L=['SYSTEM REPORT '+clock()+' AWST'],b=window.SIM_BEACON;
       L.push('rebella: '+(b&&b.state!=='chk'?b.label:'n/a'));
       var pA=fetch('https://edgerequals.github.io/rebella/sitemap.xml',{cache:'no-cache'}).then(function(r){return r.ok?r.text():null;}).then(function(t){if(!t)return;var n=(t.match(/<loc>[^<]*\/articles\/[^<]+<\/loc>/g)||[]).length;if(n)L.push('articles: '+n+' published');}).catch(function(){});
@@ -662,18 +691,82 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       Promise.all([pA,pS]).then(function(){
         L.push('age dial: '+window.SIM_AGE()+(window.SIM_AGE_SRC==='url'?' (preview ?age)':''));
         var w=window.SIM_WX||{};if(w.status==='ok'&&w.cond&&!w.forced)L.push('perth: '+(w.temp!=null?Math.round(w.temp)+'\u00B0, ':'')+w.say);
-        seq(L,done);
+        L.forEach(function(x){say(x);});
       });
     }
-    function idle(){
-      if(document.hidden||busy||document.activeElement===inp||Date.now()<holdUntil){setTimeout(idle,3000);return;}
-      cycleN++;var next=function(){setTimeout(idle,7000);};
-      if(cycleN%4===0){report(next);return;}
-      if(cycleN%4===2){var f=factLine();if(f){type(f,next);return;}}
-      var w=window.SIM_WX||{},pool=IDLE.slice();if(w.status==='ok'&&w.say&&!w.forced)pool.push('perth is '+w.say+'.');
-      type(pool[(cycleN*5)%pool.length],next);
+    // heartbeat: if nothing for ~8 s, a quiet line; every few beats a fact, a calm phrase or the system report
+    setInterval(function(){
+      if(document.hidden||busy||q.length||document.activeElement===inp||Date.now()<holdUntil||Date.now()-lastAt<8000)return;
+      beat++;
+      if(beat%8===0){report();return;}
+      if(beat%4===2){var fl=factLine();if(fl){say('FACT \u00B7 '+fl.f.source+': '+fl.f.text,3500);log('fact #'+fl.n+' loaded ('+fl.f.source.toLowerCase()+')');return;}}
+      if(beat%4===3){var w=window.SIM_WX||{},pool=IDLE.slice();if(w.status==='ok'&&w.say&&!w.forced)pool.push('perth is '+w.say+'.');say(pool[beat%pool.length]);return;}
+      log('\u00B7 all systems nominal');
+    },1000);
+    cur.innerHTML='<span class="pr">simmie&gt;</span> hello, Bonnie.';
+    return {log:log,say:say};
+  })();
+  window.MLOG_READY=true;
+  // Mission-log sources: real local events only
+  document.addEventListener('simwx',function(){var w=window.SIM_WX||{};if(w.cond){var mood={sun:'crew happy',hot:'crew grinning, water handy',cloud:'crew curious',fog:'crew calm',rain:'crew hopeful',storm:'crew cosy',night:'crew calm',snow:'crew curious'}[w.cond];MLOG.log('wx: '+(window.SIM_WX.forced?w.cond+' (preview)':w.say+(w.temp!=null?' '+Math.round(w.temp)+'\u00B0':''))+' \u2014 '+mood);}else if(w.status==='fail')MLOG.log('wx: no data \u2014 sky light off');});
+  if((window.SIM_WX||{}).cond||(window.SIM_WX||{}).status==='fail')document.dispatchEvent(new Event('simwx'));
+  document.addEventListener('visibilitychange',function(){if(document.hidden)MLOG.log('tab hidden \u2014 holding');else MLOG.log('tab visible \u2014 resuming');});
+  (function(){var t=null,lw=innerWidth,lh=innerHeight;function rs(kind){clearTimeout(t);t=setTimeout(function(){if(innerWidth===lw&&innerHeight===lh)return;lw=innerWidth;lh=innerHeight;MLOG.log((kind==='o'?'rotated: ':'resized: ')+(lw>lh?'landscape ':'portrait ')+lw+'\u00D7'+lh);},500);}
+    addEventListener('resize',function(){rs('r');});addEventListener('orientationchange',function(){rs('o');});})();
+  (function(){var v=$('bgloop'),lt=0,n=0;if(!v)return;v.addEventListener('timeupdate',function(){if(v.currentTime+0.5<lt){n++;if(n%3===1)MLOG.log('space loop wrapped ('+n+')');}lt=v.currentTime;});})();
+  (function(){var tr=$('ttrack'),n=0;tr.addEventListener('animationiteration',function(){n++;MLOG.log('ticker loop '+n+' \u00B7 age '+window.SIM_AGE()+' facts');});})();
+
+  // ---- Interludes: Bonnie's animals (every 9 s) vs Simmie's space crew (every 12 s): 3 against 4, meeting every 36 s ----
+  (function(){
+    if(reduce)return;
+    var lanes={header:$('laneH'),footer:$('laneF')},row1=document.querySelector('.row1');
+    var ANIMALS=[{e:'\uD83D\uDC0E',n:'horse',g:'trot'},{e:'\uD83D\uDC07',n:'rabbit',g:'hop'},{e:'\uD83D\uDC15',n:'dog',g:'collie'},{e:'\uD83D\uDC26',n:'bird',g:'fly'}];
+    var SPACE=['sat','rocket','comet','moon','cli'],CLI=['>_\u258D','$ ping rebella','[ OK ]','0101'];
+    var aN=0,sN=0,satN=0,t0=Date.now(),lastA=-1,lastS=-1,dir=1;
+    function W(l){return l.clientWidth||300;}
+    function el(lane,h,cls){var d=document.createElement('span');d.className='it '+(cls||'');d.innerHTML=h;lane.appendChild(d);return d;}
+    function done(lane,d,anim){anim.onfinish=function(){d.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};}
+    function run(lane,d,frames,ms){var a=d.animate(frames,{duration:ms,easing:'linear',fill:'forwards'});done(lane,d,a);return a;}
+    function animal(band){
+      var A=ANIMALS[aN%ANIMALS.length],lane=lanes[band];aN++;dir=-dir;var w=W(lane),from=dir>0?-24:w+8,to=dir>0?w+8:-24,flip=dir>0?-1:1; // emoji face left; flip when moving right
+      if(band==='footer')row1.classList.add('swap');
+      var d=el(lane,'<span class="g"><span class="fl" style="transform:scaleX('+flip+')">'+A.e+'</span></span>',A.g==='fly'?'bird':'');
+      var g=d.firstChild,jit=0.85+Math.random()*0.3,ms=Math.round((A.g==='fly'?7000:6000)*jit);
+      if(A.g==='fly'){d.style.bottom='3px';run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(0) scaleY(1)'},{transform:'translateY(-3px) scaleY(.8)',offset:.25},{transform:'translateY(0) scaleY(1)',offset:.5},{transform:'translateY(2px) scaleY(.9)',offset:.75},{transform:'translateY(0) scaleY(1)'}],{duration:Math.round(900*jit),iterations:Infinity});}
+      else if(A.g==='collie'){ // low trot, a bound, a look-back pause
+        var m=(from+to)/2;run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+(from+(to-from)*.45)+'px)',offset:.4},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.5},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.66},{transform:'translateX('+to+'px)'}],Math.round(ms*1.2));
+        g.animate([{transform:'translateY(1px)'},{transform:'translateY(-1px)'},{transform:'translateY(1px)'}],{duration:Math.round(300*jit),iterations:Infinity});
+        var fl=g.firstChild;setTimeout(function(){if(fl.isConnected)fl.animate([{transform:'scaleX('+flip+')'},{transform:'scaleX('+(-flip)+')',offset:.2},{transform:'scaleX('+(-flip)+')',offset:.8},{transform:'scaleX('+flip+')'}],{duration:900});},Math.round(ms*1.2*.52));}
+      else if(A.g==='hop'){run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(0)',easing:'ease-out'},{transform:'translateY(-7px)',offset:.45,easing:'ease-in'},{transform:'translateY(0)',offset:.9},{transform:'translateY(0)'}],{duration:Math.round(560*jit),iterations:Infinity});}
+      else{run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:Math.round(380*jit),iterations:Infinity});}
+      MLOG.log(A.e+' '+A.n+' crossing '+band);
     }
-    out.textContent='hello, Bonnie.';setTimeout(idle,4000);
+    function space(band){
+      var k=SPACE[sN%SPACE.length],lane=lanes[band],w=W(lane);sN++;
+      if(band==='footer')row1.classList.add('swap');
+      if(k==='sat'){satN++;var x=Math.round(w*(.3+Math.random()*.4));var p=el(lane,'\uD83E\uDE90');p.style.transform='translateX('+x+'px)';
+        var s=el(lane,'\uD83D\uDEF0\uFE0F');s.style.fontSize='10px';var fr=[];for(var i=0;i<=12;i++){var a=i/12*2*Math.PI;fr.push({transform:'translate('+(x+3+Math.cos(a)*16)+'px,'+(-3+Math.sin(a)*4)+'px)'});}
+        var an=s.animate(fr,{duration:2600,iterations:2});an.onfinish=function(){s.remove();p.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){p.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
+        MLOG.log('\uD83D\uDEF0\uFE0F sat orbit '+satN+'/\u221E ('+band+')');}
+      else if(k==='rocket'){var r=el(lane,'\uD83D\uDE80');run(lane,r,[{transform:'translate(-20px,2px) rotate(45deg)'},{transform:'translate('+w/2+'px,-3px) rotate(60deg)'},{transform:'translate('+(w+20)+'px,2px) rotate(80deg)'}],4200);MLOG.log('\uD83D\uDE80 rocket arcing over '+band);}
+      else if(k==='comet'){var c=el(lane,'\u2604\uFE0F<span style="opacity:.6;font-size:9px">\u2728</span>');run(lane,c,[{transform:'translateX('+(w+10)+'px) scaleX(1)',opacity:0},{transform:'translateX('+w*.8+'px)',opacity:1,offset:.1},{transform:'translateX(-40px)',opacity:.9}],4800);MLOG.log('\u2604\uFE0F comet through '+band);}
+      else if(k==='moon'){var x2=Math.round(w*(.3+Math.random()*.4));var e=el(lane,'\uD83C\uDF0D');e.style.transform='translateX('+x2+'px)';var mo=el(lane,'\uD83C\uDF19');mo.style.fontSize='9px';var fr2=[];for(var j=0;j<=12;j++){var b2=j/12*2*Math.PI;fr2.push({transform:'translate('+(x2+3+Math.cos(b2)*15)+'px,'+(-3+Math.sin(b2)*4)+'px)'});}
+        var am=mo.animate(fr2,{duration:3000,iterations:2});am.onfinish=function(){mo.remove();e.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){e.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
+        MLOG.log('\uD83C\uDF19 moon circling earth ('+band+')');}
+      else{var tok=CLI[Math.floor(sN/SPACE.length)%CLI.length],x3=Math.round(w*(.2+Math.random()*.5)),t=el(lane,'','cli');t.style.transform='translateX('+x3+'px)';var i2=0;
+        var ti=setInterval(function(){if(document.hidden)return;i2++;t.textContent=tok.slice(0,i2);if(i2>=tok.length){clearInterval(ti);setTimeout(function(){t.animate([{opacity:1},{opacity:0}],{duration:900}).onfinish=function(){t.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};},1400);}},110);
+        MLOG.log('cli: '+tok+' ('+band+')');}
+    }
+    setInterval(function(){
+      if(document.hidden)return; var t=(Date.now()-t0)/1000,ka=Math.floor(t/9),ks=Math.floor(t/12),fa=ka>lastA&&ka>0,fs=ks>lastS&&ks>0;
+      if(fa)lastA=ka; if(fs)lastS=ks;
+      if(fa&&fs){animal('footer');space('header');return;} // coincide every 36 s: split the bands
+      if(fa)animal(ka%2?'header':'footer');
+      if(fs)setTimeout(function(){space(ks%2?'footer':'header');},1000); // header/footer offset ~1 s
+    },250);
   })();
 
   // ---- Quiz state (memory only) ----
@@ -718,7 +811,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     var t=$('t'+i);
     t.onpointerdown=function(){t.classList.remove('burst');void t.offsetWidth;t.classList.add('burst');};
     t.addEventListener('animationend',function(e){if(e.target.classList.contains('sp'))t.classList.remove('burst');});
-    t.onclick=function(){state[qi].pick=i;render();setTimeout(next,650);};
+    t.onclick=function(){state[qi].pick=i;var s0=state[qi],o=s0.opts[i];MLOG.log('q'+(qi+1)+' answered: '+(s0.yn?(i===0?'yes':'no'):o.t.toLowerCase()));render();setTimeout(next,650);};
     t.onmouseenter=t.onfocus=function(){theme(state[qi].opts[i].th);};
     t.onmouseleave=t.onblur=function(){theme(state[qi].theme);};
   });
@@ -735,7 +828,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   $('send').onclick=function(){var v=$('note').value.trim();if(!v){$('saved').textContent=C.empty;return;}
     state[qi].notes.push(v);render();$('saved').textContent=C.saved;};
   $('back').onclick=$('back2').onclick=function(){if(qi>0){qi--;render();}};
-  $('skip').onclick=next;
+  $('skip').onclick=function(){MLOG.log('q'+(qi+1)+' skipped');next();};
   reset();theme('teen');SIM_LIGHTS();readout();
 })();
 </script>
