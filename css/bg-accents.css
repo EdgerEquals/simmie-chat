@@ -1,0 +1,36 @@
+/* Chat background accents (live, Danny 12:19 AWST 24 Oct 2026, t591u). The base layers stay EXACTLY as they were
+   (css/chat-dashlayout.css: .chat-bg-dots #E58AA6 at .4, .chat-bg-code at .16; untouched). On top of them, inside .chat-bg:
+     .cbw        a band of light that sweeps across the dot grid: a raspberry copy of the same 22px dot grid, shown only
+                 inside a moving soft mask band, so the existing dots brighten as the wave passes.
+     .cbw-spark  three sparse sprinkles of highlighted dots (exactly on the grid's dot centres, 154/198/242px tiles = 7/9/11
+                 dots) that shimmer; they sit inside the same band, so they twinkle only as the wave passes over them.
+   Chat palette only: #B4436C raspberry (accent), #E58AA6 dotted pink. Decorative: no network, no storage, no pop-ups.
+   Golden-ratio timing (PHI = 1.618; Simmie quarter-step slots, so none equals an existing period):
+     wave sweep     W = PHI^5.25 = 12.508 s   start offset W*frac(1*0.618) = 7.730 s
+     shimmer        W / PHI = PHI^4.25 = 7.730 s, the 3 sprinkles staggered by golden-angle offsets 4.778 / 1.825 / 6.602 s (k = 1,2,3)
+     wave angle     drifts 100deg <-> 128deg over PHI^8.25 = 52.984 s (W * PHI^3), offset 12.508 s (k = 2)
+   Wiring: every duration is base x var(--cbw-k); --cbw-k defaults to var(--phi-dial-k,1) so the site-wide frequency dial /
+   ratio pump can scale it from :root with one variable (not landed on origin/main at commit time). dash/js/phi-timing.js also
+   weather-sweeps these infinite animations at cycle boundaries like every other animation on the page.
+   Motion runs only while the chat is open and the tab is visible (html.cbw-run, js/bg-accents.js); locked / gate / hidden tab:
+   paused and faded out. Reduced motion: accents removed, the static base is unchanged. Transform-free, opacity + mask only. */
+@property --cbw-ang{syntax:"<angle>";inherits:false;initial-value:112deg}
+:root{--cbw-k:var(--phi-dial-k,1);--cbw-w:12.508s;--cbw-s:7.730s;--cbw-a:52.984s}
+.chat-bg .cbw{position:absolute;inset:0;opacity:0;transition:opacity .8s ease;
+  -webkit-mask-image:linear-gradient(var(--cbw-ang),transparent 38%,rgba(0,0,0,.4) 45%,#000 50%,rgba(0,0,0,.4) 55%,transparent 62%);
+          mask-image:linear-gradient(var(--cbw-ang),transparent 38%,rgba(0,0,0,.4) 45%,#000 50%,rgba(0,0,0,.4) 55%,transparent 62%);
+  -webkit-mask-size:300% 300%;mask-size:300% 300%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:100% 50%;mask-position:100% 50%;
+  animation:cbw-sweep calc(var(--cbw-w) * var(--cbw-k)) linear calc(-7.730s * var(--cbw-k)) infinite paused,
+            cbw-angle calc(var(--cbw-a) * var(--cbw-k)) ease-in-out calc(-12.508s * var(--cbw-k)) infinite alternate paused}
+.chat-bg .cbw-dots{position:absolute;inset:0;opacity:.8;background-image:radial-gradient(#B4436C 2.1px,transparent 2.7px);background-size:22px 22px}
+.chat-bg .cbw-spark{position:absolute;inset:0;opacity:0;animation:cbw-shimmer calc(var(--cbw-s) * var(--cbw-k)) ease-out infinite paused}
+.chat-bg .cbw-s1{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='154' height='154'%3E%3Ccircle cx='33' cy='55' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='33' cy='55' r='3' fill='%23B4436C'/%3E%3Ccircle cx='121' cy='121' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='121' cy='121' r='3' fill='%23B4436C'/%3E%3C/svg%3E") 0 0/154px 154px repeat;animation-delay:calc(-4.778s * var(--cbw-k))}
+.chat-bg .cbw-s2{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='198' height='198'%3E%3Ccircle cx='77' cy='33' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='77' cy='33' r='3' fill='%23B4436C'/%3E%3Ccircle cx='165' cy='143' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='165' cy='143' r='3' fill='%23B4436C'/%3E%3Ccircle cx='33' cy='165' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='33' cy='165' r='3' fill='%23B4436C'/%3E%3C/svg%3E") 0 0/198px 198px repeat;animation-delay:calc(-1.825s * var(--cbw-k))}
+.chat-bg .cbw-s3{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='242' height='242'%3E%3Ccircle cx='143' cy='77' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='143' cy='77' r='3' fill='%23B4436C'/%3E%3Ccircle cx='55' cy='209' r='7' fill='%23E58AA6' fill-opacity='.45'/%3E%3Ccircle cx='55' cy='209' r='3' fill='%23B4436C'/%3E%3C/svg%3E") 0 0/242px 242px repeat;animation-delay:calc(-6.602s * var(--cbw-k))}
+html.cbw-run:not(.wx-paused) .chat-bg .cbw{opacity:1}
+html.cbw-run:not(.wx-paused) .chat-bg .cbw,html.cbw-run:not(.wx-paused) .chat-bg .cbw-spark{animation-play-state:running}
+@keyframes cbw-sweep{from{-webkit-mask-position:100% 50%;mask-position:100% 50%}to{-webkit-mask-position:0% 50%;mask-position:0% 50%}}
+@keyframes cbw-angle{from{--cbw-ang:100deg}to{--cbw-ang:128deg}}
+@keyframes cbw-shimmer{0%{opacity:0}6%{opacity:1}11%{opacity:.35}16%{opacity:.9}26%{opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.chat-bg .cbw{display:none!important}}
