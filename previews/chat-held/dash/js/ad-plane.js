@@ -1,5 +1,5 @@
 /* GENERATED copy of rebella moderation/js/ad-plane.js (tools/sync_dash_header.py): shared header/footer, chat-page scope. */
-/* PREVIEW ONLY (simmie-chat/previews): Ask Dad paper airplane on a tilted 3D orbit.
+/* PREVIEW ONLY (simmie-chat/previews): Ask Dad ROCKET (was a paper airplane; Danny 24 Oct 10:40-10:41 AWST: rocket, 15% larger) on a tilted 3D orbit.
    - Path: ellipse rx = R + 9 (R = half the button width; R + 8 on the chat key), ry = 0.32 rx, tilted -18deg (flatter on the wide chat key).
    - Depth: far half (top of the ellipse) sits BEHIND the button (z swap at the two end points, where the path is outside the
      button), dimmed and a touch blurred; near half sits IN FRONT with a soft shadow. Scale 0.78 far -> 1.0 near, opacity 0.55 -> 1.
@@ -14,10 +14,13 @@
 (function(){
   "use strict";
   var SVGNS = "http://www.w3.org/2000/svg";
-  var PLANE = '<svg viewBox="-8 -8 16 16" aria-hidden="true" focusable="false">' +
-    '<polygon points="7,0 -6,-6 -3.2,0" stroke-width="1" stroke-linejoin="round" style="fill:var(--tc-13);stroke:var(--tc-23)"/>' +   // far wing
-    '<polygon points="7,0 -3.2,0 -6,6.2" stroke-width="1" stroke-linejoin="round" style="fill:var(--tc-2);stroke:var(--tc-23)"/>' +   // top (near) wing
-    '<polygon points="7,0 -3.2,0 -4.6,2.2" stroke-width=".6" stroke-linejoin="round" style="fill:var(--tc-4);stroke:var(--tc-23)"/>' + // keel / fold
+  var PLANE = '<svg viewBox="-8 -8 16 16" aria-hidden="true" focusable="false">' +   // ROCKET (Danny 24 Oct 10:40 AWST: the plane read as a fly); nose at +x like the plane
+    '<polygon points="-4.7,-1.5 -7.9,0 -4.7,1.5" stroke-width=".7" stroke-linejoin="round" fill="#F2A541" stroke="#24292E"/>' +   // exhaust flame
+    '<polygon points="-1.4,-2.6 -5.6,-5.8 -4.8,-1.9" stroke-width="1" stroke-linejoin="round" fill="#D6ECEF" stroke="#24292E"/>' +   // upper fin
+    '<polygon points="-1.4,2.6 -5.6,5.8 -4.8,1.9" stroke-width="1" stroke-linejoin="round" fill="#D6ECEF" stroke="#24292E"/>' +   // lower fin
+    '<path d="M7,0C5.6,-2.4 2.4,-3.1 -0.8,-3.1L-4.8,-2.3L-4.8,2.3L-0.8,3.1C2.4,3.1 5.6,2.4 7,0Z" stroke-width="1" stroke-linejoin="round" fill="#F6EBD9" stroke="#24292E"/>' +   // body
+    '<path d="M7,0C6.3,-1.3 5.2,-2.2 3.9,-2.7L3.9,2.7C5.2,2.2 6.3,1.3 7,0Z" stroke-width=".6" stroke-linejoin="round" fill="#0A3F4C" stroke="#24292E"/>' +   // nose cone
+    '<circle cx="0.9" cy="0" r="1.35" stroke-width=".7" fill="#D6ECEF" stroke="#24292E"/>' +   // window
     '</svg>';
   var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
   var DOTS = 4, D2R = Math.PI / 180;
@@ -93,7 +96,7 @@
   function restyle(it){
     var cs = getComputedStyle(it.btn), fixed = cs.position === "fixed", z = parseInt(cs.zIndex, 10); if(isNaN(z)) z = 2;
     var small = it.btn.offsetHeight > 0 && it.btn.offsetHeight < 30;   // chat key (17px tall) vs the 43px dashboard circle
-    if(small !== it.small){ it.small = small; it.p.style.setProperty("--adp-s", small ? "12px" : "15px"); }
+    if(small !== it.small){ it.small = small; it.p.style.setProperty("--adp-s", small ? "13.8px" : "17.25px"); }
     it.vis = cs.visibility !== "hidden" && (fixed || it.btn.offsetParent !== null);
     if(fixed !== it.fixed){ it.fixed = fixed; it.wrap.classList.toggle("is-fixed", fixed); }
     if(z - 1 !== it.zBack){ it.zBack = z - 1; it.zFront = z + 1; it.near = null; }

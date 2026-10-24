@@ -4,7 +4,7 @@ html.adp-on .ad-orbit>.ad-sat{visibility:hidden}
 html.adp-on .ad-key{z-index:2}                      /* chat preview: give the key a level the plane can sit under / over */
 .adp{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:1}
 .adp.is-fixed{position:fixed}
-.adp-p{position:absolute;left:0;top:0;width:var(--adp-s,15px);height:var(--adp-s,15px);margin:calc(var(--adp-s,15px) / -2) 0 0 calc(var(--adp-s,15px) / -2);
+.adp-p{position:absolute;left:0;top:0;width:var(--adp-s,17.25px);height:var(--adp-s,17.25px);margin:calc(var(--adp-s,17.25px) / -2) 0 0 calc(var(--adp-s,17.25px) / -2);
   will-change:transform,opacity;transition:filter .2s linear}
 .adp-p svg{display:block;width:100%;height:100%;overflow:visible}
 .adp.far .adp-p{filter:brightness(.78) blur(.35px)}
