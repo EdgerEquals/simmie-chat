@@ -83,3 +83,12 @@ html[data-term-phase="quiet"] .tstat .ts-tel{color:#5E7A66;opacity:.6}
 html[data-term-phase="quiet"] .tstat .ts-tel span{animation:none}
 body.paused .tstat .ts-tel span{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.tstat .ts-tel span{animation:none!important}}
+/* t655u/t656u (Danny 13:36 AWST 24 Oct): both cursors wave greeny-blue from ONE shared clock: a registered --cur-col animated on :root
+   (PHI^4 = 6.854 s base, pump-scaled like every CSS animation). Pill cursor and footer cursor both read var(--cur-col), so they are the
+   same colour at every moment. Cursors never go red any more (replaces t639u); red stays only on the 'live' word. Quiet: dimmed. */
+@property --cur-col{syntax:'<color>';inherits:true;initial-value:#00FF41}
+:root{animation:curWave 6.854s linear infinite}
+@keyframes curWave{0%,100%{--cur-col:#00FF41}25%{--cur-col:#00E5A8}50%{--cur-col:#00D4FF}75%{--cur-col:#39FF14}}
+.foot .tin .blk,html[data-term-status="live"] .foot .tin .blk,.tstat .ts-cur,html[data-term-phase="live"] .tstat .ts-cur{background:var(--cur-col);box-shadow:0 0 4px color-mix(in srgb,var(--cur-col) 60%,transparent)}
+html[data-term-status="quiet"] .foot .tin .blk,html[data-term-phase="quiet"] .tstat .ts-cur{background:color-mix(in srgb,var(--cur-col) 35%,#1A2420);box-shadow:none}
+@media(prefers-reduced-motion:reduce){:root{animation:none}}
