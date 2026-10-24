@@ -60,3 +60,9 @@ html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:40px;wid
 #screen-chat.askdad-up .dash-head{order:0}
 #screen-chat.askdad-up #chat-foot{order:1}
 #screen-chat.askdad-up #log{order:2}
+/* 24 Oct 2026 14:20 AWST (Danny, t668u, live): the bonnie> input sits on the chat's light input box (#FFFDFB), where the terminal
+   mint #C8EBD5 (--hz-green / --tc-51) read at 1.27:1. Typed text, caret and placeholder use the same mint green darkened
+   (hue 142, same saturation, lightness 85% -> 28%): #26693F = 6.52:1 (WCAG AA). Input only; palette variables unchanged.
+   !important on caret-color only, to beat the inline caret-color on #tty-in. */
+html #app #screen-chat .tty-form:not([data-mode="key"]) .tty-in{color:#26693F;caret-color:#26693F!important}
+html #app #screen-chat .tty-form:not([data-mode="key"]) .tty-in::placeholder{color:#26693F}
