@@ -36,7 +36,7 @@
 .q-head .qh-dj .qh-c{padding-top:.55rem}
 .q-head .qh-mast .qh-c{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.4rem 1rem;padding-top:.5rem;padding-bottom:.55rem}
 .q-head .dh-brand{display:flex;align-items:center;min-width:0}
-.q-head .dad-mark{flex:0 0 auto;width:32px;height:32px;margin-right:.6rem;display:block;box-sizing:content-box;padding:3px;background:#0A3F4C;border:1px solid #0F5C6E;border-radius:9px}
+.q-head .dad-mark{flex:0 0 auto;width:32px;height:32px;margin-right:.6rem;display:block;box-sizing:content-box;padding:3px;background:#000000;border:1px solid #143A57;border-radius:9px}/* Dad mark tile in his command-centre palette (Danny t680u 24 Oct): was bg #0A3F4C, border #0F5C6E */
 .q-head .dh-title{font-family:var(--f-serif,"Lora",Georgia,serif);font-weight:500;font-size:1.2rem;line-height:1.2;color:#D6ECEF;letter-spacing:.2px}
 .q-head .dh-pill{font-family:var(--f-hand,"Gochi Hand",cursive);text-transform:uppercase;letter-spacing:2px;background:#F2A541;color:#24292E;
   padding:.2rem .7rem .1rem;border-radius:999px;font-size:.9rem;line-height:1.2;margin-left:.65rem;white-space:nowrap;box-shadow:0 0 0 1px #0A3F4C}
