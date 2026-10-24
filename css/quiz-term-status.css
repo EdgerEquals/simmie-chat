@@ -69,3 +69,17 @@ body.paused .tstat .ts-txt,body.paused .tstat .ts-cur{animation-play-state:pause
 /* t653u (Danny 13:35 AWST 24 Oct): clearer matrix-green border; dimmed in quiet. */
 .tick .tstat{box-shadow:inset 0 0 0 1px rgba(0,255,65,.78),0 0 4px rgba(0,255,65,.22)}
 html[data-term-phase="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px rgba(0,255,65,.28)}
+/* t654u (Danny 13:35 AWST 24 Oct): wider pill + scrolling telemetry readout after the word/cursor.
+   Portrait (<=480px): pill ~3x (fixed 210px). Landscape/wider: fixed 172px so the middle ticker keeps most of the row.
+   Readout = existing page signals only (Rebella link check result + latency from its own fetch's Resource Timing entry, LINK light,
+   navigator.onLine, AWST clock). Scroll PHI^6 = 17.94 s per loop (CSS, pump-scaled), edge-faded. Quiet: dim static. */
+.tick .tstat{box-sizing:border-box;flex:0 0 auto;width:172px;overflow:hidden}
+@media(max-width:480px){.tick .tstat{width:210px}}
+.tstat .ts-tel{flex:1 1 0;min-width:0;overflow:hidden;white-space:nowrap;color:var(--mx-g);opacity:.8;font-size:.92em;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 88%,transparent)}
+.tstat .ts-tel span{display:inline-block;padding-left:4px;animation:tsTel 17.944s linear infinite}
+@keyframes tsTel{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+html[data-term-phase="quiet"] .tstat .ts-tel{color:#5E7A66;opacity:.6}
+html[data-term-phase="quiet"] .tstat .ts-tel span{animation:none}
+body.paused .tstat .ts-tel span{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.tstat .ts-tel span{animation:none!important}}

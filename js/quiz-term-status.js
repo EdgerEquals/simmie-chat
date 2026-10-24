@@ -15,8 +15,9 @@
   var SEQ=[['cursor',2*B],['status',6*B],['cursor',2*B],['live',6*B]], CYC=16*B; // t651u: every phase a whole number of footer blinks
   var root=document.documentElement, RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
   function rate(){ try{ var r=window.RatioPump&&window.RatioPump.rate(); return r>0?r:1; }catch(e){ return 1; } }
-  var w=document.querySelector('#tstat .ts-w'), txt, cur;
-  if(w){ txt=document.createElement('span'); txt.className='ts-txt'; cur=document.createElement('i'); cur.className='ts-cur'; w.appendChild(txt); w.appendChild(cur); }
+  var w=document.querySelector('#tstat .ts-w'), txt, cur, tel, lat=null, telTxt='';
+  if(w){ txt=document.createElement('span'); txt.className='ts-txt'; cur=document.createElement('i'); cur.className='ts-cur'; w.appendChild(txt); w.appendChild(cur);
+    tel=document.createElement('span'); tel.className='ts-tel'; tel.innerHTML='<span></span>'; w.parentNode.appendChild(tel); }
   var idx=1, left=SEQ[1][1], phase=null, word='status', last=Date.now();
   function footAnim(){ var b=document.querySelector('.foot .tin .blk')||document.querySelector('.tin .blk'); if(!b||!b.getAnimations) return null;
     var l=b.getAnimations(); for(var i=0;i<l.length;i++) if(l[i].animationName==='cblink') return l[i]; return null; }
@@ -31,6 +32,7 @@
     if(ph===phase) return; phase=ph; root.setAttribute('data-term-phase',ph);
     if(txt){ txt.classList.remove('ts-go'); txt.textContent= ph==='status'?'status': ph==='live'?'live': ph==='quiet'?'away':''; void txt.offsetWidth; if(ph==='status'||ph==='live') txt.classList.add('ts-go'); }
     var st= ph==='cursor'?word:ph; if(ph==='status'||ph==='live') word=ph;
+    try{ telemetry(); }catch(e){}
     if(root.getAttribute('data-term-status')!==st){ root.setAttribute('data-term-status',st);
       try{ document.dispatchEvent(new CustomEvent('termstatus:change',{detail:{state:st,phase:ph}})); }catch(e){} }
   }
@@ -48,6 +50,16 @@
     if(left<=0){ setVars(); idx=(idx+1)%SEQ.length; left=SEQ[idx][1]; }
     show(SEQ[idx][0]);
   }
+  // t654u telemetry: existing signals only, no new requests. Latency from the page's own Rebella check fetch (Resource Timing).
+  try{ new PerformanceObserver(function(l){ l.getEntries().forEach(function(e){ if(/edgerequals\.github\.io\/rebella\/(\?|$)/.test(e.name)) { lat=Math.round(e.duration); telemetry(); } }); }).observe({type:'resource',buffered:true}); }catch(e){}
+  function awst(){ try{ return new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Australia/Perth'})+' AWST'; }catch(e){ return ''; } }
+  function telemetry(){ if(!tel) return; var b=window.SIM_BEACON, on=navigator.onLine!==false, lk=document.getElementById('vLink'), r;
+    var bs=b&&b.state==='down'?'rebella down':b&&b.state==='live'?('rebella up'+(lat!=null?' '+lat+'ms':'')):'rebella checking';
+    var ls='link '+(lk&&/OFF/i.test(lk.textContent)?'off':'ok');
+    if(phase==='quiet') r=(b&&b.state==='down'?'link down':ls)+' \u00b7 '+(on?'online':'offline')+' :(';
+    else r=bs+' \u00b7 '+ls+' \u00b7 '+(on?'online':'offline')+' \u00b7 '+awst()+' \u00b7 ';
+    if(r===telTxt) return; telTxt=r; tel.firstChild.textContent= phase==='quiet'||RM.matches ? r : r+r; }
+  setInterval(telemetry,1000);
   setVars(); show(isLive()?'status':'quiet');
   document.addEventListener('ratiopump:change',setVars);
   document.addEventListener('visibilitychange',function(){ last=Date.now(); });
