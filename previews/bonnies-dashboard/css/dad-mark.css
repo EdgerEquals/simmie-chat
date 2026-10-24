@@ -1,4 +1,0 @@
-/* PREVIEW: Dad's world equals mark in the dashboard preview header, left of the title. 32 px, decorative.
-   Doesn't touch Ask Dad, the lock, the landscape layout or the header lock-in-place. */
-#app .brand{align-items:center}
-#app .brand .dad-mark{flex:0 0 auto;width:32px;height:32px;margin-right:.55rem;display:block}

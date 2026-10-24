@@ -1,8 +1,0 @@
-{
- "version": "c195fb28fe436ef2",
- "built": "2026-10-24 11:14:42 AWST",
- "source_commit": "4cd618d",
- "source_branch": "chat-dashfunc",
- "source_dirty": false,
- "note": "qheld_sync: rebuilt from the held questionnaire work; page reloads when version changes"
-}

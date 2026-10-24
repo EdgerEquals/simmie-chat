@@ -1,19 +1,6 @@
-previews/chat/index.html :: style:css/command-centre.css
-# Danny 02:02 AWST: dad-mark specimen heading renamed Emerald option -> Sapphire option (green -> sapphire swap)
-previews/dad-mark/index.html :: h2:Emerald option: Matrix-style emerald top bar (instead of the forest-looking teal
 # Danny 02:50 AWST 24 Oct: questionnaire header replaced by the dashboard-structure header in the Simmie chat palette (supersedes Dad-palette header 53b7cda); ticker moved into it as a div (no nested header)
 questionnaire-preview.html :: landmark:header
 questionnaire-preview.html :: style:previews/shared/dad-head-quiz.css
-# Danny 08:54 AWST 24 Oct: questionnaire-held preview header loses the "Questions for Bonnie" card row (preview only)
-previews/questionnaire-held/index.html :: landmark:header
-# Danny 11:11 AWST 24 Oct: questionnaire-held preview loses the 'turn your volume up' note and Bonnie's sounds layer (preview only)
-previews/questionnaire-held/index.html :: id:vol-sound
-previews/questionnaire-held/index.html :: landmark:aside
-previews/questionnaire-held/index.html :: script:previews/shared/bonnie-sound-quiz.js
-previews/questionnaire-held/index.html :: script:previews/shared/bonnie-sound.js
-previews/questionnaire-held/index.html :: style:previews/shared/bonnie-sound.css
-# approved by Danny 2026-10-24 11:26: dashboard-held preview header loses Dad's world mark (img.dad-mark + css/dad-mark.css; preview only, live /moderation/ untouched)
-previews/dashboard-held/index.html :: style:css/dad-mark.css
 # approved by Danny 12:20 AWST 24 Oct (t594u): live chat footer message box + Send removed; Bonnie types in the simmie> terminal (Enter sends via js/app.js, same encrypted path)
 index.html :: button:send-btn
 index.html :: id:msg
@@ -32,3 +19,20 @@ questionnaire-preview.html :: script:previews/shared/bonnie-sound.js
 questionnaire-preview.html :: script:previews/shared/bonnie-sound-quiz.js
 questionnaire-preview.html :: style:previews/shared/bonnie-sound.css
 questionnaire-preview.html :: id:fwx
+# approved by Danny 13:08 AWST 24 Oct (t631u): all preview pages and the whole previews/ folder deleted (live-only from now on); the questionnaire's still-used preview assets moved to css/ + js/ (Dad mark -> existing identical dash/img/dad-mark.svg); retired backdrop test page moderation-bg-preview.html deleted
+moderation-bg-preview.html
+previews/bonnies-dashboard/index.html
+previews/chat-held/index.html
+previews/chat/index.html
+previews/dad-mark/index.html
+previews/dashboard-held/index.html
+previews/questionnaire-held/index.html
+previews/rebella-bars/article.html
+previews/rebella-bars/index.html
+previews/rebella-held/index.html
+previews/rebella-sticky/index.html
+questionnaire-preview.html :: script:previews/shared/dad-autodj-quiz.js
+questionnaire-preview.html :: style:previews/shared/command-centre-quiz.css
+questionnaire-preview.html :: style:previews/shared/command-centre.css
+questionnaire-preview.html :: style:previews/shared/dad-dj-quiz.css
+questionnaire-preview.html :: style:previews/shared/quiz-foot-lock.css
