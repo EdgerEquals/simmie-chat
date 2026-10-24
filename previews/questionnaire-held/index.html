@@ -472,7 +472,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="previews/shared/command-centre.css?v=2">
 <link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=3">
 <link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=2">
-<link rel="stylesheet" href="previews/questionnaire-held/dad-head.css?v=adcf3e5e"><!-- Dad's palette (Danny 24 Oct 08:38 AWST: the questionnaire is from Dad, so it always uses his palette) -->
+<link rel="stylesheet" href="previews/questionnaire-held/dad-head.css?v=5f3b49d0"><!-- Dad's palette (Danny 24 Oct 08:38 AWST: the questionnaire is from Dad, so it always uses his palette) -->
 <link rel="stylesheet" href="previews/shared/quiz-foot-lock.css?v=1">
 <link rel="stylesheet" href="previews/questionnaire-held/tide-swell.css?v=1"><!-- tide + swell after the critters (Danny 24 Oct 2026 03:43 AWST, HELD) -->
 <style>
@@ -1059,7 +1059,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
    version.json (same origin, cache-busted, no-store); when the box's qheld_sync has rebuilt the preview from newer held work,
    reload onto the new version. Never while a text field is focused or typed in during the last 20 s (waits, then reloads).
    Nothing else is contacted: one same-origin GET of a static file. */
-(function(){var V='05b995e32e0c4f2c',U='previews/questionnaire-held/version.json',last=0,pend=null;
+(function(){var V='7594b1d5cb96f635',U='previews/questionnaire-held/version.json',last=0,pend=null;
 function busy(){var a=document.activeElement,t=a&&a.tagName;return !!(a&&(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||a.isContentEditable))||Date.now()-last<20000;}
 addEventListener('input',function(){last=Date.now();},true);addEventListener('keydown',function(){last=Date.now();},true);
 function go(nv){pend=nv;if(busy())return;var k='qheld-reload-'+nv,n=0;try{n=+(sessionStorage.getItem(k)||0);if(n>=3)return;sessionStorage.setItem(k,n+1);}catch(e){}

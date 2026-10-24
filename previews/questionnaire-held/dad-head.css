@@ -55,3 +55,10 @@
 /* Start button ~17% smaller (Danny 24 Oct 2026 08:48 AWST: "too big"); still the primary action, colours/shadow unchanged.
    was .big font-size 1.5rem, padding .9rem 2.2rem (from the questionnaire's own CSS) */
 #go.big{font-size:1.25rem;padding:.75rem 1.8rem}
+/* Logo levelled + enlarged (PREVIEW ONLY; Danny 24 Oct 2026 10:27 AWST). Bonnie's hand-lettered logo slopes downhill: measured
+   x-height top line (e/e/a tops, robust fit in headless Chrome) = 5.7deg clockwise, so rotate 5.7deg anti-clockwise about its centre.
+   ~20% bigger: 38 -> 46px tall (phones 32 -> 38px, short landscape 30 -> 36px); lifted 2-3px so the turned R stem clears the bar's bottom edge; width = height x 1810/893 so the box hugs the
+   ink and the rotation centre is the ink centre (was a 97px box with the logo left-aligned in it). */
+.q-head .qh-logo{height:46px;width:93px;max-width:none;transform:translateY(-3px) rotate(-5.7deg);transform-origin:50% 50%}
+@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{height:36px;width:73px;transform:translateY(-2px) rotate(-5.7deg)}}
+@media(max-width:480px){.q-head .qh-logo{height:38px;width:77px;transform:translateY(-2px) rotate(-5.7deg)}}
