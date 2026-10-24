@@ -43,3 +43,16 @@ html[data-term-status="live"] .foot .tin .blk{background:var(--mx-r);box-shadow:
 
 body.paused .tstat .ts-dot,body.paused .tstat .ts-s i{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.tstat .ts-dot,.tstat .ts-s i{animation:none!important}.tstat .ts-w b,.foot .tin .blk{transition:none!important}}
+
+/* ---- t648u (Danny 13:30 AWST 24 Oct): grouped pulses (status x3 green, live x3 red, PHI^2 / pump each) + quiet "away" when not live ---- */
+.tstat .ts-l{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite;text-shadow:0 0 3px rgba(255,0,51,.35)}
+.tstat .ts-s i{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
+html[data-term-status="status"] .tstat .ts-s i,html[data-term-status="live"] .tstat .ts-l{animation-delay:0s}
+.tstat .ts-q{opacity:0;color:#5E7A66}
+html[data-term-status="quiet"] .tstat .ts-s,html[data-term-status="quiet"] .tstat .ts-l{opacity:0}
+html[data-term-status="quiet"] .tstat .ts-q{opacity:.85}
+html[data-term-status="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px #1E2A33}
+html[data-term-status="quiet"] .tstat .ts-dot{animation:none;background:#4F6168;box-shadow:none;transform:scale(.8);opacity:.6}
+html[data-term-status="quiet"] .foot .tin .blk{background:#4F6168;box-shadow:none}
+body.paused .tstat .ts-l{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.tstat .ts-l{animation:none!important}}
