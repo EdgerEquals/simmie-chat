@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Bonnie's Dashboard (held header/footer preview, sample data)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,700;1,400&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
+<link rel="stylesheet" href="css/mod.css?v=9">
+<link rel="stylesheet" href="css/hud.css?v=9">
+<link rel="stylesheet" href="css/night.css?v=9">
+<link rel="stylesheet" href="css/play.css?v=9">
+<link rel="stylesheet" href="css/inbox-dash.css?v=9">
+<link rel="stylesheet" href="css/dad-mark.css?v=9">
+<link rel="stylesheet" href="css/ad-plane.css?v=9">
+<link rel="stylesheet" href="css/bonnie-music.css?v=9">
+<link rel="stylesheet" href="css/bonnie-sound.css?v=9">
+<link rel="stylesheet" href="css/command-centre.css?v=9">
+<link rel="stylesheet" href="css/music-glow.css?v=9">
+<link rel="stylesheet" href="css/sticky-head.css?v=9">
+<link rel="stylesheet" href="css/agedial.css?v=3">
+<link rel="stylesheet" href="css/dash-foot-lock.css?v=2">
+<link rel="stylesheet" href="css/tide-swell.css?v=1">
+<link rel="stylesheet" href="css/theme-command-centre.css?v=10">
+<script src="js/phi-timing.js?v=9"></script>
+<script src="js/mlog.js?v=9" defer></script>
+<script src="js/hud.js?v=10" defer></script>
+<script src="js/talk.js?v=10" defer></script>
+<script src="js/interludes.js?v=9" defer></script>
+<script src="js/play.js?v=10" defer></script>
+<script src="js/app.js?v=10" defer></script>
+<script src="js/inbox-dash.js?v=9" data-inbox-mode="preview" data-mock="data/inbox-mock.json" defer></script>
+<script src="js/ad-plane.js?v=9" defer></script>
+<!-- music button: generated Web Audio music (Danny 03:20 AWST 24 Oct). The held YouTube player is kept unloaded in js/bonnie-music-youtube.js (restore note there; from 0f3607d). -->
+<script src="js/bonnie-music.js?v=10" data-page="dash" defer></script>
+<script src="js/bonnie-sound.js?v=10" data-page="dash" defer></script>
+<script src="js/music-glow.js?v=9" defer></script>
+<script src="js/sticky-head.js?v=9" defer></script>
+<script src="js/agedial.js?v=2" defer></script>
+<script src="js/tide-swell.js?v=1" defer></script>
+</head>
+<body>
+
+<!-- PREVIEW (simmie-chat/previews/dashboard-held): the held header/footer work from EdgerEquals/rebella branch rebella-dashheader 69b0779.
+     No passcode gate, no real queue, no keys: sample cards only, and nothing is saved or sent. -->
+<p class="preview-band" role="note">PREVIEW — sample data, nothing sent</p>
+
+<!-- Dashboard (hidden until unlocked) -->
+<div id="app">
+  <!-- background layers (behind everything; decorative) -->
+  <div class="wx-bg" aria-hidden="true">
+    <video id="wx-bg-video" class="wx-bg-video" muted loop playsinline autoplay preload="none" poster="media/space-loop-poster.webp" disablepictureinpicture tabindex="-1"></video>
+    <div class="wx-code"></div>
+  </div>
+  <!-- sticky black header (css/sticky-head.css, js/sticky-head.js) -->
+  <div class="dash-head" id="dash-head">
+  <div class="topbar"><div class="container">
+    <!-- Rebella logo (the public site's header wordmark in its black-background version, ../img/rebella-wordmark-dark.svg; not a link here, so Bonnie stays in the dashboard). Danny 24 Oct 2026 02:31 AWST: it takes the tagline's old spot; the tagline now sits in the header's bottom row beside Dad's mark (02:59). -->
+    <img class="tb-logo" src="img/rebella-wordmark-dark.svg" alt="Rebella" width="121" height="47" decoding="async">
+    <span class="tb-right"><button id="lock" class="lockbtn" type="button" aria-label="Lock dashboard">&#128274; Lock</button>
+    <!-- Ask Dad: amber circle pinned top-right of the header, Lock just to its left -->
+    <button id="ask-dad" class="ask-dad" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="dad-panel" aria-label="Ask Dad"><span class="ad-orbit" aria-hidden="true"><span class="ad-sat">🛰️</span></span><span class="ad-w" aria-hidden="true">Ask</span><span class="ad-w" aria-hidden="true">Dad</span></button></span>
+  </div></div>
+  <!-- weather chip + age-linked fun-fact ticker -->
+  <div class="wx-hud"><div id="il-head" class="il-lane il-head" aria-hidden="true"></div><div class="container">
+    <div id="wx-ticker" class="wx-ticker" role="marquee" aria-label="Fun facts"><div id="wx-tick-track" class="wx-tick-track"></div></div>
+    <span id="wx-seq" class="wx-seq" aria-hidden="true"></span><span id="wx-chip" class="wx-chip" role="img" hidden><span class="wx-text"></span></span>
+  </div></div>
+  <header class="masthead"><div class="container">
+    <div class="brand">
+      <img class="dad-mark" src="img/dad-mark.svg?v=2" width="32" height="32" alt="" title="Dad's world mark">
+      <!-- tagline: in the header's bottom row beside Dad's mark (Danny 24 Oct 2026 02:59 AWST; its own line under the header from 517e809 removed) -->
+      <span class="tagline mh-tagline">Keep Rebella safe, fun and cool</span>
+      <!-- Removed "for now" (Danny 24 Oct 2026 02:31 AWST): the small "rebella" wordmark logo (div.wordmark.small) and the
+           "Bonnie's Dashboard" pill (span.mod-pill). Restore both from commit 8a7e6d7 (moderation/index.html, .masthead .brand). -->
+    </div>
+    <!-- Removed (Danny 24 Oct 2026 02:31 AWST): the "Export decisions (JSON)" button #export and the "Reset all" button #reset
+         with its confirm strip (#reset-strip, #reset-q, #reset-yes, #reset-no, #reset-msg) and their handlers in js/app.js.
+         Restore from commit 8a7e6d7 (div.head-actions). -->
+  </div></header>
+  <div class="ad-pin"><div class="container">
+  <!-- Age dial (Danny 24 Oct 2026 02:51-02:54 AWST): half height, pinned inside the sticky header, pale teal; - / + change the age on the
+       spot (10-16, one step per press), the queue + fun facts follow it, and the change is sent to Simmie (js/agedial.js, js/app.js). -->
+  <section class="agedial" id="agedial" aria-labelledby="agedial-label" data-age="13">
+    <div class="ad-row">
+      <button class="ad-step" id="ad-dn" type="button" aria-label="Younger (age down one)" aria-controls="agedial">&minus;</button><span class="ad-label" id="agedial-label" aria-live="polite">Age dial: <strong id="ad-age">13</strong></span><button class="ad-step" id="ad-up" type="button" aria-label="Older (age up one)" aria-controls="agedial">+</button>
+    </div>
+    <div class="ad-vis"><p class="ad-note">Content is curated for a reader of this age (10&ndash;16).</p><svg class="ad-family" id="ad-family" viewBox="0 0 86 64" aria-hidden="true" focusable="false"><ellipse class="fm-floor" cx="43" cy="62.6" rx="40" ry="1.4"/><g id="ad-dad" class="fm-p"><path class="fm-arm" d="M21.5 21.5Q28 20 31.5 27Q33 31 33.5 34"/><path class="fm-arm" d="M8.2 21.5Q5 30 5.8 39.5"/><path d="M10.4 62H14.4Q15.2 50 14.8 40H8.4Q8.8 52 10.4 62Z"/><path d="M19.6 62H15.6Q14.8 50 15.2 40H21.6Q21.2 52 19.6 62Z"/><path d="M7 23.5C7 19 10 17.2 15 17.2C20 17.2 23 19 23 23.5L22 41Q15 43 8 41Z"/><rect x="13" y="14" width="4" height="5" rx="1.5" transform="translate(0.9 0)"/><ellipse cx="15" cy="9.6" rx="5.6" ry="6.6" transform="translate(0.9 0)"/><path class="fm-hair" transform="translate(0.9 0)" d="M9.3 9.5Q9 3 15 3Q20.6 3 20.8 9Q19 6.2 16 6.6Q11.5 6.4 9.3 9.5Z"/></g><g id="ad-mum" class="fm-p"><path class="fm-hair" d="M63.2 9Q62.6 3 69 3Q75.4 3 74.8 9Q76.6 16 75.8 22Q69 23.5 62.2 22Q61.4 16 63.2 9Z"/><path class="fm-arm" d="M63 22Q57 20.5 54 27Q52.5 31 52 34"/><path class="fm-arm" d="M75.2 22Q78.5 30 77.6 39"/><path d="M64.6 62H68Q68.4 54 68 46H64Q64 54 64.6 62Z"/><path d="M73.4 62H70Q69.6 54 70 46H74Q74 54 73.4 62Z"/><path d="M62.4 23.5C62.4 19.5 65 17.8 69 17.8C73 17.8 75.6 19.5 75.6 23.5Q75 30 74 33Q78 40 79 47Q69 49 59 47Q60 40 64 33Q63 30 62.4 23.5Z"/><rect x="67.2" y="14" width="3.6" height="5" rx="1.5" transform="translate(-0.9 0)"/><ellipse cx="69" cy="10" rx="5.1" ry="6.2" transform="translate(-0.9 0)"/><path class="fm-hair" transform="translate(-0.9 0)" d="M63.7 9.2Q64 3.6 69.5 3.5Q74.6 3.8 74.3 9.4Q71 5.6 67.5 6.8Q65 7.6 63.7 9.2Z"/></g><g id="ad-kid-b" class="fm-k"><path class="fm-arm" d="M26.7 21.8Q23.8 30 24.6 39"/><path class="fm-arm" d="M39.3 21.8Q42 31 44.6 38.6"/><circle cx="44.6" cy="38.8" r="2.1"/><path d="M28.6 62H32.4Q33.1 50 32.8 40H27Q27.2 52 28.6 62Z"/><path d="M37.4 62H33.6Q32.9 50 33.2 40H39Q38.8 52 37.4 62Z"/><path d="M25.8 23.5C25.8 19.3 28.5 17.5 33 17.5C37.5 17.5 40.2 19.3 40.2 23.5L39.4 41Q33 42.6 26.6 41Z"/><rect x="31.1" y="14" width="3.8" height="5" rx="1.5" transform="translate(0.5 0)"/><ellipse cx="33" cy="10.3" rx="5.5" ry="6.4" transform="translate(0.5 0)"/><path class="fm-hair" transform="translate(0.5 0)" d="M27.2 10Q26.4 5 29.4 3.9L30.4 3.1L31.7 4L33.4 3L34.7 4L36.4 3.4L37 4.6Q39.6 5.6 38.9 10Q37.6 7 35 7.6L33.6 6.4L32 7.8L30.6 6.6Q28.4 7.6 27.2 10Z"/></g><g id="ad-kid-g" class="fm-k"><path class="fm-hair" d="M54.6 5.2Q60.6 4.6 61 11Q61.4 16.5 59 19.5Q59.6 14 57.6 11Q56.4 9 54.6 9Z"/><path class="fm-arm" d="M45.2 22Q42 31 39.4 38.6"/><circle cx="39.4" cy="38.8" r="2.1"/><path class="fm-arm" d="M56.8 22Q60 30 59 38.5"/><path d="M46.8 62H50Q50.4 53 50 44H46.2Q46.2 53 46.8 62Z"/><path d="M55.2 62H52Q51.6 53 52 44H55.8Q55.8 53 55.2 62Z"/><path d="M44.8 23.5C44.8 19.6 47.2 17.8 51 17.8C54.8 17.8 57.2 19.6 57.2 23.5Q56.8 29 55.8 32Q59.4 38.5 60.2 45Q51 46.8 41.8 45Q42.6 38.5 46.2 32Q45.2 29 44.8 23.5Z"/><rect x="49.3" y="14" width="3.4" height="5" rx="1.5" transform="translate(-0.5 0)"/><ellipse cx="51" cy="9.6" rx="5.2" ry="6.6" transform="translate(-0.5 0)"/><path class="fm-hair" transform="translate(-0.5 0)" d="M45.6 9.4Q45.4 3 51.3 3Q56.8 3.2 56.4 9Q54 5.8 50.6 6.4Q47.4 7.2 45.6 9.4Z"/></g></svg>
+</div>
+  </section>
+  </div></div>
+  </div><!-- /dash-head -->
+
+  <main class="container" id="main">
+    <div class="notice dots-mustard">
+      <span class="example">Sample</span>
+      Held header + footer preview with invented sample cards, not Bonnie's real queue. <strong>Approve</strong> and <strong>Reject</strong> only change this page.
+    </div>
+    <p class="queue-meta" id="queue-meta"></p>
+
+    <nav class="tabs" role="tablist" aria-label="Filter queue">
+      <button role="tab" class="tab" data-filter="pending" aria-selected="true">Pending <span class="count" id="c-pending">0</span></button>
+      <button role="tab" class="tab" data-filter="approved" aria-selected="false">Approved <span class="count" id="c-approved">0</span></button>
+      <button role="tab" class="tab" data-filter="rejected" aria-selected="false">Rejected <span class="count" id="c-rejected">0</span></button>
+      <button role="tab" class="tab" data-filter="all" aria-selected="false">All <span class="count" id="c-all">0</span></button>
+    </nav>
+
+    <div id="queue" class="queue" aria-live="polite"></div>
+    <p id="empty" class="empty hand" hidden>Nothing here. Nice work!</p>
+  </main>
+
+  <!-- footer: locked to the bottom of the screen in the lane just above the fixed bar (css/dash-foot-lock.css). The "Bonnie's Dashboard"
+       span was removed with the header text (Danny 24 Oct 2026 02:31 AWST); restore from commit 8a7e6d7. -->
+  <footer class="footer" id="app-foot"><div class="container">
+    <span>Preview: decisions are not saved or sent</span>
+  </div></footer>
+
+  <template id="biplane-tpl"><svg class="biplane" viewBox="0 0 48 30" width="64" height="40" aria-hidden="true" focusable="false">
+    <g stroke-width="1.2" stroke-linejoin="round" style="stroke:var(--tc-89)">
+      <rect x="9" y="3" width="28" height="4" rx="2" style="fill:var(--tc-16)"/>
+      <line x1="15" y1="7" x2="15" y2="17"/><line x1="31" y1="7" x2="31" y2="17"/><line x1="15" y1="7" x2="31" y2="17" stroke-width=".8"/>
+      <path d="M2 12 L8 9 L9 15 Z" style="fill:var(--tc-5)"/><path d="M1 8 L5 8 L8 13 L4 13 Z" style="fill:var(--tc-16)"/>
+      <path d="M6 13 Q22 8 38 11 Q41 14 38 17 Q22 19 6 15 Z" style="fill:var(--tc-88)"/>
+      <rect x="9" y="16" width="28" height="4" rx="2" style="fill:var(--tc-16)"/>
+      <circle cx="40" cy="14" r="2.6" style="fill:var(--tc-5)"/>
+      <line x1="20" y1="20" x2="18" y2="25"/><line x1="26" y1="20" x2="28" y2="25"/><circle cx="18" cy="26" r="2" style="fill:var(--tc-21)"/><circle cx="28" cy="26" r="2" style="fill:var(--tc-21)"/>
+      <circle cx="22" cy="12" r="1.6" stroke="none" style="fill:var(--tc-21)"/>
+    </g>
+    <g class="bp-prop"><rect x="42.2" y="6" width="1.6" height="16" rx=".8" opacity=".85" style="fill:var(--tc-92)"/></g>
+  </svg></template>
+  <!-- Ask Dad transmission window (the one pop-up; Esc or the close key dismisses it). Sending is OFF on live: it says "coming soon" (needs Danny's yes). -->
+  <section id="dad-panel" class="dad-panel" role="dialog" aria-modal="false" aria-labelledby="dad-title" hidden>
+    <div class="dp-head"><h2 id="dad-title" class="dp-title">transmit to Dad</h2><button id="dp-x" class="dp-x" type="button" aria-label="Close, don't send">×</button></div>
+    <form id="dp-form" class="dp-form" autocomplete="off">
+      <div class="dp-chips" role="group" aria-label="Quick messages">
+        <button type="button" class="dp-chip">Can we talk?</button><button type="button" class="dp-chip">Can you check something on my page?</button><button type="button" class="dp-chip">Just saying hi</button>
+      </div>
+      <label for="dp-text" class="sr-only">Message to Dad</label>
+      <textarea id="dp-text" class="dp-text" rows="2" maxlength="1200" placeholder="&gt; type to Dad…"></textarea>
+      <div id="dp-keyrow" class="dp-keyrow" hidden><label for="dp-key" class="dp-keylab">chat password$</label><input id="dp-key" class="dp-key" type="password" autocomplete="current-password" aria-describedby="dp-keyhelp"><span id="dp-keyhelp" class="sr-only">Same password as your chat page. Kept for this tab only.</span></div>
+      <div class="dp-foot"><span id="dp-status" class="dp-status" role="status" aria-live="polite"></span><button id="dp-send" class="dp-send" type="submit">Transmit</button></div>
+    </form>
+    <span class="dp-ripple" aria-hidden="true"></span><span class="dp-sat" aria-hidden="true">🛰️</span>
+  </section>
+
+  <!-- interlude lanes (decorative; animals every PHI^5 = 11.09 s, space every PHI^4.5 = 8.72 s; js/phi-timing.js) -->
+  <div id="il-foot" class="il-lane il-foot" aria-hidden="true"></div>
+
+  <!-- quiet fixed footer bar: Simmie terminal + control strip + weather -->
+  <div id="wx-foot" class="wx-foot" role="region" aria-label="Simmie and status">
+    <div id="tty" class="tty">
+      <div class="tty-bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span aria-hidden="true">simmie — tty</span><em id="tty-mlog" class="tty-mlog" aria-hidden="true"></em></div>
+      <div class="tty-body">
+        <span class="tty-cloudwrap"><span class="cl-orbit" aria-hidden="true"><span>🛰️</span></span><svg id="tty-cloud" class="tty-cloud" viewBox="0 0 196 172" aria-hidden="true" focusable="false"><defs><clipPath id="tty-cl"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></clipPath><linearGradient id="tty-sh" x1="0" x2="1"><stop offset="0" stop-opacity="0" style="stop-color:var(--tc-80)"/><stop offset=".5" stop-opacity=".35" style="stop-color:var(--tc-80)"/><stop offset="1" stop-opacity="0" style="stop-color:var(--tc-80)"/></linearGradient></defs><g class="cl-body"><g style="fill:var(--tc-210)"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></g><g clip-path="url(#tty-cl)"><rect class="cl-shine" x="-120" y="0" width="90" height="172" fill="url(#tty-sh)"/></g><g class="cl-eyes" style="fill:var(--tc-211)"><rect x="93.10" y="44.4" width="18" height="42" rx="9.0" transform="rotate(-27 102.1 65.4)"/><rect x="130.65" y="34.5" width="16.5" height="42" rx="8.25" transform="rotate(-27 138.9 55.5)"/></g></g></svg></span>
+        <button id="tty-open" class="tty-line" type="button" aria-label="Simmie says hello. Tap to talk to Simmie"><span class="tty-p">simmie&gt;</span> <span id="tty-out" class="tty-out"></span><span class="tty-hint" aria-hidden="true">tap to talk to Simmie</span></button>
+        <div id="tty-busy" class="tty-line tty-busy" hidden><span class="tty-p">simmie&gt;</span> <span id="tty-busy-text" class="tty-out"></span></div>
+        <form id="tty-form" class="tty-form" hidden autocomplete="off">
+          <label for="tty-in" id="tty-prompt" class="tty-p">simmie$</label>
+          <span class="tty-inwrap"><input id="tty-in" class="tty-in" type="text" maxlength="1500" spellcheck="true" enterkeyhint="send"><span class="tty-cursor" aria-hidden="true"></span></span>
+          <button id="tty-send" class="tty-send" type="submit">Send</button>
+          <button id="tty-x" class="tty-x" type="button" aria-label="Close talk to Simmie">×</button>
+        </form>
+        <span id="tty-measure" class="tty-measure" aria-hidden="true">0000000000</span>
+      </div>
+      <p id="tty-live" class="sr-only" aria-live="polite"></p>
+    </div>
+    <!-- footer row: portrait = display:contents (layout unchanged); short landscape = one horizontally scrollable row above the full-width terminal -->
+    <div id="ft-row" class="ft-row">
+    <div id="wx-mlog" class="wx-mlog" role="log" aria-label="Mission log" aria-live="off"></div>
+      <div class="wx-strip">
+        <span class="wx-light idle" data-light="queue" role="img" aria-label="QUEUE"><b></b><small><span class="lg">QUEUE</span><span class="sm">Q</span></small></span>
+        <span class="wx-light idle" data-light="fresh" role="img" aria-label="FRESH"><b></b><small><span class="lg">FRESH</span><span class="sm">F</span></small></span>
+        <span class="wx-light idle" data-light="link" role="img" aria-label="LINK"><b></b><small><span class="lg">LINK</span><span class="sm">L</span></small></span>
+        <svg class="wx-wave" viewBox="0 0 80 16" aria-hidden="true"><path d="M0 8 Q5 2 10 8 T20 8 T30 8 T40 8 T50 8 T60 8 T70 8 T80 8 T90 8 T100 8 T110 8 T120 8 T130 8 T140 8 T150 8 T160 8"/></svg>
+        <svg id="wx-gauge" class="wx-gauge" viewBox="0 0 32 18" role="img" aria-label="Decided"><path class="g-arc" d="M3 16 A13 13 0 0 1 29 16"/><line class="g-needle" x1="16" y1="16" x2="16" y2="5"/><circle cx="16" cy="16" r="1.8"/></svg>
+      </div>
+      <!-- weather left the footer (Danny 24 Oct 2026 03:15 AWST: weather in the header only): #wx-readout and the SKY light removed.
+           The strip below now carries animals and critters ordered by the Moon's phase (js/hud.js critters), scrolling on the phi clock. -->
+      <div id="wx-marquee" class="wx-marquee" aria-hidden="true"><div id="wx-mq-track" class="wx-mq-track"></div></div>
+      <!-- tide + swell (Danny 24 Oct 2026 03:43 AWST, HELD): today's tide off Fremantle + dolphins paced by the swell (js/tide-swell.js; Open-Meteo Marine, CC BY 4.0) -->
+      <span id="wx-tide" class="tsw" data-ts-key="rebella.dash.tide" hidden></span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+{
+ "mock": true,
+ "note": "MOCK DATA ONLY: invented items for the preview. No real messages, people or emails.",
+ "generated": 1792772978942,
+ "mail": [
+  {
+   "id": "cm-6faa97faa790",
+   "ts": 1792765778942,
+   "type": "contact-message",
+   "status": "approved-for-bonnie",
+   "safe_summary": "A Rebella reader wrote in. \"I loved the article about octopuses having three hearts. My little brother now wants one as a pet! Thanks Rebella.\""
+  },
+  {
+   "id": "ms-564f569dfd07",
+   "ts": 1792754978942,
+   "type": "music-submission",
+   "status": "approved-for-bonnie",
+   "safe_summary": "Salt Lake Static from Fremantle sent a track called 'Low Tide Radio'.",
+   "stage_name": "Salt Lake Static",
+   "region": "Fremantle",
+   "track_link": "https://freemusicarchive.org/music/example-artist/example-track/",
+   "track_title": "Low Tide Radio"
+  },
+  {
+   "id": "cm-7e8fbc780ba2",
+   "ts": 1792740578942,
+   "type": "contact-message",
+   "status": "approved-for-bonnie",
+   "safe_summary": "A Rebella reader wrote in. \"Could you do a page about how volcanoes work? I have a science project on them next term.\""
+  },
+  {
+   "id": "sc-659fe4162cab",
+   "ts": 1792700978942,
+   "type": "music-scout",
+   "status": "approved-for-bonnie",
+   "safe_summary": "Simmie found 'Margaret River Morning' by Quokka Choir (mock) (South West WA), CC BY 4.0.",
+   "stage_name": "Quokka Choir (mock)",
+   "region": "South West WA",
+   "track_link": "https://ccmixter.org/files/example/00000",
+   "track_title": "Margaret River Morning",
+   "licence": "CC BY 4.0",
+   "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+   "source": "ccMixter (mock)"
+  },
+  {
+   "id": "ms-41f8bf66a374",
+   "ts": 1792664978942,
+   "type": "music-submission",
+   "status": "replied",
+   "safe_summary": "Night Parrot from Pilbara WA sent a track called 'Red Dust'.",
+   "stage_name": "Night Parrot",
+   "region": "Pilbara WA",
+   "track_link": "https://exampleartist.bandcamp.com/track/red-dust",
+   "track_title": "Red Dust"
+  }
+ ],
+ "dad_list_counts": {
+  "total": 7,
+  "held_for_dad": 1,
+  "rejected": 1
+ },
+ "music": {
+  "featured": "mock-t2",
+  "tracks": [
+   {
+    "id": "mock-t1",
+    "title": "Low Tide Radio",
+    "artist": "Salt Lake Static",
+    "region": "Fremantle",
+    "licence": "CC BY 4.0",
+    "source": "FMA (mock)",
+    "state": "keep"
+   },
+   {
+    "id": "mock-t2",
+    "title": "Margaret River Morning",
+    "artist": "Quokka Choir (mock)",
+    "region": "South West WA",
+    "licence": "CC BY 4.0",
+    "source": "ccMixter (mock)",
+    "state": "featured"
+   },
+   {
+    "id": "mock-t3",
+    "title": "Red Dust",
+    "artist": "Night Parrot",
+    "region": "Pilbara WA",
+    "licence": "CC BY-SA 4.0",
+    "source": "Bandcamp (mock)",
+    "state": "new",
+    "from_submission": true
+   }
+  ]
+ }
+}

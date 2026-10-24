@@ -1,0 +1,44 @@
+/* Mail row + Music tab on Bonnie's Dashboard: the dashboard vibe (night palette vars from css/night.css, pink/teal,
+   Gochi Hand labels). Sits in the normal page flow between the notice and the tabs, so it can never overlap the fixed
+   header, the pinned Ask Dad, the landscape strip or the footer. Transitions are PHI^-1 = 0.618 s. */
+#app .ibx-mail{margin:0 0 1.1rem;border:2px solid var(--nt-line,var(--tc-89));border-radius:10px;background:var(--nt-panel,var(--tc-90));color:var(--nt-ink,var(--tc-85));overflow:hidden}
+#app .ibx-line{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:.55rem;width:100%;padding:.6rem .8rem;cursor:pointer;min-height:44px}
+#app .ibx-line:focus-visible{outline:3px solid var(--nt-amber,var(--tc-5));outline-offset:-3px}
+#app .ibx-ico{font-size:1.15rem;flex:none}
+#app .ibx-word{font-family:var(--f-hand,"Gochi Hand",cursive);text-transform:uppercase;letter-spacing:1.5px;font-weight:400;color:var(--nt-blush,var(--tc-16));font-size:1.1rem;flex:none}
+#app .ibx-count{flex:none;min-width:1.7em;text-align:center;font:700 .85rem/1.7 var(--f-body,sans-serif);border-radius:999px;background:var(--nt-panel2,var(--tc-86));color:var(--nt-soft,var(--tc-91))}
+#app .ibx-count.on{background:var(--nt-pink,var(--tc-18));color:var(--nt-plum,var(--tc-17))}
+#app .ibx-peek{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--nt-soft,var(--tc-91));font-size:.95rem}
+#app .ibx-chev{flex:none;color:var(--nt-line,var(--tc-89))}
+#app .ibx-list{border-top:2px dotted var(--nt-line,var(--tc-89));padding:.4rem .5rem .6rem}
+#app .ibx-mock{margin:.2rem .3rem .5rem;font-size:.85rem;color:var(--nt-butter,var(--tc-88))}
+#app .ibx-item{border-radius:8px;margin:.3rem 0;background:var(--nt-panel2,var(--tc-86));transition:background-color .618s}
+#app .ibx-item.done{opacity:.72}
+#app .ibx-head{all:unset;box-sizing:border-box;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"k w" "s s";gap:.15rem .6rem;width:100%;padding:.55rem .7rem;cursor:pointer}
+#app .ibx-head:focus-visible{outline:3px solid var(--nt-amber,var(--tc-5));outline-offset:-3px;border-radius:8px}
+#app .ibx-kind{grid-area:k;font-family:var(--f-hand,"Gochi Hand",cursive);text-transform:uppercase;letter-spacing:1.2px;font-size:.85rem;color:var(--nt-plum,var(--tc-17));background:var(--nt-lav,var(--tc-92));border-radius:999px;padding:.05rem .55rem;justify-self:start}
+#app .ibx-kind.k-music-submission{background:var(--nt-butter,var(--tc-88))}#app .ibx-kind.k-music-scout{background:var(--nt-mint,var(--tc-93))}
+#app .ibx-when{grid-area:w;justify-self:end;font-size:.8rem;color:var(--nt-soft,var(--tc-91))}
+#app .ibx-sum{grid-area:s;font-size:1rem;line-height:1.35;color:var(--nt-ink,var(--tc-85))}
+#app .ibx-body{padding:0 .7rem .7rem}
+#app .ibx-f{margin:.15rem 0;font-size:.95rem;color:var(--nt-soft,var(--tc-91))}
+#app .ibx-f a{color:var(--nt-aqua,var(--tc-94))}
+#app .ibx-mocklink{color:var(--nt-aqua,var(--tc-94));text-decoration:underline dotted}
+#app .ibx-reply{margin-top:.5rem}
+#app .ibx-ta{width:100%;box-sizing:border-box;font:inherit;font-size:1rem;border-radius:8px;border:2px solid var(--nt-line,var(--tc-89));background:var(--nt-bg,var(--tc-95));color:var(--nt-ink,var(--tc-85));padding:.5rem .6rem;resize:vertical}
+#app .ibx-send{margin-top:.4rem}
+#app .ibx-fine{font-size:.8rem;color:var(--nt-soft,var(--tc-91));margin:.35rem 0 0}
+#app .ibx-draft{font-style:italic;margin:.4rem 0 .2rem;color:var(--nt-blush,var(--tc-16))}
+#app .ibx-sent,#app .ibx-note{font-size:.88rem;color:var(--nt-butter,var(--tc-88));margin:.3rem 0 0}
+#app .ibx-empty{color:var(--nt-soft,var(--tc-91));margin:.4rem .3rem}
+body.ibx-music-on #queue,body.ibx-music-on #empty{display:none!important}
+#app .ibx-music{display:grid;gap:1rem}
+#app .ibx-music[hidden]{display:none}
+#app .ibx-mhint{margin:0;color:var(--nt-soft,var(--tc-91))}
+#app .ibx-sub{margin:.4rem 0 0;font-family:var(--f-hand,"Gochi Hand",cursive);font-weight:400;letter-spacing:1.5px;color:var(--nt-blush,var(--tc-16));font-size:1.15rem}
+#app .ibx-track.removed{opacity:.55}
+#app .ibx-track .actions{display:flex;flex-wrap:wrap;gap:.5rem}
+#app .ibx-state.featured{background:var(--nt-amber,var(--tc-5));color:var(--tc-23)}
+#app .ibx-export{justify-self:start}
+@media (max-width:480px){#app .ibx-peek{font-size:.85rem}#app .ibx-track .actions .btn{flex:1 1 30%;padding-left:.4rem;padding-right:.4rem}}
+@media (prefers-reduced-motion:reduce){#app .ibx-item{transition:none}}

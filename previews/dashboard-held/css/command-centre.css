@@ -1,0 +1,39 @@
+/* PREVIEW ONLY: "command centre" theme tokens (Danny, 2026-10-24 01:14 AWST).
+   Emerald "Matrix code" green replaces the old forest/teal greens; dark olive / gunmetal / charcoal panels with thin
+   emerald or amber hairlines and small HUD labels; sand text (never white). Dad's palette kept:
+   #0F5C6E #0A3F4C #F2A541 #F6EBD9 #D6ECEF #24292E.
+   Contrast (WCAG AA, normal text >= 4.5:1): sand on panel #161D21 14.5 | sand on olive #262E1F 11.9 | sand on teal-deep #0A3F4C 9.7 |
+   emerald glow #19FF9C on #0B0F10 14.5 | emerald dim #16B877 on #0B0F10 7.5 | muted #B8CCC0 on #161D21 10.1 |
+   amber on olive 6.9 | charcoal on amber 7.2. The fill emerald #0B8F5A carries NO text (sand on it is only 3.5). */
+:root{
+  --cc-emerald-glow:var(--tc-25);   /* text / glow on dark */
+  --cc-emerald:var(--tc-26);        /* bright accent, LEDs */
+  --cc-emerald-fill:var(--tc-27);   /* fills without text: bars, stars, meters */
+  --cc-emerald-dim:var(--tc-28);    /* dim terminal lines (7.5:1 on #0B0F10) */
+  --cc-emerald-deep:var(--tc-29);   /* dark emerald surface, sand text 10.7:1 */
+  --cc-olive:var(--tc-30); --cc-olive-2:var(--tc-31); --cc-olive-deep:var(--tc-32);
+  --cc-gunmetal:var(--tc-33); --cc-charcoal:var(--tc-23); --cc-panel:var(--tc-34); --cc-panel-2:var(--tc-35); --cc-ink:var(--tc-36);
+  --cc-teal:var(--tc-7); --cc-teal-deep:var(--tc-4); --cc-amber:var(--tc-5); --cc-sand:var(--tc-2); --cc-sky:var(--tc-13); --cc-muted:var(--tc-37);
+  --cc-hair-em:var(--tc-38); --cc-hair-em-soft:var(--tc-39); --cc-hair-am:var(--tc-40);
+  --cc-laser:var(--tc-41); --cc-laser-hi:var(--tc-42); --cc-cyan:var(--tc-43);
+  --cc-mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --cc-grid:repeating-linear-gradient(0deg,var(--tc-44) 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,var(--tc-44) 0 1px,transparent 1px 28px);
+}
+/* HUD label: small mono caps with a leading tick, used via data-hud="..." on any panel */
+[data-hud]{position:relative}
+[data-hud]::before{content:attr(data-hud);position:absolute;top:-.62em;left:10px;padding:0 5px;font:700 9px/1.2 var(--cc-mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cc-emerald-glow);background:var(--cc-hud-bg,var(--cc-panel));pointer-events:none;z-index:1}
+
+/* Avatar slot (PLACEHOLDER: Danny's dancing-around logo/avatar is not designed yet). Uses Dad's world equals mark,
+   dancing gently on the phi ladder: bob PHI^2 = 2.618 s, sway PHI^3 = 4.236 s (PHI^3 and PHI^4 x the default PHI^-1 s beat),
+   golden-angle starts (k=1: -0.618 x period, k=2: -0.236 x period). Still under reduced motion. */
+.avatar-slot{position:relative;flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 40%,var(--tc-45),var(--tc-46) 70%);border:1px dashed var(--cc-hair-em);box-shadow:0 0 0 1px var(--tc-47) inset}
+.avatar-slot .as-dance{display:block;width:30px;height:30px;animation:as-bob 2.618s ease-in-out -1.618s infinite}
+.avatar-slot .as-dance img{display:block;width:100%;height:100%;animation:as-sway 4.236s ease-in-out -1.0s infinite;transform-origin:50% 85%}
+.avatar-slot .as-tag{position:absolute;right:-6px;bottom:-4px;padding:1px 3px;border-radius:3px;font:700 7px/1 var(--cc-mono);letter-spacing:.08em;
+  color:var(--tc-23);background:var(--cc-amber);pointer-events:none}
+@keyframes as-bob{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2.5px)}}
+@keyframes as-sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@media (prefers-reduced-motion:reduce){.avatar-slot .as-dance,.avatar-slot .as-dance img{animation:none}}
+@media (max-width:480px){.avatar-slot{width:36px;height:36px}.avatar-slot .as-dance{width:26px;height:26px}}

@@ -1,0 +1,12 @@
+/* PREVIEW ONLY: Ask Dad paper airplane with a 3D orbit (passes behind the button, then in front).
+   Driven by ad-plane.js. The old emoji satellite is only hidden (its CSS orbit keeps running as the phi clock). */
+html.adp-on .ad-orbit>.ad-sat{visibility:hidden}
+html.adp-on .ad-key{z-index:2}                      /* chat preview: give the key a level the plane can sit under / over */
+.adp{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;z-index:1}
+.adp.is-fixed{position:fixed}
+.adp-p{position:absolute;left:0;top:0;width:var(--adp-s,15px);height:var(--adp-s,15px);margin:calc(var(--adp-s,15px) / -2) 0 0 calc(var(--adp-s,15px) / -2);
+  will-change:transform,opacity;transition:filter .2s linear}
+.adp-p svg{display:block;width:100%;height:100%;overflow:visible}
+.adp.far .adp-p{filter:brightness(.78) blur(.35px)}
+.adp.near .adp-p{filter:drop-shadow(0 1.6px 1.2px var(--tc-1))}   /* soft shadow onto the button, only in front */
+.adp-dot{position:absolute;left:-1.25px;top:-1.25px;width:2.5px;height:2.5px;border-radius:50%;background:var(--tc-2);box-shadow:0 0 0 .5px var(--tc-3);opacity:0;will-change:transform,opacity}

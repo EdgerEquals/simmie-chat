@@ -1,0 +1,34 @@
+/* PREVIEW ONLY: the music-note button (.bm-pill from bonnie-music.js) as the most luminous element on the page.
+   Laser blue #00B8FF / #4FD8FF, cyan #2EE6F0 and laser emerald #19FF9C / #00E676 on a near-black #03141B core:
+   layered glow (hairline ring + two soft outer glows + an inner gradient), never solid RGB.
+   Timing (music-glow.js sets the vars from the current BPM):
+     --mg-beat  = 60 / BPM            (pulse: soft swell on every beat)
+     --mg-drift = beat x PHI^4        (colour drift blue -> cyan -> emerald -> blue, smooth keyframes, no hard jumps)
+   BPM = Dad's auto-DJ target (window.DadDJ.now.bpm) where the page has it, else the phi-ladder default 60 / PHI^-1 = 97.08 BPM
+   (beat 0.618 s, drift PHI^3 = 4.236 s). Re-read only at a drift-cycle boundary. Static glow under reduced motion. */
+.bm.mg .bm-pill{position:relative;isolation:isolate;opacity:1;border:1px solid var(--cc-laser,var(--tc-41));border-style:solid;cursor:pointer;
+  color:var(--tc-2);
+  background:radial-gradient(120% 140% at 50% 0%,var(--tc-140),var(--tc-141) 45%,var(--tc-142) 70%),
+             radial-gradient(90% 120% at 50% 110%,var(--tc-143),var(--tc-142) 65%),var(--tc-144);
+  box-shadow:0 0 0 1px var(--tc-145),0 0 10px 2px var(--tc-146),0 0 24px 6px var(--tc-147),inset 0 0 10px var(--tc-148);
+  animation:mg-drift var(--mg-drift,4.236s) ease-in-out 0s infinite,mg-beat var(--mg-beat,.618s) cubic-bezier(.2,.7,.3,1) 0s infinite}
+.bm.mg .bm-pill-ico{color:var(--tc-42);text-shadow:0 0 6px currentColor,0 0 14px currentColor;animation:mg-ico var(--mg-drift,4.236s) ease-in-out 0s infinite}
+.bm.mg .bm-pill::after{content:"";position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:radial-gradient(closest-side,var(--tc-149),var(--tc-39) 60%,var(--tc-150));opacity:.25;
+  animation:mg-halo var(--mg-beat,.618s) ease-out 0s infinite}
+.bm.mg .bm-pill:hover{background-color:var(--tc-151)}
+.bm.mg .bm-pill:focus-visible{outline:2px solid var(--tc-2);outline-offset:3px}
+.bm.mg[data-state="unset"] .bm-pill{opacity:1;border-style:solid}
+.bm.mg[data-state="playing"]{--mg-amp:1.045;--mg-halo:.85}
+@keyframes mg-drift{
+  0%,100%{border-color:var(--tc-41);box-shadow:0 0 0 1px var(--tc-152),0 0 10px 2px var(--tc-145),0 0 24px 6px var(--tc-153),inset 0 0 10px var(--tc-154)}
+  33%{border-color:var(--tc-43);box-shadow:0 0 0 1px var(--tc-155),0 0 10px 2px var(--tc-156),0 0 24px 6px var(--tc-157),inset 0 0 10px var(--tc-158)}
+  66%{border-color:var(--tc-25);box-shadow:0 0 0 1px var(--tc-159),0 0 10px 2px var(--tc-160),0 0 24px 6px var(--tc-161),inset 0 0 10px var(--tc-162)}}
+@keyframes mg-ico{0%,100%{color:var(--tc-42)}33%{color:var(--tc-43)}66%{color:var(--tc-25)}}
+@keyframes mg-beat{0%{scale:var(--mg-amp,1.025)}22%{scale:1}100%{scale:1}}
+@keyframes mg-halo{0%{opacity:var(--mg-halo,.6);transform:scale(1.08)}45%{opacity:.22;transform:scale(1)}100%{opacity:.2;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  .bm.mg .bm-pill,.bm.mg .bm-pill-ico,.bm.mg .bm-pill::after{animation:none!important}
+  .bm.mg .bm-pill{border-color:var(--tc-43);box-shadow:0 0 0 1px var(--tc-163),0 0 10px 2px var(--tc-164),0 0 22px 6px var(--tc-165),inset 0 0 10px var(--tc-148)}
+  .bm.mg .bm-pill::after{opacity:.3}
+}
