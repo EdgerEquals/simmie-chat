@@ -192,7 +192,7 @@ window.QUIZ_COPY = {
 <link rel="stylesheet" href="css/dad-palette.css?v=2">
 <style>
 /* PREVIEW ONLY. Nothing Bonnie types is sent anywhere: no forms, no POSTs. Answers live in page memory and vanish on reload.
-   Only reads: age-dial.json (same site) for the ticker age, and Open-Meteo current weather for fixed Perth coordinates (GET, no key, no geolocation), cached 30 min in localStorage. */
+   Only reads: age-dial.json (same site) for the ticker age, and Open-Meteo current weather for fixed Perth coordinates (GET, no key, no geolocation), cached 30 min in localStorage; and the Open-Meteo Marine API for fixed Fremantle coordinates (tide + swell strip in the footer, dash/js/tide-swell.js, GET, no key, cached 60 min). */
 /* Dark Dad theme: only Dad palette colours (css/dad-palette.css) plus darker/lighter tints of them. No Bonnie pastels on this page. */
 :root{--bg:#161B1F;--bg-top:#0A3F4C;--surface:#11303A;--surface-2:#0E252D;--line:rgba(78,170,190,.32);--teal-hi:#2A8FA3;--ink:var(--dad-sand);--heading:var(--dad-sand);--accent:var(--dad-amber);--deep:#B9762A;
   --f-body:"Alegreya Sans",Helvetica,Arial,sans-serif;--f-hand:"Gochi Hand",cursive;--f-script:"Kaushan Script",cursive;--f-serif:"Lora",Georgia,serif;--shadow:0 8px 24px rgba(0,0,0,.35)}
@@ -325,7 +325,7 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px so
 @keyframes sTalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-8%)}}
 .foot .note{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:.78rem;white-space:nowrap}
 .foot .note .dot{opacity:.6}
-.foot .fwx{font-size:.85rem}
+.foot .fcr{font-size:.85rem}
 body.paused .foot .lt i,body.paused .tin .blk,body.paused .simmie.talk{animation-play-state:paused}
 @media(max-width:400px){.foot .note{font-size:.7rem;gap:4px}.foot .strip{gap:6px;font-size:9px}}
 @media(prefers-reduced-motion:reduce){.foot .lt i,.tin .blk,.simmie.talk,.foot .lt.blip i{animation:none!important}}
@@ -339,10 +339,15 @@ body.paused .foot .lt i,body.paused .tin .blk,body.paused .simmie.talk{animation
 .tick .tag i{font-style:normal;font-weight:400;opacity:.85}
 .tick .wx{flex:0 0 auto;font-size:11px;color:var(--dad-sand);border:1px solid rgba(242,165,65,.55);border-radius:999px;padding:3px 6px}
 .tick .wx b{color:var(--dad-amber);font-weight:700}
-.wxr,.fwx{flex:0 0 auto;display:inline-flex;gap:2px;line-height:1}
-.wxr .fs,.wxr .os,.fwx .fs,.fwx .os{position:relative;display:inline-block;width:1.2em;height:1.2em}
-.wxr .fs>span,.wxr .os>span,.fwx .fs>span,.fwx .os>span{position:absolute;left:0;top:0;width:100%;text-align:center;opacity:0;transition:opacity .6s ease}
-.wxr .on,.fwx .on{opacity:1!important}
+.wxr{flex:0 0 auto;display:inline-flex;gap:2px;line-height:1}
+.fcr{flex:0 0 auto;display:inline-block;width:5.6em;overflow:hidden;line-height:1.2;white-space:nowrap;vertical-align:middle;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.fcr .ct{display:inline-flex;animation:fcr-scroll var(--phi-marquee) linear var(--phi-marquee-d) infinite}.fcr .ct>span{padding-right:.3em}
+@keyframes fcr-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(max-width:460px){.fcr{width:2.6em}}
+@media(prefers-reduced-motion:reduce){.fcr .ct{animation:none}}
+.wxr .fs,.wxr .os{position:relative;display:inline-block;width:1.2em;height:1.2em}
+.wxr .fs>span,.wxr .os>span{position:absolute;left:0;top:0;width:100%;text-align:center;opacity:0;transition:opacity .6s ease}
+.wxr .on{opacity:1!important}
 .tick .wxr{font-size:15px}
 .tick .tview{flex:1 1 auto;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
 .ttrack{display:inline-flex;will-change:transform;animation:tickmove var(--td,82.25s) linear var(--tdl,0s) infinite}
@@ -463,41 +468,16 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 .bgloop-still{display:none;background:url("media/space-loop-poster.webp") center/cover no-repeat}
 @media(prefers-reduced-motion:reduce){.bgloop{display:none}.bgloop-still{display:block}}
 </style>
-<link rel="stylesheet" href="previews/shared/bonnie-sound.css?v=3">
 <link rel="stylesheet" href="previews/shared/command-centre.css?v=2">
 <link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=3">
 <link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=2">
-<link rel="stylesheet" href="previews/shared/chat-head-quiz.css?v=2">
+<link rel="stylesheet" href="css/quiz-dad-head.css?v=f527ad1b"><!-- Dad's palette (Danny 24 Oct 08:38 AWST: the questionnaire is from Dad, so it always uses his palette) -->
 <link rel="stylesheet" href="previews/shared/quiz-foot-lock.css?v=1">
-<style>
-/* inline volume note (not a pop-up): first thing on the page; the sound switch lives inside it */
-/* light sapphire (Danny 02:49 AWST: "more opaque and much lighter"; harmonised with the chat palette 02:50): was the radiant
-   translucent #3D7BFF .86 -> #185AD4 .88 -> #0F52BA .90 with a strong glow (47687f8). Now near-opaque pale sapphire
-   #C9D9FF .97 -> #AFC6FB .98 -> #9DBBFF .98, hairline #7FA6F5, soft proportionate glow; text deep sapphire #0A2F6E
-   (6.7:1 on #9DBBFF, 7.5:1 on #AFC6FB, 9.0:1 on #C9D9FF); chips/switch inside the box recoloured to match (below). */
-.vol-note{margin:0 0 .8rem;padding:.55rem .8rem .5rem;color:#0A2F6E;border:1px solid #7FA6F5;border-radius:12px;line-height:1.3;background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 50%),linear-gradient(135deg,rgba(201,217,255,.97) 0%,rgba(175,198,251,.98) 25%,rgba(157,187,255,.98) 100%);box-shadow:0 0 14px rgba(157,187,255,.45),0 0 4px rgba(201,217,255,.4),inset 0 1px 0 rgba(255,255,255,.6)}
-.vol-note .vn-top{text-shadow:none}
-/* sound switch + flavour chips inside the light box: deep sapphire on pale sapphire, selected = chat accent #B4436C with white (5.3:1);
-   the row wraps instead of side-scrolling, so no chip is cut off at 375 px */
-.vol-note .bs-row{color:#0A2F6E;flex-wrap:wrap;white-space:normal;overflow:visible;row-gap:5px}
-.vol-note .bs-flav{flex-wrap:wrap;row-gap:4px;flex:1 1 auto;max-width:100%;min-width:0}
-.vol-note .bs-flav legend{color:#0A2F6E}
-.vol-note .bs-flav span{border-color:rgba(10,47,110,.5);color:#0A2F6E;background:rgba(255,255,255,.35)}
-.vol-note .bs-flav input:checked + span{background:#B4436C;border-color:#B4436C;color:#FFFFFF}
-.vol-note .bs-flav input:focus-visible + span,.vol-note .bs-toggle:focus-visible{outline:3px solid #B4436C}
-.vol-note .bs-toggle{border-color:#0A2F6E;color:#0A2F6E}
-.vol-note .bs-toggle[aria-pressed="true"]{border-color:#7A2448;color:#7A2448;background:rgba(255,255,255,.45)}
-.vol-note .vn-top{margin:0 0 .3rem;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.45rem}
-.vol-note .vn-spk{color:#F2A541;display:inline-block;font-size:1.15rem;animation:vnBreathe 4.236s ease-in-out infinite}  /* PHI^3 s */
-.vol-note .bs-row{padding:2px 0;font-size:.76rem}
-@keyframes vnBreathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:1}}
-@media(prefers-reduced-motion:reduce){.vol-note .vn-spk{animation:none}}
-</style>
-<script src="previews/shared/bonnie-sound.js?v=4" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
-<script src="previews/shared/bonnie-sound-quiz.js?v=3" defer></script>
+<link rel="stylesheet" href="dash/css/tide-swell.css?v=1"><!-- tide + swell after the critters (Danny 03:43 AWST 24 Oct; live 12:39) -->
+<script src="dash/js/tide-swell.js?v=2" defer></script>
 <script src="previews/shared/dad-autodj-quiz.js?v=2" defer></script>
-<link rel="stylesheet" href="css/quiz-dj-pill.css?v=c0c7afb8"><!-- Dad's DJ pill + pop-up (Danny 11:06 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-dots-glow.css?v=19d4b8ab"><!-- travelling glow on the four footer lights (Danny 10:42 AWST 24 Oct) -->
+<link rel="stylesheet" href="css/quiz-dj-pill.css?v=c0c7afb8"><!-- Dad's DJ pill + pop-up (Danny 11:06 AWST 24 Oct) -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -507,7 +487,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <!-- Questionnaire header (Danny 24 Oct 2026 02:50 AWST): the live Bonnie's Dashboard header STRUCTURE (rebella 517e809 moderation/:
      top bar with logo + right-side key, weather chip / fun-fact ticker row, Dad's DJ, then the bottom masthead row with the mark,
      title, pill and the tagline (Danny 02:59 AWST: tagline in the bottom row, not a line under the header)),
-     recoloured to the live Simmie chat page palette (css/chat.css values). Static: scrolls with the page, no Create button,
+     In Dad's palette (css/quiz-dad-head.css, Danny 08:38 AWST) and pinned like the dashboard header; no Create button,
      no Lock / Ask Dad keys (they would do nothing here); the only key is the existing REBELLA status beacon.
      Replaces Dad's-palette header 53b7cda (restore from that commit: header.dad-head, previews/shared/dad-head-quiz.css). -->
 <div class="q-head dad-head" id="q-head">
@@ -544,8 +524,6 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   </div></header>
 </div>
 <main class="wrap">
-  <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><div id="vol-sound"></div></aside>
-
   <section class="panel" id="start">
     <h1><span data-copy="intro">Hey Bonnie, here's a questionnaire I prepared for you,</span> <span class="from" data-copy="from">from Dad</span></h1>
     <div class="leadrow"><span class="simmie" data-simmie style="--sz:56px"></span><p class="lead" data-copy="instruction">Pick the one you like better, tap Reroll under a choice to swap in a different topic, or type a question or comment in the box under each one.</p></div>
@@ -596,7 +574,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       </div>
     </div>
   </div>
-  <div class="note"><span data-copy="footer">Preview only, nothing is sent</span><span class="dot" aria-hidden="true">&middot;</span><span data-copy="credit">Made by Dad, with help from Simmie</span><span class="fwx" id="fwx" aria-hidden="true" hidden></span></div>
+  <div class="note"><span data-copy="footer">Preview only, nothing is sent</span><span class="dot" aria-hidden="true">&middot;</span><span data-copy="credit">Made by Dad, with help from Simmie</span><span class="fcr" id="fcr" aria-hidden="true"></span><span class="tsw" id="fts" data-ts-key="dadQuizTide" hidden></span></div>
 </div>
 <script>
 (function(){
@@ -793,6 +771,17 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     },100));
     var oc=PT.every('offer-cycle',function(){if(document.hidden)return;offs[k].classList.remove('on');k=(k+1)%offs.length;offs[k].classList.add('on');});wxTimers.push(oc);
   }
+  (function footCritters(){ // footer emojis (Danny 03:17/03:18): animals & critters only (none are in this header's weather set);
+    // own feed, not the weather: the Moon's phase, worked out on the device from the date (days since a known new moon, 29.53-day
+    // cycle, no request), sets the order; the strip scrolls on the PHI^8 = 46.98 s marquee clock (--phi-marquee) and a new order
+    // lands at the next loop boundary. Same source, epoch and loop as the Rebella / dashboard / chat footers. Reduced motion: still.
+    var el=$('fcr');if(!el)return;
+    var L=['\uD83E\uDD8A','\uD83D\uDC28','\uD83E\uDD98','\uD83D\uDC19','\uD83E\uDD8E','\uD83D\uDC1E','\uD83D\uDC38','\uD83E\uDD94','\uD83D\uDC0C','\uD83E\uDD89'],last=-1;
+    function moon(){var a=((Date.now()-Date.UTC(2000,0,6,18,14))/864e5)%29.530588853;if(a<0)a+=29.530588853;return Math.floor(a/29.530588853*L.length);}
+    el.innerHTML='<span class="ct"></span>';var tr=el.firstChild;
+    function fill(){var m=moon();if(m===last)return;last=m;var row=L.slice(m).concat(L.slice(0,m)).join(' ')+' ';tr.innerHTML='<span>'+row+'</span><span>'+row+'</span>';}
+    tr.addEventListener('animationiteration',fill);fill();
+  })();
   function showWx(cond,temp){
     var w=WX[cond];if(!w)return;
     window.SIM_WX.cond=cond;window.SIM_WX.temp=temp;window.SIM_WX.say=w.say;
@@ -800,7 +789,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     $('wx').hidden=false;$('wx').setAttribute('aria-label',C.place+' weather'+(temp!=null?' '+Math.round(temp)+' degrees':''));
     wxTimers.forEach(function(t){if(t&&t.stop)t.stop();else clearInterval(t);});wxTimers=[];
     window.PhiTiming.setWeather(cond);   // weather state drives the phi sweep for everything outside the weather loop
-    reaction($('wxr'),w);reaction($('fwx'),w);
+    reaction($('wxr'),w);   // weather lives in the header only (Danny 03:15): no footer weather reaction
     document.dispatchEvent(new Event('simwx'));
   }
   (function(){
@@ -898,7 +887,6 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       }).catch(function(){});
       Promise.all([pA,pS]).then(function(){
         L.push('age dial: '+window.SIM_AGE()+(window.SIM_AGE_SRC==='url'?' (preview ?age)':''));
-        var w=window.SIM_WX||{};if(w.status==='ok'&&w.cond&&!w.forced)L.push('perth: '+(w.temp!=null?Math.round(w.temp)+'\u00B0, ':'')+w.say);
         L.forEach(function(x){say(x);});
       });
     }
@@ -908,7 +896,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       beat++;
       if(beat%8===0){report();return;}
       if(beat%4===2){var fl=factLine();if(fl){say('FACT \u00B7 '+fl.f.source+': '+fl.f.text,window.PhiTiming.ms('tty-hold'));log('fact #'+fl.n+' loaded ('+fl.f.source.toLowerCase()+')');return;}}
-      if(beat%4===3){var w=window.SIM_WX||{},pool=IDLE.slice();if(w.status==='ok'&&w.say&&!w.forced)pool.push('perth is '+w.say+'.');say(pool[beat%pool.length]);return;}
+      if(beat%4===3){var pool=IDLE.slice();say(pool[beat%pool.length]);return;}
       log('\u00B7 all systems nominal');
     },1000);
     cur.innerHTML='<span class="pr">simmie&gt;</span> hello, Bonnie.';
@@ -916,7 +904,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   })();
   window.MLOG_READY=true;
   // Mission-log sources: real local events only
-  document.addEventListener('simwx',function(){var w=window.SIM_WX||{};if(w.cond){var mood={sun:'crew happy',hot:'crew grinning, water handy',cloud:'crew curious',fog:'crew calm',rain:'crew hopeful',storm:'crew cosy',night:'crew calm',snow:'crew curious'}[w.cond];MLOG.log('wx: '+(window.SIM_WX.forced?w.cond+' (preview)':w.say+(w.temp!=null?' '+Math.round(w.temp)+'\u00B0':''))+' \u2014 '+mood);}else if(w.status==='fail')MLOG.log('wx: no data \u2014 sky light off');});
+  // (Danny 03:15) weather lives in the header only: the footer mission log no longer prints 'wx:' lines
   if((window.SIM_WX||{}).cond||(window.SIM_WX||{}).status==='fail')document.dispatchEvent(new Event('simwx'));
   document.addEventListener('visibilitychange',function(){if(document.hidden)MLOG.log('tab hidden \u2014 holding');else MLOG.log('tab visible \u2014 resuming');});
   (function(){var t=null,lw=innerWidth,lh=innerHeight;function rs(kind){clearTimeout(t);t=setTimeout(function(){if(innerWidth===lw&&innerHeight===lh)return;lw=innerWidth;lh=innerHeight;MLOG.log((kind==='o'?'rotated: ':'resized: ')+(lw>lh?'landscape ':'portrait ')+lw+'\u00D7'+lh);},500);}
@@ -1043,5 +1031,9 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 })();
 </script>
 <script src="js/quiz-dj-pill.js?v=788205e5" defer></script>
+<script>/* pinned header: compacts once the page scrolls (dashboard sticky-head.js thresholds 72 / 8 px) */
+(function(){var h=document.getElementById('q-head');if(!h)return;var c=false,r=0;
+function f(){r=0;var y=window.scrollY||document.documentElement.scrollTop||0,w=c?y>8:y>72;if(w!==c){c=w;h.classList.toggle('is-scrolled',c);}}
+addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive:true});f();})();</script>
 </body>
 </html>

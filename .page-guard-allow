@@ -24,3 +24,11 @@ index.html :: landmark:form
 index.html :: id:chat-head
 index.html :: id:status
 index.html :: landmark:header
+# approved by Danny 12:53 AWST 24 Oct (t619u): questionnaire held work live - Dad's palette header (chat-head-quiz.css -> css/quiz-dad-head.css), volume box removed (aside.vol-note, #vol-sound, bonnie-sound css/js), footer weather (#fwx) -> Moon-phase critters + tide/swell strip
+questionnaire-preview.html :: style:previews/shared/chat-head-quiz.css
+questionnaire-preview.html :: landmark:aside
+questionnaire-preview.html :: id:vol-sound
+questionnaire-preview.html :: script:previews/shared/bonnie-sound.js
+questionnaire-preview.html :: script:previews/shared/bonnie-sound-quiz.js
+questionnaire-preview.html :: style:previews/shared/bonnie-sound.css
+questionnaire-preview.html :: id:fwx
