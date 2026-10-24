@@ -102,3 +102,5 @@ html[data-term-phase="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px rgba(46,13
 html[data-term-phase="status"] .tstat .ts-txt{opacity:.85}
 html[data-term-phase="live"] .tstat .ts-txt{color:#FF2A4A;text-shadow:0 0 4px rgba(255,42,74,.75),0 0 9px rgba(255,42,74,.4)}
 .tstat .ts-tel{opacity:.6}
+/* t656u fix: no colour transition on the footer cursor, so it tracks the shared --cur-col exactly with the pill cursor. */
+.foot .tin .blk,.tin .blk{transition:none!important}
