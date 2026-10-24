@@ -185,3 +185,15 @@ textarea:focus-visible{border-color:#0AF2FF;outline-color:#0AF2FF!important}
 #start.panel::before,#quiz.panel::before,#summary.panel::before{opacity:.4}
 /* text on Bonnie's coloured topic tiles: text-strong #B4CEDC (>= 4.6:1 on the lightest tile colour #0F5C6E, 7-8:1 on the rest) */
 .tile{color:#B4CEDC}
+/* Pictures untouched, everything around them in Dad's palette (PREVIEW ONLY; Danny 24 Oct 2026 10:49-10:51 AWST).
+   Topic tiles + summary rows lose the old warm/teal tile tones (#3A2E22 #123F47 #2A363C #0F4A57 #3B3320 #1F3440, set inline as --c
+   by dk()) and sit on Dad's raised panel; the emoji pictures inside them are not touched (no filter, no colour, same size).
+   Summary "vs" line sand #D9CDB9 -> muted text; DJ volume slider's inherited warm grey -> text blue.
+   The "Hey Bonnie, turn your volume up" note is deliberately NOT changed (Danny 10:51). */
+#t0,#t1{--c:#071829!important}
+.choices .tile{border-color:#143A57}
+.choices .tile:hover{border-color:#1F5478}
+.choices .tile.picked{border-color:#0AF2FF}
+.sum li{--c:#071829!important;border-color:#143A57}
+.sum .vs{color:#85A6BB}
+.dad-dj .dj-vol input{color:#85A6BB}
