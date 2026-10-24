@@ -31,3 +31,8 @@
   .q-head .qh-mast .dad-mark{width:34px;height:34px;padding:2px;margin-right:.5rem;border-radius:10px}
   .q-head .qh-mast .dh-sub{margin:2px 0 0 .55rem}
 }
+/* Title + tagline spacing tidied (Danny t682u 18:16 AWST 24 Oct): the gap between "Questions for Bonnie" and the tagline was uneven
+   (2px phones / 3px desktop; the Q's tail nearly touched the tagline on phones). Now one 4px gap at every width; the two-line block stays
+   centred on the mark (.dh-brand align-items:center), nudge, sizes and colours unchanged. */
+.q-head .qh-mast .dh-sub{margin-top:4px}
+@media (max-width:575px){.q-head .qh-mast .dh-sub{margin-top:4px}}
