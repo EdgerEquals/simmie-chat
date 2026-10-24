@@ -1,0 +1,16 @@
+/* Questionnaire header row layout (Danny 13:26 AWST 24 Oct 2026, t646u, live).
+   Portrait phones (<=480px, ticker on its own line below): status pill stays left, weather + emojis sit on the right.
+   Landscape / wider (>480px, ticker shares the row): status pill left, ticker in the middle filling the gap
+   (clipped by .tview's own overflow + edge mask), weather + emojis on the right. Layout only: ticker speed/content,
+   pill, colours untouched. Static (reduced-motion) ticker keeps its full-width line; only the weather is pushed right. */
+.tick .tstat{order:1}
+.tick .wx{order:3;margin-left:auto}
+.tick .wxr{order:4}
+.tick .sr{order:5}
+@media (min-width:481px){
+  .tick:not(.static) .tview{order:2;flex:1 1 0;min-width:0;margin:0 2px}
+}
+@media (max-width:480px){
+  .tick .tview{order:9}
+}
+.tick.static .tview{order:9}
