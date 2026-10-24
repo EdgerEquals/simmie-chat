@@ -92,3 +92,13 @@ body.paused .tstat .ts-tel span{animation-play-state:paused}
 .foot .tin .blk,html[data-term-status="live"] .foot .tin .blk,.tstat .ts-cur,html[data-term-phase="live"] .tstat .ts-cur{background:var(--cur-col);box-shadow:0 0 4px color-mix(in srgb,var(--cur-col) 60%,transparent)}
 html[data-term-status="quiet"] .foot .tin .blk,html[data-term-phase="quiet"] .tstat .ts-cur{background:color-mix(in srgb,var(--cur-col) 35%,#1A2420);box-shadow:none}
 @media(prefers-reduced-motion:reduce){:root{animation:none}}
+/* t657u (Danny 13:38 AWST 24 Oct): flexible width - grows into free row space, telemetry clips first; weather/emojis never pushed off
+   the top line (320px+). Border muted dim green. 'live' is the brightest thing on the pill: #FF2A4A + soft red glow; 'status' slightly dimmed. */
+.tick .tstat,.tick .tstat{flex:1 1 auto;width:auto;min-width:calc(7ch + 22px);max-width:300px}
+@media(max-width:480px){.tick .tstat{width:auto;max-width:none}}
+@media(min-width:481px){.tick .tstat{flex:0 1 190px;max-width:190px}}
+.tick .tstat{box-shadow:inset 0 0 0 1px rgba(46,139,87,.55)}
+html[data-term-phase="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px rgba(46,139,87,.25)}
+html[data-term-phase="status"] .tstat .ts-txt{opacity:.85}
+html[data-term-phase="live"] .tstat .ts-txt{color:#FF2A4A;text-shadow:0 0 4px rgba(255,42,74,.75),0 0 9px rgba(255,42,74,.4)}
+.tstat .ts-tel{opacity:.6}
