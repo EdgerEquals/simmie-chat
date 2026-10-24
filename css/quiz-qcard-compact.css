@@ -1,0 +1,20 @@
+/* 'Questions for Bonnie' row (header.qh-mast) compacted to about HALF its height (Danny 13:00 AWST 24 Oct, t623u), instead of
+   removing it. Same content (Dad mark, title, FROM DAD pill, tagline), same colours (Dad's command-centre amber pill + teal tile);
+   only padding, margins, gaps, line-heights, mark size and font sizes are tightened. Text stays >= 12px. The row has no buttons.
+   Loaded after css/quiz-dad-head.css; selectors are one class more specific so they win regardless of order. */
+.q-head .qh-mast .qh-c{padding-top:2px;padding-bottom:2px;gap:0 .75rem}
+.q-head .qh-mast .dh-brand{line-height:1}
+.q-head .qh-mast .dad-mark{width:20px;height:20px;padding:1px;margin-right:.45rem;border-radius:6px}
+.q-head .qh-mast .dh-title{font-size:15px;line-height:1.1}
+.q-head .qh-mast .dh-pill{font-size:12px;line-height:1.1;letter-spacing:1.5px;padding:.1rem .45rem 0;margin-left:.45rem}
+.q-head .qh-mast .dh-sub{font-size:12.5px;line-height:1.2;padding-left:.4rem}
+@media (max-width:575px){
+  .q-head .qh-mast .qh-c{padding-top:1px;padding-bottom:1px;gap:2px .5rem}
+  .q-head .qh-mast .dad-mark{width:16px;height:16px;padding:1px;margin-right:.35rem;border-radius:5px}
+  .q-head .qh-mast .dh-title{font-size:14px}
+  .q-head .qh-mast .dh-pill{font-size:12px;letter-spacing:1px;padding:.05rem .4rem 0;margin-left:.4rem}
+  .q-head .qh-mast .dh-sub{font-size:12px;line-height:1.2}
+}
+/* 'FROM DAD' pill (span.dh-pill, data-copy=headPill) hidden in this row (Danny 13:01 AWST 24 Oct, t625u); the element stays in the
+   page. Dad mark + title + tagline unchanged. The intro's 'from Dad' line and the ticker's 'From Dad' tag are not touched. */
+.q-head .qh-mast .dh-pill{display:none}
