@@ -99,7 +99,7 @@ body::before{background:var(--cc-grid),#000}
 /* header */
 .q-head{color:#85A6BB;background:#000;border-bottom:1px solid #143A57;box-shadow:0 1px 0 #040E19,0 6px 18px rgba(0,0,0,.6)}
 .q-head .qh-top{background:#000;border-top:1px solid #0C2338;border-bottom:1px solid #143A57}
-.q-head .qh-logo{color:#9DBCCE}
+.q-head .qh-logo{color:#B0275A}/* Bonnie's logo keeps Rebella's raspberry (Danny t674u); was #9DBCCE */
 .q-head .beacon{background:#040E19;color:#85A6BB}
 .q-head .beacon:focus-visible{outline-color:#0AF2FF}
 .q-head .qh-hud{background:#040E19;border-bottom:1px solid #143A57}
