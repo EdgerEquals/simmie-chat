@@ -61,9 +61,9 @@
    ink and the rotation centre is the ink centre (was a 97px box with the logo left-aligned in it). */
 /* 24 Oct 2026 13:11 AWST (Danny, t633u/t634u, live): Bonnie's logo levelled the same on every site: 8deg anticlockwise about the ink centre
    (width = height x 1810/893), 40px tall on desktop, 32px on phones (was 46 / 38 / 36 at -5.7deg). */
-.q-head .qh-logo{height:40px;width:81px;max-width:none;overflow:visible;transform:translateY(-3px) rotate(-8deg);transform-origin:50% 50%}
-@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{height:32px;width:65px;transform:translateY(-2px) rotate(-8deg)}}
-@media(max-width:480px){.q-head .qh-logo{height:32px;width:65px;transform:translateY(-2px) rotate(-8deg)}}
+.q-head .qh-logo{height:40px;width:81px;max-width:none;overflow:visible;transform:translateY(-3px) rotate(-5.5deg);transform-origin:50% 50%}
+@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{height:32px;width:65px;transform:translateY(-2px) rotate(-5.5deg)}}
+@media(max-width:480px){.q-head .qh-logo{height:32px;width:65px;transform:translateY(-2px) rotate(-5.5deg)}}
 /* ==== DAD'S PALETTE: COMMAND CENTRE (held preview, live 12:53 AWST 24 Oct t619u; Danny 24 Oct 2026 10:34-10:38 AWST). Colour values only, no layout/content.
    Sampled (k-means + highlight pick) from Danny's two command-centre photos: dark room, wall of glowing blue screens, one person.
    Pure black room, dim cool blues for panels/borders/text, ONE bright accent = the radar sweep (#09B1C0 sampled, the most saturated

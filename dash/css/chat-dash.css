@@ -52,5 +52,5 @@ html #app #screen-chat #app-foot .container{color:var(--muted)}
    ~25% bigger: 32 -> 40px tall (phones 26 -> 32px); width = height x 1810/893 so the rotation centre is the ink centre. */
 /* 24 Oct 2026 13:11 AWST (Danny, t633u/t634u, live): turned further, 8deg anticlockwise (the slope drawn into the lettering is ~8deg across
    the letters, ~13deg with the swash + heart); same 40px / phones 32px, same on every site. */
-html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:40px;width:81px;overflow:visible;transform:rotate(-8deg);transform-origin:50% 50%}
+html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:40px;width:81px;overflow:visible;transform:rotate(-5.5deg);transform-origin:50% 50%}
 @media (max-width:575px){html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:32px;width:65px}}
