@@ -6,3 +6,9 @@ questionnaire-preview.html :: landmark:header
 questionnaire-preview.html :: style:previews/shared/dad-head-quiz.css
 # Danny 08:54 AWST 24 Oct: questionnaire-held preview header loses the "Questions for Bonnie" card row (preview only)
 previews/questionnaire-held/index.html :: landmark:header
+# Danny 11:11 AWST 24 Oct: questionnaire-held preview loses the 'turn your volume up' note and Bonnie's sounds layer (preview only)
+previews/questionnaire-held/index.html :: id:vol-sound
+previews/questionnaire-held/index.html :: landmark:aside
+previews/questionnaire-held/index.html :: script:previews/shared/bonnie-sound-quiz.js
+previews/questionnaire-held/index.html :: script:previews/shared/bonnie-sound.js
+previews/questionnaire-held/index.html :: style:previews/shared/bonnie-sound.css
