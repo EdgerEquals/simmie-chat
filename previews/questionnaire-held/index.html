@@ -477,6 +477,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <script src="previews/questionnaire-held/tide-swell.js?v=1" defer></script>
 <script src="previews/shared/dad-autodj-quiz.js?v=2" defer></script>
 <link rel="stylesheet" href="previews/questionnaire-held/dots-glow.css?v=19d4b8ab"><!-- travelling glow on the four footer lights (Danny 10:42 AWST 24 Oct) -->
+<link rel="stylesheet" href="previews/questionnaire-held/dj-pill.css?v=c0c7afb8"><!-- Dad's DJ pill + pop-up (Danny 11:06 AWST 24 Oct) -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -492,7 +493,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <div class="q-head dad-head" id="q-head">
   <div class="qh-top"><div class="qh-c">
     <svg class="qh-logo" viewBox="413 534 1810 893" width="97" height="38" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Rebella" focusable="false"><use href="img/bonnies-logo.svg?v=1#bonnies-logo"/></svg>
-    <span class="qh-right"><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
+    <span class="qh-right"><button type="button" class="dj-pill" id="dj-pill" aria-expanded="false" aria-controls="qh-djpop" aria-haspopup="dialog"><span class="djp-led" aria-hidden="true"></span><span class="djp-lbl">Dad&rsquo;s DJ</span><span class="djp-car" aria-hidden="true">&#9662;</span></button><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
   </div></div>
   <div class="qh-hud"><div class="qh-c">
     <div class="tick" id="tick" role="region" aria-label="Fun facts from Dad">
@@ -504,9 +505,10 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     </div>
     <div class="lane" id="laneH" aria-hidden="true"></div>
   </div></div>
-  <div class="qh-dj"><div class="qh-c">
+  <div class="qh-djpop" id="qh-djpop" role="dialog" aria-label="Dad's DJ" hidden><div class="qh-c">
   <!-- Dad's auto-DJ (phi rule 10): generated in the browser, plays only after a tap; the sound switch below is the master mute -->
   <section class="dad-dj" id="dad-dj" data-guard="dad-dj" aria-label="Dad's music">
+    <button type="button" class="djp-x" aria-label="Close Dad's DJ">&times;</button>
     <div class="dj-row">
       <button type="button" class="dj-play" id="dj-play" aria-pressed="false"><span class="dj-led" aria-hidden="true"></span><span class="dj-lbl">Dad&rsquo;s DJ</span></button>
       <label class="dj-vol"><span>music vol</span><input type="range" id="dj-vol" min="0" max="100" step="1" value="80"></label>
@@ -1023,6 +1025,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   reset();theme('teen');SIM_LIGHTS();readout();
 })();
 </script>
+<script src="previews/questionnaire-held/dj-pill.js?v=788205e5" defer></script>
 <script>/* pinned header: compacts once the page scrolls (dashboard sticky-head.js thresholds 72 / 8 px) */
 (function(){var h=document.getElementById('q-head');if(!h)return;var c=false,r=0;
 function f(){r=0;var y=window.scrollY||document.documentElement.scrollTop||0,w=c?y>8:y>72;if(w!==c){c=w;h.classList.toggle('is-scrolled',c);}}
@@ -1031,7 +1034,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
    version.json (same origin, cache-busted, no-store); when the box's qheld_sync has rebuilt the preview from newer held work,
    reload onto the new version. Never while a text field is focused or typed in during the last 20 s (waits, then reloads).
    Nothing else is contacted: one same-origin GET of a static file. */
-(function(){var V='03599143e181dc05',U='previews/questionnaire-held/version.json',last=0,pend=null;
+(function(){var V='c195fb28fe436ef2',U='previews/questionnaire-held/version.json',last=0,pend=null;
 function busy(){var a=document.activeElement,t=a&&a.tagName;return !!(a&&(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||a.isContentEditable))||Date.now()-last<20000;}
 addEventListener('input',function(){last=Date.now();},true);addEventListener('keydown',function(){last=Date.now();},true);
 function go(nv){pend=nv;if(busy())return;var k='qheld-reload-'+nv,n=0;try{n=+(sessionStorage.getItem(k)||0);if(n>=3)return;sessionStorage.setItem(k,n+1);}catch(e){}
