@@ -36,3 +36,9 @@
    centred on the mark (.dh-brand align-items:center), nudge, sizes and colours unchanged. */
 .q-head .qh-mast .dh-sub{margin-top:4px}
 @media (max-width:575px){.q-head .qh-mast .dh-sub{margin-top:4px}}
+/* Tagline TEXT left edge lined up with the title's "Q" (Danny t684u 18:20 AWST 24 Oct: "Horizontal is off"; right nudge removed).
+   The 2px orange bar stays, moved out into the gap between the mark and the text column: margin-left -5px = -(2px bar + 3px padding),
+   so the text starts exactly at the title's left edge. Vertical alignment and the 4px line gap unchanged. */
+
+.q-head .qh-mast .dh-sub{margin-left:-5px;padding-left:3px}
+@media (max-width:575px){.q-head .qh-mast .dh-sub{margin-left:-5px;padding-left:3px}}
