@@ -4,3 +4,5 @@ previews/dad-mark/index.html :: h2:Emerald option: Matrix-style emerald top bar 
 # Danny 02:50 AWST 24 Oct: questionnaire header replaced by the dashboard-structure header in the Simmie chat palette (supersedes Dad-palette header 53b7cda); ticker moved into it as a div (no nested header)
 questionnaire-preview.html :: landmark:header
 questionnaire-preview.html :: style:previews/shared/dad-head-quiz.css
+# Danny 08:54 AWST 24 Oct: questionnaire-held preview header loses the "Questions for Bonnie" card row (preview only)
+previews/questionnaire-held/index.html :: landmark:header
