@@ -34,8 +34,8 @@
     ['.tick .tview','Fun facts from Dad',function(){var s=[].slice.call(document.querySelectorAll('#ttrack>span'));s=s.slice(0,Math.max(1,Math.ceil(s.length/2)));
       var li=s.map(function(x){var t=x.querySelector('.ts'),c=x.querySelector('.tc');return '<li>'+esc(t?txt(t).replace(/^"|"$/g,''):txt(x))+(c?' <span class="src">'+esc(txt(c).replace(/^\/\/\s*/,''))+'</span>':'')+'</li>';}).join('');
       return '<p class="qp-note">Picked for age '+esc(window.SIM_AGE?window.SIM_AGE():13)+'.</p><ul class="qp-list">'+(li||'<li>Loading&hellip;</li>')+'</ul>';}],
-    ['.qh-mast .dh-brand','Questions for Bonnie',function(){var q=$('quiz'),c=$('count');return '<p>From Dad. '+esc(txt(document.querySelector('.dh-sub')))+'</p>'+kv([['progress',q&&!q.hidden?txt(c):($('summary')&&!$('summary').hidden?'finished':'not started')],['answered',txt($('vDone'))||'0']]);}],
     ['.qh-mast .dh-sub','Questions for Bonnie',function(){return '<p>'+esc(txt(document.querySelector('.dh-sub')))+'</p>';}],
+    ['.qh-mast .dh-brand','Questions for Bonnie',function(){var q=$('quiz'),c=$('count');return '<p>From Dad. '+esc(txt(document.querySelector('.dh-sub')))+'</p>'+kv([['progress',q&&!q.hidden?txt(c):($('summary')&&!$('summary').hidden?'finished':'not started')],['answered',txt($('vDone'))||'0']]);}],
     ['#ltStep','STEP',function(){return kv([['question',txt($('vStep'))],['state',$('quiz')&&!$('quiz').hidden?'in progress':'waiting']])+'<p class="qp-note">Which question you&rsquo;re on.</p>';}],
     ['#ltDone','DONE',function(){return kv([['answered',txt($('vDone'))]])+'<p class="qp-note">Questions answered so far (kept on this page only).</p>';}],
     ['#ltSky','SKY',function(){var w=window.SIM_WX||{};return kv([['weather feed',w.status==='ok'?'OK':w.status==='fail'?'not available':'loading'],['sky',COND[w.cond]||'n/a']]);}],

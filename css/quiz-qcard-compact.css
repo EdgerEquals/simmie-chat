@@ -18,3 +18,16 @@
 /* 'FROM DAD' pill (span.dh-pill, data-copy=headPill) hidden in this row (Danny 13:01 AWST 24 Oct, t625u); the element stays in the
    page. Dad mark + title + tagline unchanged. The intro's 'from Dad' line and the ticker's 'From Dad' tag are not touched. */
 .q-head .qh-mast .dh-pill{display:none}
+/* Dad's mark TWICE the size + tagline moved under the title (Danny t681u 18:09 AWST 24 Oct). The tagline (p.dh-sub, "Go with whatever
+   feels right to you.") was its own line below the row on phones and far right of the row on desktop; it now sits inside .dh-brand
+   (.dh-words) directly under "Questions for Bonnie", nudged .6rem right of the title's left edge. The mark spans both text lines.
+   Rendered mark box (content + 2px padding + 1px border each side): phones (<=575px) 20 -> 40px, wider 24 -> 48px. Pill stays hidden. */
+.q-head .qh-mast .qh-c{flex-wrap:nowrap}
+.q-head .qh-mast .dh-brand{align-items:center;min-width:0}
+.q-head .qh-mast .dad-mark{width:42px;height:42px;padding:2px;margin-right:.6rem;border-radius:12px}
+.q-head .qh-mast .dh-words{display:flex;flex-wrap:wrap;align-items:baseline;min-width:0}
+.q-head .qh-mast .dh-sub{flex:0 0 100%;margin:3px 0 0 .6rem;padding-left:.4rem}
+@media (max-width:575px){
+  .q-head .qh-mast .dad-mark{width:34px;height:34px;padding:2px;margin-right:.5rem;border-radius:10px}
+  .q-head .qh-mast .dh-sub{margin:2px 0 0 .55rem}
+}
