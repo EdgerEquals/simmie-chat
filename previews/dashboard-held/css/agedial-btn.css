@@ -1,0 +1,24 @@
+/* PREVIEW ONLY (Danny 11:07 AWST 24 Oct 2026): the pinned age dial strip folds into a compact family button on the right.
+   Collapsed: just the family silhouette in the panel's own pale box, sitting in the masthead row's right end; the strip
+   takes no height, so the sticky header is shorter. Pressed: it extends across (js/agedial-btn.js, PHI^-1 = 0.618 s, the
+   same ease as the kids' animation; instant with reduced motion) into the age dial exactly as before. Colours, artwork,
+   - / + behaviour and sessionStorage are unchanged (css/agedial.css, js/agedial.js). */
+#app .agedial .ad-fam{grid-column:2;grid-row:1/span 2;display:block;margin:0;padding:0;border:0;background:none;color:inherit;
+  border-radius:6px;cursor:pointer;line-height:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#app .agedial .ad-fam:focus-visible{outline:2px solid #0A3F4C;outline-offset:2px}
+/* collapsed */
+#app .ad-pin.is-collapsed .container{position:relative;height:0;padding-top:0;padding-bottom:0}
+#app .ad-pin.is-collapsed .agedial{position:absolute;z-index:2;right:max(var(--gutter,15px),env(safe-area-inset-right));
+  bottom:calc((var(--ad-mh,42px) - 36px) / 2);display:block;padding:1px 5px}
+#app .ad-pin.is-collapsed .agedial .ad-row,#app .ad-pin.is-collapsed .agedial .ad-note{display:none}
+#app .ad-pin.is-collapsed .agedial .ad-family{width:38px;height:28px}
+#app .ad-pin.is-collapsed .agedial .ad-fam:focus-visible{outline-color:#D6ECEF;outline-offset:3px}
+@media (orientation:landscape) and (max-height:500px){#app .ad-pin.is-collapsed .agedial{padding:1px 5px}#app .ad-pin.is-collapsed .agedial .ad-family{width:38px;height:28px}}
+/* expanded layout (Danny 11:12 AWST): ONE row = [AGE DIAL: 13] ... [-][+][family], + stays at the right end beside the family,
+   - sits just left of it; the "curated for a reader" line runs full width underneath. Family drawn at button size so the
+   expanded strip is shorter. */
+#app .ad-pin .agedial .ad-row{grid-column:1;grid-row:1}
+#app .ad-pin .agedial #ad-dn{margin-left:auto}
+#app .ad-pin .agedial .ad-fam{grid-column:2;grid-row:1}
+#app .ad-pin .agedial .ad-note{grid-column:1/-1;grid-row:2}
+#app .ad-pin .agedial .ad-family{width:38px;height:28px}
