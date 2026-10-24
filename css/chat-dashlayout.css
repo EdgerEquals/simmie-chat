@@ -3,6 +3,7 @@
    page already used (css/chat.css): blush #F8CFDB, dotted pink #E58AA6, line #EBCFC2, bg #FFF8F4, white, plum #5B3A50,
    raspberry #B4436C, muted #6E5A66, and the .55 white wash. Nothing here animates.
 
+   (header + footer: now the shared dashboard header/footer, dash/css/dash-shared.css + dash/css/chat-dash.css)
    Dashboard            -> chat page
    top bar: logo | Lock + Ask Dad   -> Simmie avatar + name | Lock  (no Ask Dad on the live chat page)
    bottom (mark) row of the header  -> the tagline: the page's existing sub-line "Replies usually take under a minute"
@@ -18,39 +19,9 @@
 
 /* the chat screen spans the full width (like the dashboard); content columns are 640px, centred */
 #screen-chat.chat{max-width:none;height:100vh;height:100dvh;margin:0;border-radius:0;box-shadow:none;overflow:hidden;background:transparent}
-#screen-chat .container{width:100%;max-width:640px;margin:0 auto;padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
-
-/* header */
-#screen-chat .chat-head{display:block;flex:none;padding:0;padding-top:env(safe-area-inset-top);background:var(--blush);border-bottom:3px dotted #E58AA6;position:relative;z-index:2}
-#screen-chat .topbar .container{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:52px;padding-top:6px;padding-bottom:2px}
-#screen-chat .tb-right{display:flex;align-items:center;gap:8px;flex:none}
-#screen-chat .avatar{width:38px;height:38px;font-size:1.35rem}
-#screen-chat .name{font-size:1.25rem}
-#screen-chat .masthead .container{padding-top:0;padding-bottom:6px}
-#screen-chat .masthead .status{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* message log: the only part that scrolls; the .55 white wash sits on the 640px column only */
 #screen-chat .log{padding:16px max(12px,calc((100% - 616px) / 2));
   background:linear-gradient(90deg,transparent calc(50% - 320px),rgba(255,255,255,.55) calc(50% - 320px),rgba(255,255,255,.55) calc(50% + 320px),transparent calc(50% + 320px))}
 @media (max-width:640px){#screen-chat .log{background:rgba(255,255,255,.55)}}
 
-/* footer stack, locked at the bottom: typing line, #app-foot line, message bar */
-#screen-chat .chat-foot{flex:none;background:#fff;border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom);position:relative;z-index:2}
-#screen-chat .typing{max-width:640px;margin:0 auto;padding:4px 16px 0}
-#screen-chat #app-foot.footer{height:22px;margin:0}
-#screen-chat #app-foot .container{display:flex;align-items:center;justify-content:flex-end;height:100%;font-size:.66rem;line-height:1;color:var(--muted);
-  white-space:nowrap;overflow:hidden;opacity:.85}
-#screen-chat #app-foot .container span{overflow:hidden;text-overflow:ellipsis}
-#screen-chat .composer{display:block;padding:0 0 10px;background:transparent;border:0}
-#screen-chat .composer .container{display:flex;gap:8px;align-items:flex-end}
-#screen-chat .composer textarea{flex:1 1 0;min-width:0}
-
-/* short landscape phones (iPhone SE sideways 667x375): tighter rows so the header stays small */
-@media (orientation:landscape) and (max-height:500px){
-  #screen-chat .topbar .container{min-height:40px;padding-top:3px;padding-bottom:3px}
-  #screen-chat .avatar{width:30px;height:30px;font-size:1.1rem}
-  #screen-chat .masthead .container{padding-bottom:3px}
-  #screen-chat #app-foot.footer{height:18px} #screen-chat #app-foot .container{font-size:.6rem}
-  #screen-chat .composer{padding-bottom:6px}
-  #screen-chat .send{width:42px;height:42px}
-}
