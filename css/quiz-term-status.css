@@ -52,12 +52,13 @@ body.paused .tstat .ts-dot,body.paused .tstat .ts-s i{animation-play-state:pause
 .tstat .ts-w > b{display:none!important}
 .tstat .ts-txt{white-space:pre;color:var(--mx-g)}
 .tstat .ts-cur{display:inline-block;width:.6em;height:.95em;margin-left:1px;background:var(--mx-g);box-shadow:0 0 4px rgba(0,255,65,.6)}
-html[data-term-phase="cursor"] .tstat .ts-cur{animation:tsBlink var(--ts-blink,1.272s) steps(1,end) infinite}
-html[data-term-phase="status"] .tstat .ts-txt.ts-go{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
+/* t651u: pill cursor = footer cursor animation exactly (cblink, var(--phi-cursor), steps(1), var(--phi-cursor-d)); JS locks its startTime to the footer's. Runs always, hidden by opacity:1 override outside cursor phases. */
+.tstat .ts-cur{animation:cblink var(--phi-cursor,1.272s) steps(1) var(--phi-cursor-d,0s) infinite}
+html:not([data-term-phase="cursor"]) .tstat .ts-cur{opacity:1!important}
+html[data-term-phase="status"] .tstat .ts-txt.ts-go{animation:tsPulse 2.618s ease-in-out infinite}
 html[data-term-phase="live"] .tstat .ts-txt{color:var(--mx-r);text-shadow:0 0 3px rgba(255,0,51,.35)}
-html[data-term-phase="live"] .tstat .ts-txt.ts-go{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
+html[data-term-phase="live"] .tstat .ts-txt.ts-go{animation:tsPulse 2.618s ease-in-out infinite}
 html[data-term-phase="live"] .tstat .ts-cur{background:var(--mx-r);box-shadow:0 0 4px rgba(255,0,51,.6)}
-@keyframes tsBlink{0%{opacity:1}50%{opacity:0}}
 html[data-term-phase="quiet"] .tstat .ts-txt{color:#5E7A66;opacity:.85;text-shadow:none}
 html[data-term-phase="quiet"] .tstat .ts-cur{background:#3E4F47;box-shadow:none;opacity:.6}
 html[data-term-phase="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px #1E2A33}
