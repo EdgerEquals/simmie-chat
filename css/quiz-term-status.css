@@ -45,7 +45,8 @@ body.paused .tstat .ts-dot,body.paused .tstat .ts-s i{animation-play-state:pause
 @media(prefers-reduced-motion:reduce){.tstat .ts-dot,.tstat .ts-s i{animation:none!important}.tstat .ts-w b,.foot .tin .blk{transition:none!important}}
 
 /* ---- t648u (Danny 13:30 AWST 24 Oct): grouped pulses (status x3 green, live x3 red, PHI^2 / pump each) + quiet "away" when not live ---- */
-.tstat .ts-l{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite;text-shadow:0 0 3px rgba(255,0,51,.35)}
+.tstat .ts-l{text-shadow:0 0 3px rgba(255,0,51,.35)}
+html[data-term-status="live"] .tstat .ts-l{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
 .tstat .ts-s i{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
 html[data-term-status="status"] .tstat .ts-s i,html[data-term-status="live"] .tstat .ts-l{animation-delay:0s}
 .tstat .ts-q{opacity:0;color:#5E7A66}
