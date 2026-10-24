@@ -54,3 +54,9 @@ html #app #screen-chat #app-foot .container{color:var(--muted)}
    the letters, ~13deg with the swash + heart); same 40px / phones 32px, same on every site. */
 html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:40px;width:81px;overflow:visible;transform:rotate(-5.5deg);transform-origin:50% 50%}
 @media (max-width:575px){html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:32px;width:65px}}
+/* 24 Oct 2026 14:05 AWST (Danny, t665u, live): Ask Dad on a phone -> the footer (with the bonnie> input) slides up to sit directly
+   under the header, so the keyboard can't cover what she types. Messages move below it. Set by dash/js/chat-term.js (class
+   askdad-up on #screen-chat; height follows window.visualViewport while the keyboard is up). Blur / keyboard closed -> back down. */
+#screen-chat.askdad-up .dash-head{order:0}
+#screen-chat.askdad-up #chat-foot{order:1}
+#screen-chat.askdad-up #log{order:2}

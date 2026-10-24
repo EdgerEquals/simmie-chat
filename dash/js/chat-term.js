@@ -82,17 +82,55 @@
   // phones); Enter hands the text to js/app.js (window.SimmieChatSend: same message, encryption, relay and log entry as the
   // old Send). Nothing here stores or logs what she types. Her line is cleared once handed over.
   var sending = false;
-  function openInput(prefix){
+  // Ask Dad on a phone (Danny 14:05 AWST 24 Oct, t665u): the keyboard used to cover the bonnie> input at the bottom of the page.
+  // Now the whole footer (input included) slides up to sit directly under the header (CSS order, dash/css/chat-dash.css) and the
+  // chat screen's height follows window.visualViewport, so the input stays in view above the keyboard. Blur, Esc, Enter (sent)
+  // or the keyboard closing -> it slides back to its normal place. Touch phones/tablets only (no on-screen keyboard on desktop).
+  // Slide time PHI^-2 = 0.382 s; no slide under reduced motion. Nothing typed is read, stored or logged here.
+  var TOUCH = window.matchMedia ? window.matchMedia("(hover: none) and (pointer: coarse)") : {matches:false};
+  var kb = {on:false, base:0, shrunk:false};
+  function slide(el, fromTop){
+    if(RM.matches || !el || !el.animate) return;
+    var d = fromTop - el.getBoundingClientRect().top; if(Math.abs(d) < 1) return;
+    try{ el.animate([{transform:"translateY(" + d + "px)"}, {transform:"none"}], {duration:382, easing:"cubic-bezier(.2,.7,.2,1)"}); }catch(e){}
+  }
+  function logToEnd(){ var lg = $("#log"); if(lg) lg.scrollTop = lg.scrollHeight; }
+  function fitKb(){
+    if(!kb.on) return;
+    var s = $("#screen-chat"), v = window.visualViewport; if(!s) return;
+    var h = v ? v.height : window.innerHeight;
+    if(h < kb.base * 0.85) kb.shrunk = true;
+    else if(kb.shrunk){ var i = $("#tty-in"); if(i) i.blur(); dropFoot(); return; }   // keyboard closed
+    s.style.height = Math.round(h) + "px";
+    if(window.scrollY) window.scrollTo(0, 0);
+    s.style.transform = (v && v.offsetTop > 0.5) ? "translateY(" + Math.round(v.offsetTop) + "px)" : "";
+  }
+  function liftFoot(){
+    var s = $("#screen-chat"), ft = $("#chat-foot"); if(!s || !ft || kb.on || !TOUCH.matches) return;
+    var v = window.visualViewport; kb.on = true; kb.shrunk = false; kb.base = v ? v.height : window.innerHeight;
+    var y0 = ft.getBoundingClientRect().top;
+    s.classList.add("askdad-up"); slide(ft, y0); logToEnd(); fitKb();
+  }
+  function dropFoot(){
+    var s = $("#screen-chat"), ft = $("#chat-foot"); if(!s || !kb.on) return;
+    kb.on = false; var y0 = ft ? ft.getBoundingClientRect().top : 0;
+    s.classList.remove("askdad-up"); s.style.height = ""; s.style.transform = "";
+    if(ft) slide(ft, y0); logToEnd();
+  }
+  if(window.visualViewport){ window.visualViewport.addEventListener("resize", fitKb); window.visualViewport.addEventListener("scroll", fitKb); }
+  window.addEventListener("resize", fitKb);
+  function openInput(prefix, lift){
     var f = $("#tty-form"), i = $("#tty-in"); if(!f || !i) return;
     if(prefix && !i.value.trim()) i.value = prefix;
     f.hidden = false; stop(); sync();
+    if(lift) liftFoot();
     i.focus({preventScroll:true});
     try{ i.setSelectionRange(i.value.length, i.value.length); }catch(e){}
   }
-  function closeInput(){ var f = $("#tty-form"); if(!f || f.hidden) return; f.hidden = true; sync(); }
+  function closeInput(){ dropFoot(); var f = $("#tty-form"); if(!f || f.hidden) return; f.hidden = true; sync(); }
   function wire(){
     var o = $("#tty-open"); if(o) o.addEventListener("click", function(){ openInput(""); });
-    var b = $("#ask-dad"); if(b){ b.addEventListener("click", function(){ openInput("Dad: "); }); b.classList.add("ready"); }
+    var b = $("#ask-dad"); if(b){ b.addEventListener("click", function(){ openInput("Dad: ", true); }); b.classList.add("ready"); }
     var f = $("#tty-form"), i = $("#tty-in");
     if(f && i){
       f.addEventListener("submit", function(e){
@@ -113,5 +151,5 @@
     if(!started){ started = true; wire(); }
     if(!running){ running = true; seenKey = null; armedAt = Date.now() + 6000; wasPending = false; checkReply(); sync(); }
   });
-  document.addEventListener("rebella:locked", function(){ running = false; stop(); endReply(); var f = $("#wx-foot"); if(f) f.classList.remove("tty-busy-on"); });
+  document.addEventListener("rebella:locked", function(){ running = false; stop(); endReply(); dropFoot(); var f = $("#wx-foot"); if(f) f.classList.remove("tty-busy-on"); });
 })();
