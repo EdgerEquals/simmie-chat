@@ -1,0 +1,24 @@
+/* PREVIEW ONLY (previews/chat-held/): travelling glow on the four footer dots left of / above the Simmie avatar
+   (.tty-bar title-bar dots: three window dots + the .msg-led message-status LED). Danny 24 Oct 2026 10:42 AWST: a soft light walks dot 1->2->3->4, then back 4->3->2->1, looping
+   (ping-pong, like a signal bouncing). It sits on a ::after halo, so each dot's own colour/animation underneath is untouched.
+   Colour: the page's own palette via --dg-c = var(--accent) = the chat raspberry #B4436C.
+   Timing (/home/box/.config/phi-timing-rules.md): Simmie terminal element, Bonnie slot "offering story" PHI^6 17.94 s x PHI^-1.5
+   = PHI^4.5 = 8.723 s per full there-and-back cycle (6 steps of 1.454 s). The four dots move as one group, so they share one
+   golden-angle start (-8.723 x frac(k x 0.618), k = 61 -> -6.24 s); each dot's keyframe peaks at its own step (dot1 0, dot2 1/6 + 5/6,
+   dot3 2/6 + 4/6, dot4 3/6 of the cycle). Fixed period (not weather-swept: that needs the shared phi-timing.js, left untouched).
+   prefers-reduced-motion: no animation, halo hidden (dots static). */
+#tty{--dg-c:var(--accent,#B4436C);--dg-max:.9;--dg-t:8.723s;--dg-d:-6.24s}
+#tty .tty-bar > i:nth-of-type(1),#tty .tty-bar > i:nth-of-type(2),#tty .tty-bar > i:nth-of-type(3),#tty .tty-bar > .msg-led{position:relative}
+#tty .tty-bar > i:nth-of-type(1)::after,#tty .tty-bar > i:nth-of-type(2)::after,#tty .tty-bar > i:nth-of-type(3)::after,#tty .tty-bar > .msg-led::after{content:"";position:absolute;inset:-1px;border-radius:50%;pointer-events:none;opacity:0;
+  background:color-mix(in srgb,var(--dg-c) 75%,transparent);
+  box-shadow:0 0 3px 1px color-mix(in srgb,var(--dg-c) 85%,transparent),0 0 9px 2px color-mix(in srgb,var(--dg-c) 40%,transparent);
+  animation:dg1 var(--dg-t) ease-in-out var(--dg-d) infinite}
+#tty .tty-bar > i:nth-of-type(2)::after{animation-name:dg2}
+#tty .tty-bar > i:nth-of-type(3)::after{animation-name:dg3}
+#tty .tty-bar > .msg-led::after{animation-name:dg4}
+html.wx-paused #tty .tty-bar > i:nth-of-type(1)::after,html.wx-paused #tty .tty-bar > i:nth-of-type(2)::after,html.wx-paused #tty .tty-bar > i:nth-of-type(3)::after,html.wx-paused #tty .tty-bar > .msg-led::after{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){#tty .tty-bar > i:nth-of-type(1)::after,#tty .tty-bar > i:nth-of-type(2)::after,#tty .tty-bar > i:nth-of-type(3)::after,#tty .tty-bar > .msg-led::after{animation:none;opacity:0}}
+@keyframes dg1{0%{opacity:var(--dg-max)}16.667%{opacity:0}83.333%{opacity:0}100%{opacity:var(--dg-max)}}
+@keyframes dg2{0%{opacity:0}16.667%{opacity:var(--dg-max)}33.333%{opacity:0}66.667%{opacity:0}83.333%{opacity:var(--dg-max)}100%{opacity:0}}
+@keyframes dg3{0%,16.667%{opacity:0}33.333%{opacity:var(--dg-max)}50%{opacity:0}66.667%{opacity:var(--dg-max)}83.333%,100%{opacity:0}}
+@keyframes dg4{0%,33.333%{opacity:0}50%{opacity:var(--dg-max)}66.667%,100%{opacity:0}}
