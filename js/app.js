@@ -237,6 +237,36 @@
   // ---------- render ----------
   const fmtTime = (ts) => new Date(ts).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
   const fmtDay = (ts) => new Date(ts).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+  // Web addresses in message text become tappable links (Danny t670u 14:20 AWST 24 Oct). DOM nodes only: text via
+  // createTextNode, links via createElement('a') + textContent; never innerHTML. Only http(s):// is matched, and the
+  // parsed protocol is re-checked, so javascript:, data: etc. stay plain text. Trailing . , ! ? ; : quotes and an
+  // unbalanced ) are left out of the link. Message data itself is untouched.
+  const URL_RE = /\bhttps?:\/\/[^\s<>"'`]+/gi;
+  function trimUrl(u) {
+    for (;;) {
+      const c = u.slice(-1);
+      if ('.,!?;:\'"]}'.includes(c) && c) u = u.slice(0, -1);
+      else if (c === ')' && (u.split('(').length < u.split(')').length)) u = u.slice(0, -1);
+      else return u;
+    }
+  }
+  function safeHref(u) {
+    try { const x = new URL(u); return (x.protocol === 'https:' || x.protocol === 'http:') ? x.href : null; } catch (e) { return null; }
+  }
+  function linkified(text) {
+    const frag = document.createDocumentFragment(), s = String(text); let at = 0, m;
+    URL_RE.lastIndex = 0;
+    while ((m = URL_RE.exec(s))) {
+      const u = trimUrl(m[0]), href = safeHref(u);
+      if (!href) continue;
+      if (m.index > at) frag.appendChild(document.createTextNode(s.slice(at, m.index)));
+      const a = document.createElement('a'); a.className = 'msg-link'; a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.textContent = u; frag.appendChild(a);
+      at = m.index + u.length; URL_RE.lastIndex = at;
+    }
+    if (at < s.length) frag.appendChild(document.createTextNode(s.slice(at)));
+    return frag;
+  }
   function render() {
     const log = $('log'), list = [...msgs.values()].sort((a, b) => a.ts - b.ts);
     
@@ -257,8 +287,8 @@
       if (m.reply_to) {
         const qm = msgs.get(m.reply_to), q = document.createElement('span'); q.className = 'quote';
         q.textContent = 'Answer to ' + (qm ? senderName(qm.from) : (m.text.match(/^\[Answer to (\w+)/) || [, 'Dad'])[1]); b.appendChild(q);
-        b.appendChild(document.createTextNode(m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text)));
-      } else b.appendChild(document.createTextNode(m.text));
+        b.appendChild(linkified(m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text)));
+      } else b.appendChild(linkified(m.text));
       if (m.from !== 'daughter' && m.kind === 'question') b.appendChild(questionControls(m));
       const meta = document.createElement('span'); meta.className = 'meta';
       let label = fmtTime(m.ts);

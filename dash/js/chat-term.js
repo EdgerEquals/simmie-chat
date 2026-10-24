@@ -52,7 +52,8 @@
   // newest Simmie reply on screen (the same bubble js/app.js renders; Dad's messages are not Simmie's)
   function lastReply(){
     var els = document.querySelectorAll("#log .msg.them:not(.dad)"), b = els[els.length - 1]; if(!b) return {n:0, key:"", text:""};
-    var t = ""; for(var c = b.firstChild; c; c = c.nextSibling){ if(c.nodeType === 3){ t = c.data; break; } }
+    var t = "", got = false; for(var c = b.firstChild; c; c = c.nextSibling){   // message text = its text nodes + tappable links (t670u)
+      if(c.nodeType === 3){ t += c.data; got = true; } else if(c.nodeType === 1 && c.classList.contains("msg-link")){ t += c.textContent; got = true; } else if(got) break; }
     t = String(t).replace(/\s+/g, " ").trim();
     return {n:els.length, key:els.length + "|" + t.slice(0, 60), text:t};
   }

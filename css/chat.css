@@ -80,3 +80,5 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 .msg.dad .choice:not(:disabled):hover,.msg.dad .choice.open{background:var(--dad-sky,#D6ECEF)}
 .msg.dad .choices.done .choice.picked{background:var(--dad-amber,#F2A541);border-color:var(--dad-amber,#F2A541);color:var(--dad-charcoal,#24292E)}
 .msg.dad .ask-box textarea{border-color:var(--dad-ocean,#0F5C6E)}
+/* tappable web addresses in chat messages (Danny t670u 24 Oct): same colour as the bubble text, underlined; palette unchanged */
+.msg a.msg-link{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;overflow-wrap:anywhere;word-break:break-all;-webkit-tap-highlight-color:rgba(0,0,0,.08)}
