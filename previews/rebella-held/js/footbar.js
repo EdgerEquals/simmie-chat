@@ -7,7 +7,7 @@
    localStorage: 'rebella.footer.weather' (that cache) and 'rebella.footer.pause' (only if Pause motion is pressed).
    It only READS the nickname via window.RebellaVisitor and listens to the radio's own 'rebella:station' / 'rebella:radio'
    events. It never reads Bonnie's Dashboard, the age dial, the queue, messages, simmie-chat data or ntfy.
-   TIMING (/home/box/.config/phi-timing-rules.md, Bonnie ladder): light blinks PHI^2, facts PHI^4 (PHI^5 for long ones),
+   TIMING (/home/box/.config/phi-timing-rules.md, Bonnie ladder): light blinks PHI^2 / PHI^3 / PHI^4 (Time / Radio / Device beat), facts PHI^4 (PHI^5 for long ones),
    animals every PHI^5 crossing in PHI^4, wave breathes PHI^5 (4 beats when the radio plays), golden-angle offsets,
    weather sweep s read at each cycle boundary. Reduced motion: nothing moves, facts swap in place. */
 (function () {
@@ -77,11 +77,19 @@
   document.addEventListener('rebella:station', function (e) { var d = e.detail || {}; radio.label = d.label || ''; radio.bpm = Number(d.bpm) || 0; lightRadio(); wave(); });
   document.addEventListener('rebella:radio', function (e) { radio.on = !!(e.detail && e.detail.playing); lightRadio(); wave(); });
 
-  // light blinks: PHI^2, golden-angle offsets k=1..4; a new sweep lands at the next cycle boundary
-  var bs = foot.querySelectorAll('.fb-light b');
-  function blinkT() { var p = period(2); Array.prototype.forEach.call(bs, function (b) { b.style.animationDuration = p + 's'; }); }
-  Array.prototype.forEach.call(bs, function (b, i) { var p = period(2); b.style.animationDuration = p + 's'; b.style.animationDelay = -(p * frac((i + 1) * G)) + 's'; });
-  if (bs[0]) bs[0].addEventListener('animationiteration', blinkT);
+  /* light blinks (beat, 24 Oct 2026 10:53): base PHI^2 (the Bonnie-ladder blink slot) plus a second time parameter, a phi step
+     per light: Time PHI^2 2.618 s, Radio PHI^3 4.236 s, Device PHI^4 6.854 s (1 : PHI : PHI^2, all rule-3 ladder slots).
+     PHI is irrational, so the three never lock; pairwise beats land on the ladder too (Time/Radio PHI^4, Radio/Device PHI^5,
+     Time/Device PHI^3). Golden-angle offsets k=1..3 kept; a new sweep lands at each light's own next cycle boundary.
+     Idle lights still do not blink; reduced motion and Pause motion still hold them still (CSS). */
+  var bs = foot.querySelectorAll('.fb-light b'), BEAT = 1; // BEAT = phi steps added per light (the second time parameter)
+  function blinkN(i) { return 2 + BEAT * i; }
+  function blinkT(b, i) { b.style.animationDuration = period(blinkN(i)) + 's'; }
+  Array.prototype.forEach.call(bs, function (b, i) {
+    var p = period(blinkN(i)); b.style.animationDuration = p + 's'; b.style.animationDelay = -(p * frac((i + 1) * G)) + 's';
+    b.addEventListener('animationiteration', function () { blinkT(b, i); });
+  });
+  document.addEventListener('rebella:weather', function () { Array.prototype.forEach.call(bs, function (b, i) { if (b.parentNode.classList.contains('idle')) blinkT(b, i); }); });
 
   /* fun-fact ticker in #bar-line (the help orb borrows this line; never write while it is busy) */
   var FACTS = [
