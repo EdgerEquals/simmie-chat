@@ -42,3 +42,7 @@
 
 .q-head .qh-mast .dh-sub{margin-left:-5px;padding-left:3px}
 @media (max-width:575px){.q-head .qh-mast .dh-sub{margin-left:-5px;padding-left:3px}}
+/* Optical correction (Danny t685u 18:24 AWST 24 Oct: "bottom line slightly too far to left"): ink-exact alignment with the round Q's
+   overshoot read too far left, so the tagline text sits 2px right of the Q's ink. Padding 3px -> 5px; the orange bar stays where it was. */
+.q-head .qh-mast .dh-sub{padding-left:5px}
+@media (max-width:575px){.q-head .qh-mast .dh-sub{padding-left:5px}}
