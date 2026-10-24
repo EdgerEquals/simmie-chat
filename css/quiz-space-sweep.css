@@ -1,0 +1,25 @@
+/* Space orbit layer (Danny 13:01-13:03 AWST 24 Oct, t626u/t628u/t629u): a NEW, very slow layer of 4 space emojis on two tilted
+   rings across the MIDDLE band of the page (header bottom -> footer top; js/quiz-space-sweep.js keeps --qs-top / --qs-h and
+   the ring length in step). The existing space emojis are untouched. Three motions per emoji, all CSS animations (so
+   js/ratio-pump.js + Dad's dial 0.75 scale them), all on distinct phi-power periods (irrational ratios, so the layer beats):
+     orbit    ring -20deg PHI^(10 - 0.5*moon), ring +25deg PHI^(9.5 - 0.25*moon)    (moon = RatioPump feed, 0 new .. 1 full)
+     rotation PHI^7.125 / 7.375 / 7.625 / 7.875 per emoji (spin 360 / flip / 180 and back / rock)
+     opacity  PHI^(5.25 + 0.5*day + j/8) per emoji, 0.08 -> 0.32, ease-in-out      (day = RatioPump feed, Perth time of day)
+   Durations come from per-element CSS vars set by the JS (progress kept when a feed changes, so nothing jumps); golden-angle
+   start offsets. Behind content (z-index -1 after the theme layers), pointer-events none, aria-hidden. Paused while the tab is
+   hidden or Pause motion is on; hidden for prefers-reduced-motion. */
+.qs-layer{position:fixed;left:0;right:0;top:var(--qs-top,120px);height:var(--qs-h,50vh);z-index:-1;pointer-events:none;overflow:hidden}
+.qs-ring{position:absolute;left:-25%;width:150%;top:50%;height:0;transform:rotate(var(--ring,-20deg));transform-origin:50% 0}
+.qs-ring .qs{position:absolute;left:-24px;top:var(--off,0px);font-size:18px;line-height:1;will-change:transform;
+  animation:qsOrbit var(--qs-orbit,122.99s) linear var(--del,0s) infinite}
+.qs .qs-rot{display:block;transform-style:preserve-3d;animation:var(--rot-kf,qsSpin) var(--qs-rot,34.79s) var(--rot-ease,linear) var(--rdel,0s) infinite}
+.qs .qs-op{display:block;opacity:.08;animation:qsPulse var(--qs-pulse,14.1s) ease-in-out var(--pdel,0s) infinite}
+@keyframes qsOrbit{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--len,1920px),0,0)}}
+@keyframes qsSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes qsFlip{0%{transform:perspective(200px) rotateY(0deg)}50%{transform:perspective(200px) rotateY(180deg)}100%{transform:perspective(200px) rotateY(360deg)}}
+@keyframes qsHalf{0%,100%{transform:rotate(0deg)}50%{transform:rotate(180deg)}}
+@keyframes qsRock{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(20deg)}}
+@keyframes qsPulse{0%,100%{opacity:.08}50%{opacity:.32}}
+@media (max-width:575px){.qs-ring .qs{font-size:14px}}
+.qs-layer.qs-paused *,body.paused .qs-layer *{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){.qs-layer{display:none}}

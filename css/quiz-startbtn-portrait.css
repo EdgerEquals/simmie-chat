@@ -1,0 +1,8 @@
+/* 'Start questionnaire' button (#go.big) in PORTRAIT on phones only (Danny 13:04 AWST 24 Oct, t630u): slimmer and a little
+   further from the intro text, so it (and its glow) sits cleanly above the questionnaire instead of crowding it. It was already
+   in normal flow (position:relative, not fixed/sticky/absolute); only size and spacing change here. Landscape is untouched
+   (this file matches portrait only). Was 20px text, 30px line, 12px/28.8px padding = 56px tall; now 17px text, 21px line,
+   11.5px/22px padding = 44px tall (tap target stays >= 44px), 14px gap above. Cyan accent + glow unchanged. */
+@media (orientation:portrait) and (max-width:600px){
+  #start #go.big{font-size:17px;line-height:21px;padding:11.5px 22px;min-height:44px;margin-top:14px}
+}
