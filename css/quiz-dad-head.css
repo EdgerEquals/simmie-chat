@@ -199,3 +199,11 @@ textarea:focus-visible{border-color:#0AF2FF;outline-color:#0AF2FF!important}
 .sum li{--c:#071829!important;border-color:#143A57}
 .sum .vs{color:#85A6BB}
 .dad-dj .dj-vol input{color:#85A6BB}
+/* Bonnie's Rebella logo 30% bigger, its bottom floating ~28% below the top bar (Danny t686u/t687u 18:25 AWST 24 Oct).
+   Was 81x40 (wide) / 65x32 (<=480px and short landscape); now 105x52 / 85x42, same -5.5deg levelling. Moved with transform only, so the
+   top bar keeps its 50/44/40px height; the top bar is lifted above the weather/ticker row so the overhang hovers over it (nothing clips it). */
+.q-head .qh-top{position:relative;z-index:3;overflow:visible}
+.q-head .qh-top .qh-c{overflow:visible}
+.q-head .qh-logo{height:52px;width:105px;transform:translateY(14px) rotate(-5.5deg)}
+@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{height:42px;width:85px;transform:translateY(12px) rotate(-5.5deg)}}
+@media(max-width:480px){.q-head .qh-logo{height:42px;width:85px;transform:translateY(12px) rotate(-5.5deg)}}
