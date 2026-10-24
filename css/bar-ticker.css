@@ -1,0 +1,41 @@
+/* The simmie> bar (live chat footer), Danny 12:23 + 12:24 AWST 24 Oct 2026 (t596u/t597u). Chat palette only.
+   - Header: the fun-fact ticker moved out; the weather chip keeps its place on the right; row height unchanged.
+   - Bar: ticker scrolls in the gap beside "simmie>" (speed in px/s from dash/js/hud.js via the ratio pump);
+     hidden while she types; "ANSWER PENDING" blinks slowly after she sends; Simmie's reply scrolls through in raspberry
+     #B4436C with a heartbeat. Phi timing (Simmie slots, PHI^n * PHI^-1.5): blink var(--phi-tty-hold) = PHI^2.5 = 3.33 s,
+     heartbeat var(--phi-cursor) = PHI^0.5 = 1.27 s; both are CSS animations, so the ratio pump's rate (site dial 0.75 x pump)
+     also slows them. Reduced motion: no scrolling, steady text, no beat. */
+#dash-head .wx-hud .container{justify-content:flex-end}
+
+#tty-open .wx-ticker{flex:1 1 auto;min-width:0;align-self:stretch;display:flex;align-items:center;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 3%,#000 95%,transparent)}
+#tty-open .wx-ticker[hidden],#tty-open .tty-pend[hidden],#tty-open .tty-reply[hidden]{display:none}
+#tty-open .wx-tick-track{white-space:nowrap}
+#tty-open .tk-k{color:#2F7F86}
+#tty-open .tk-n{color:#B4436C}
+#tty-open .tk-s{color:#5B3A50}
+#tty-open .tk-p{color:#9C7E8E}
+
+#tty-open .tty-pend{flex:1 1 auto;min-width:0;font:700 11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:1.5px;color:#5B3A50;
+  animation:bar-pend var(--phi-tty-hold,3.33s) ease-in-out var(--phi-tty-hold-d,0s) infinite}
+@keyframes bar-pend{0%,40%{opacity:1}55%,90%{opacity:.12}100%{opacity:1}}
+
+#tty-open .tty-reply{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px;color:#B4436C}
+#tty-open .tty-heart{flex:none;display:inline-block;font-size:12px;line-height:1;color:#B4436C;transform-origin:50% 60%;
+  animation:bar-heart var(--phi-cursor,1.27s) ease-out infinite}
+#tty-open .tty-reply-win{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 3%,#000 95%,transparent)}
+#tty-open .tty-reply-track{display:inline-block;font:700 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#B4436C;will-change:transform;
+  animation:bar-glow var(--phi-cursor,1.27s) ease-out infinite}
+/* lub-dub: two quick beats, then rest */
+@keyframes bar-heart{0%{transform:scale(1)}10%{transform:scale(1.35)}20%{transform:scale(1)}30%{transform:scale(1.22)}42%,100%{transform:scale(1)}}
+@keyframes bar-glow{0%{text-shadow:0 0 0 rgba(180,67,108,0)}10%{text-shadow:0 0 6px rgba(180,67,108,.55)}20%{text-shadow:0 0 1px rgba(180,67,108,.15)}
+  30%{text-shadow:0 0 5px rgba(180,67,108,.45)}42%,100%{text-shadow:0 0 0 rgba(180,67,108,0)}}
+
+@media (prefers-reduced-motion:reduce){
+  #tty-open .tty-pend,#tty-open .tty-heart,#tty-open .tty-reply-track{animation:none!important;opacity:1}
+  #tty-open .wx-ticker{overflow:hidden;-webkit-mask-image:none;mask-image:none}
+  #tty-open .wx-tick-track{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  #tty-open .tty-reply-win{text-overflow:ellipsis}
+  #tty-open .tty-reply-track{display:inline}
+}

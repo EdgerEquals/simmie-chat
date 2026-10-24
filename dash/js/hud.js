@@ -171,14 +171,32 @@
       });
       tr.appendChild(h);
     }
-    tickN = list.length; tr.setAttribute("data-phi-js", "");   // one item passes every PHI^4 (swept at the loop boundary)
-    var ta = tr.getAnimations ? tr.getAnimations()[0] : null;
-    if(ta && ta.effect){ PT.retime(ta, tickN * PT.ms("fact")); } else tr.style.animationDuration = (tickN * PT.s("fact")).toFixed(2) + "s";
+    tickN = list.length; tr.setAttribute("data-phi-js", "");   // speed set here (px/s), so the pump/sweep never rescale it twice
+    tickRetime(tr);
     $("#wx-ticker").setAttribute("aria-label", "Fun facts for age " + age);
   }
   var tickN = 0;
-  document.addEventListener("animationiteration", function(ev){ if(ev.target.id === "wx-tick-track" && tickN && ev.target.getAnimations){
-    var ta = ev.target.getAnimations()[0]; if(ta) PT.retime(ta, tickN * PT.ms("fact")); } });
+  // Ticker SPEED (chat page, Danny 12:23 AWST 24 Oct, t596u: "going crazy fast", now in the simmie> bar).
+  // Was: one fact every PHI^4 s whatever its length, weather-swept -> ~268 px/s with today's long facts.
+  // Now a constant reading speed in px/s, driven by ONE feed through the ratio pump: js/ratio-pump.js picks the lowest
+  // incoming feed (weather / moon / time of day / messages) as the master ratio, pump = PHI^((master-1)/4) (slow-only),
+  // rate = site dial 0.75 x pump. Speed = TICK_V0 x rate = 32 x (0.665..0.75) = ~21..24 px/s. The weather sweep is NOT applied on
+  // top (gain capped: weather already reaches the ticker as one of the pump's feeds). No pump module: dial only (24 px/s).
+  // Re-read every 5 s and when the ticker reappears; the loop position is kept, so a new speed lands without a jump.
+  // Reduced motion: no scrolling (CSS).
+  var TICK_V0 = 32, TICK_MIN = 16, TICK_MAX = 30;
+  function tickRate(){ var P = window.RatioPump; var r = P && P.rate ? +P.rate() : 0.75; return (r > 0 && isFinite(r)) ? r : 0.75; }
+  function tickPxps(){ return Math.max(TICK_MIN, Math.min(TICK_MAX, TICK_V0 * tickRate())); }
+  function tickRetime(tr){
+    tr = tr || $("#wx-tick-track"); if(!tr) return; var w = tr.scrollWidth / 2; if(!(w > 0)) return;   // hidden: keep the last speed
+    var D = Math.round(w / tickPxps() * 1000), ta = tr.getAnimations ? tr.getAnimations()[0] : null;
+    if(ta && ta.effect){ var t = ta.effect.getTiming(); if(Math.abs((t.duration || 0) - D) < 5) return;
+      var p = ((ta.currentTime || 0) - (t.delay || 0)) / (t.duration || D); p = p - Math.floor(p);
+      ta.effect.updateTiming({duration:D, delay:0}); ta.currentTime = p * D;   // same spot in the loop, new speed: no jump
+    } else tr.style.animationDuration = (D / 1000).toFixed(2) + "s";
+  }
+  document.addEventListener("rebella:ticker-shown", function(){ tickRetime(); });
+  setInterval(function(){ if(!document.hidden && tickN) tickRetime(); }, 5000);   // picks up a new pump value (functional check, not an animation)
   function loadAgeAndFacts(){
     var q = clampAge(qs.get("age")), dial = window.RebellaAgeDial && clampAge(window.RebellaAgeDial.age());
     var ageP = q ? Promise.resolve((ageSrc = "?age", q)) : dial ? Promise.resolve((ageSrc = "age dial", dial)) :
@@ -273,6 +291,8 @@
     weather: function(){ return wx.key && SETS[wx.key] ? {label:SETS[wx.key].label, temp:wx.temp, at:wx.at, forced:!!forced, ok:wx.state === "ok"} : null; },
     status: function(){ return last; },
     age: function(){ return {age:age, src:ageSrc}; },
+    tickerSpeed: function(){ var P = window.RatioPump, m = P && P.master ? P.master() : null;
+      return {pxps:+tickPxps().toFixed(1), v0:TICK_V0, rate:+tickRate().toFixed(4), dial:P ? P.dial : 0.75, master:m ? m.feed : null, masterRatio:m ? m.ratio : null}; },
     fact: function(i){ var l = factList(); return l.length ? l[i % l.length] : null; },
     stats: function(){ return pstats; }
   };

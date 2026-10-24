@@ -21,6 +21,7 @@
 <script src="js/ratio-pump.js?v=1" data-site="chat" data-freq="0.75" data-slow=".ad-orbit=0.5"></script><!-- ratio pump + site frequency dial 0.75 (all motion 25% slower); Ask Dad rocket a further 50% slower (Danny 12:15 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/tagline-breathe.css?v=1"><!-- tagline breathing + wave, chat palette (Danny 12:11 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/bg-accents.css?v=1"><!-- background accents: wave + shimmer over the unchanged dots (Danny 12:19 AWST 24 Oct) -->
+<link rel="stylesheet" href="css/bar-ticker.css?v=1"><!-- fun-fact ticker in the simmie> bar, answer pending, Simmie reply (Danny 12:23-12:24 AWST 24 Oct) -->
 </head>
 <body>
 <!-- background: static dots + code texture (css/chat-dashlayout.css, unchanged) + wave/shimmer accents added by js/bg-accents.js (css/bg-accents.css) -->
@@ -59,12 +60,11 @@
     <!-- Bonnie's logo, tinted with the chat page's raspberry #B4436C (not a link) -->
     <svg class="tb-logo tb-logo-svg" viewBox="413 534 1810 893" role="img" aria-label="Rebella"><use href="img/bonnies-logo.svg#bonnies-logo"/></svg>
     <span class="tb-right"><button id="lock-btn" class="lockbtn" type="button" title="Lock this chat" aria-label="Lock this chat">&#128274; Lock</button>
-    <!-- Ask Dad: starts a message to Dad in the message box below (dash/js/chat-term.js); sends nothing by itself -->
+    <!-- Ask Dad: starts a message to Dad in the simmie> bar below (dash/js/chat-term.js); sends nothing by itself -->
     <button id="ask-dad" class="ask-dad" type="button" aria-label="Ask Dad: start a message to Dad in the message box" title="Ask Dad"><span class="ad-orbit" aria-hidden="true"><span class="ad-sat">🛰️</span></span><span class="ad-w" aria-hidden="true">Ask</span><span class="ad-w" aria-hidden="true">Dad</span></button></span>
   </div></div>
-  <!-- weather chip (Open-Meteo, fixed Perth point, no location) + age-linked fun-fact ticker (facts.json) -->
+  <!-- weather chip (Open-Meteo, fixed Perth point, no location). The fun-fact ticker moved to the simmie> bar in the footer (Danny 12:23 AWST 24 Oct, t596u) -->
   <div class="wx-hud"><div class="container">
-    <div id="wx-ticker" class="wx-ticker" role="marquee" aria-label="Fun facts"><div id="wx-tick-track" class="wx-tick-track"></div></div>
     <span id="wx-seq" class="wx-seq" aria-hidden="true"></span><span id="wx-chip" class="wx-chip" role="img" hidden><span class="wx-text"></span></span>
   </div></div>
   <!-- masthead (Dad's world mark + "Replies usually take under a minute") removed from the chat header (Danny 12:15 AWST 24 Oct, t588u) -->
@@ -82,7 +82,7 @@
       <div class="tty-bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span aria-hidden="true">simmie — tty</span></div>
       <div class="tty-body">
         <span class="tty-cloudwrap"><span class="cl-orbit" aria-hidden="true"><span>🛰️</span></span><svg id="tty-cloud" class="tty-cloud" viewBox="0 0 196 172" aria-hidden="true" focusable="false"><defs><clipPath id="tty-cl"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></clipPath><linearGradient id="tty-sh" x1="0" x2="1"><stop offset="0" stop-opacity="0" style="stop-color:var(--tc-80)"/><stop offset=".5" stop-opacity=".35" style="stop-color:var(--tc-80)"/><stop offset="1" stop-opacity="0" style="stop-color:var(--tc-80)"/></linearGradient></defs><g class="cl-body"><g style="fill:var(--tc-210)"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></g><g clip-path="url(#tty-cl)"><rect class="cl-shine" x="-120" y="0" width="90" height="172" fill="url(#tty-sh)"/></g><g class="cl-eyes" style="fill:var(--tc-211)"><rect x="93.10" y="44.4" width="18" height="42" rx="9.0" transform="rotate(-27 102.1 65.4)"/><rect x="130.65" y="34.5" width="16.5" height="42" rx="8.25" transform="rotate(-27 138.9 55.5)"/></g></g></svg></span>
-        <button id="tty-open" class="tty-line" type="button" aria-label="Simmie says hello. Tap to type a message to Simmie"><span class="tty-p">simmie&gt;</span> <span id="tty-out" class="tty-out"></span><span class="tty-hint" aria-hidden="true">tap to type to Simmie</span></button>
+        <button id="tty-open" class="tty-line" type="button" aria-label="Fun facts scrolling. Tap to type a message to Simmie"><span class="tty-p">simmie&gt;</span> <span id="tty-out" class="tty-out" hidden></span><!-- age-linked fun-fact ticker (facts.json), moved here from the header; speed: dash/js/hud.js (ratio pump) --><span id="wx-ticker" class="wx-ticker" role="marquee" aria-label="Fun facts"><span id="wx-tick-track" class="wx-tick-track"></span></span><span id="tty-pend" class="tty-pend" hidden>ANSWER PENDING</span><span id="tty-reply" class="tty-reply" hidden><span class="tty-heart" aria-hidden="true">&#9829;</span><span class="tty-reply-win"><span id="tty-reply-track" class="tty-reply-track"></span></span></span><span class="tty-hint" aria-hidden="true">tap to type to Simmie</span></button>
         <form id="tty-form" class="tty-form" hidden autocomplete="off"><label for="tty-in" class="tty-p">bonnie&gt;</label><span class="tty-inwrap"><input id="tty-in" class="tty-in" type="text" maxlength="1500" spellcheck="true" enterkeyhint="send" placeholder=" " aria-label="Message to Simmie" style="caret-color:var(--hz-green)"><span class="tty-cursor" aria-hidden="true"></span></span></form>
         <div id="tty-busy" class="tty-line tty-busy" hidden><span class="tty-p">simmie&gt;</span> <span id="tty-busy-text" class="tty-out"></span></div>
         <span id="tty-measure" class="tty-measure" aria-hidden="true">0000000000</span>
@@ -106,8 +106,8 @@
 <script src="js/crypto.js?v=4"></script>
 <script src="js/app.js?v=8"></script>
 <script src="dash/js/chat-dash.js?v=1"></script>
-<script src="dash/js/hud.js?v=1" defer></script>
-<script src="dash/js/chat-term.js?v=3" defer></script>
+<script src="dash/js/hud.js?v=2" defer></script>
+<script src="dash/js/chat-term.js?v=4" defer></script>
 <script src="dash/js/ad-plane.js?v=3" defer></script>
 <script src="js/bg-accents.js?v=1" defer></script>
 </body>
