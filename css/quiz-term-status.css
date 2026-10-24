@@ -66,3 +66,6 @@ html[data-term-phase="quiet"] .tstat .ts-dot{animation:none;background:#4F6168;b
 html[data-term-status="quiet"] .foot .tin .blk{background:#4F6168;box-shadow:none}
 body.paused .tstat .ts-txt,body.paused .tstat .ts-cur{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.tstat .ts-txt,.tstat .ts-cur{animation:none!important}}
+/* t653u (Danny 13:35 AWST 24 Oct): clearer matrix-green border; dimmed in quiet. */
+.tick .tstat{box-shadow:inset 0 0 0 1px rgba(0,255,65,.78),0 0 4px rgba(0,255,65,.22)}
+html[data-term-phase="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px rgba(0,255,65,.28)}
