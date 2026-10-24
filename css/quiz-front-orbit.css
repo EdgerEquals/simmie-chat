@@ -11,6 +11,8 @@
    above the content panel (positioned, z auto) but BELOW the pinned header (.q-head sticky z 40) and the fixed footer
    (.foot z 5), so the emojis slide UNDER both edges. On top of that the JS keeps a clip-path inset on the layer equal to
    the header's bottom edge and the footer's top edge, so nothing ever draws over them even where they are translucent.
+   t652u (13:33): ellipses span the visible middle band (header bottom -> footer top) instead of hugging the greeting; 24px phone /
+   28px desktop; opacity 0.18 floor -> 0.75 held for 20% of each fade cycle.
    pointer-events none, aria-hidden. Paused with the tab hidden / body.paused / html.wx-paused; hidden for reduced motion.
    SCROLL FADE (t643u/t644u): html.qorb-away (set by the JS once scrollY > innerHeight/12) fades BOTH orbit layers
    (this one + .qs-layer) out over PHI^-1 s, and back in when scrolled back above it. Other emojis are untouched. */
@@ -20,12 +22,12 @@
 .qf-x{position:absolute;left:0;top:0;animation:qfX var(--qf-half,25s) cubic-bezier(.3642,0,.6358,1) var(--dx,0s) infinite alternate}
 .qf-y{display:block;animation:qfY var(--qf-half,25s) cubic-bezier(.3642,0,.6358,1) var(--dy,0s) infinite alternate}
 .qf-up{display:block;transform:translate(-50%,-50%) rotate(var(--untilt,20deg))}
-.qf-op{display:block;font-size:20px;line-height:1;opacity:.06;animation:qfPulse var(--qf-pulse,11s) ease-in-out var(--pdel,0s) infinite;
+.qf-op{display:block;font-size:28px;line-height:1;opacity:.18;animation:qfPulse var(--qf-pulse,11s) ease-in-out var(--pdel,0s) infinite;
   text-shadow:0 0 6px rgba(10,242,255,.35)}
 @keyframes qfX{from{transform:translateX(calc(-1 * var(--rx,60px)))}to{transform:translateX(var(--rx,60px))}}
 @keyframes qfY{from{transform:translateY(calc(-1 * var(--ry,40px)))}to{transform:translateY(var(--ry,40px))}}
-@keyframes qfPulse{0%,100%{opacity:.06}30%{opacity:.18}50%{opacity:.7}70%{opacity:.18}}
-@media (max-width:575px){.qf-op{font-size:17px}}
+@keyframes qfPulse{0%,100%{opacity:.18}25%{opacity:.45}40%,60%{opacity:.75}75%{opacity:.45}}
+@media (max-width:575px){.qf-op{font-size:24px}}
 .qf-layer.qf-paused *,body.paused .qf-layer *,html.wx-paused .qf-layer *{animation-play-state:paused!important}
 .qf-layer[hidden]{display:none}
 /* scroll fade for both orbit layers */

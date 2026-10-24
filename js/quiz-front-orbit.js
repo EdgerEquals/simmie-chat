@@ -2,7 +2,8 @@
    Ellipses are anchored to the greeting block (#start h1, .from, avatar, intro row) in DOCUMENT coordinates, so they scroll
    with the content; the layer sits under the pinned header / fixed footer (z-order) and is clip-path'd to the band between
    them. Periods are CSS animation durations, so RatioPump (rate() = Dad's dial 0.75 x pump) scales them; QuizFrontOrbit.info()
-   reports base and effective seconds. No network, no storage. */
+   reports base and effective seconds. No network, no storage.
+   t652u (13:33): orbits enlarged to span the visible middle band, emojis 24/28px, opacity floor 0.18, peak 0.75 held longer. */
 (function () {
   'use strict';
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -37,14 +38,18 @@
     var ftTop = foot ? foot.getBoundingClientRect().top : innerHeight;   // fixed: same in document coords at scroll 0
     var docH = document.documentElement.scrollHeight;
     L.style.setProperty('--qf-h', Math.round(Math.min(docH, Math.max(ftTop, sr.bottom + sy) + 40)) + 'px');
+    // t652u: every ellipse spans the visible middle band (header bottom -> footer top at scroll 0) so the emojis sweep across
+    // the main content, and overshoots it by 26px top + bottom so they slide under the header / footer edges (t642u).
+    var bandTop = hd0, bandBot = Math.max(hd0 + 120, ftTop), band = bandBot - bandTop, my = (bandTop + bandBot) / 2;
+    var pl = sr.left, pw = sr.width, reach = band / 2 + 26;
     items.forEach(function (it) {
-      var t = document.querySelector(it.d[1]); if (!t) return;
-      var r = t.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + sy + r.height / 2, rx, ry;
+      var t = document.querySelector(it.d[1]), cx, cy = my, rx, ry;
+      var r = t ? t.getBoundingClientRect() : null;
       switch (it.d[5]) {
-        case 'reachUp':   rx = Math.max(40, Math.min(110, r.width * 0.3)); ry = Math.max(60, cy - hd0 + 26); break;
-        case 'wide':      rx = r.width * 0.52; ry = r.height * 0.5 + 26; break;
-        case 'reachDown': rx = 42; ry = Math.max(60, ftTop - cy + 26); break;
-        default:          rx = r.width * 0.5; ry = r.height * 0.5 + 22;
+        case 'reachUp':   cx = r ? r.left + r.width / 2 : pl + pw / 2; rx = Math.max(48, Math.min(130, pw * 0.3)); ry = reach; break;   // star: through "from Dad"
+        case 'wide':      cx = pl + pw * 0.5;  rx = pw * 0.44; ry = band * 0.34; break;                                                // rocket: across the heading + intro
+        case 'reachDown': cx = pl + pw * 0.42; rx = pw * 0.26; ry = reach; break;                                                      // sparkles: through the avatar + text
+        default:          cx = pl + pw * 0.62; rx = pw * 0.34; ry = band * 0.4;                                                        // globe: across the intro row
       }
       it.o.style.setProperty('--cx', Math.round(cx) + 'px'); it.o.style.setProperty('--cy', Math.round(cy) + 'px');
       it.o.firstChild.style.setProperty('--rx', Math.round(rx) + 'px'); it.o.firstChild.firstChild.style.setProperty('--ry', Math.round(ry) + 'px');
