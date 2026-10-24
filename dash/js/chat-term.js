@@ -1,12 +1,12 @@
 /* Live chat page: Simmie terminal READOUT + Ask Dad key (Danny 12:01 AWST 24 Oct 2026: chat-held header/footer ported live,
    a bit less busy). Based on the shared dash/js/talk.js, cut down:
    - the terminal only DISPLAYS (cloud + "simmie>" line): idle greetings, a fun fact now and then, a short status report
-     (counts only, from dash/js/chat-dash.js). There is NO second typing box: tapping the line puts the cursor in the
-     page's own message box (#msg), which is the only input and sends exactly as before (js/app.js).
+     (counts only, from dash/js/chat-dash.js). Tapping the line opens the terminal input (the only input since the message
+     box was removed, Danny 12:20 AWST 24 Oct); Enter sends through js/app.js exactly as the old Send did.
    - while the page is waiting for Simmie (#typing shown by js/app.js) the line shows a spinner.
-   - Ask Dad: no separate transmission window or channel. It starts a message to Dad in the same message box ("Dad: "
-     prefilled, cursor at the end); nothing is sent until she presses Send, and it then goes the normal encrypted path.
-   Never reads message text, never sends, never stores anything. Static under reduced motion. Paused while the tab is hidden. */
+   - Ask Dad: no separate transmission window or channel. It opens the terminal input with "Dad: "
+     prefilled; nothing is sent until she presses Enter, and it then goes the normal encrypted path.
+   Never stores or logs message text; sending is done by js/app.js. Static under reduced motion. Paused while the tab is hidden. */
 (function(){
   "use strict";
   var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
@@ -72,25 +72,46 @@
     var t = $("#typing"), foot = $("#wx-foot"), busy = !!(t && !t.hidden && running), line = $("#tty-busy"), open = $("#tty-open");
     if(!foot || !line || !open) return;
     if(busy === foot.classList.contains("tty-busy-on")) return;
-    foot.classList.toggle("tty-busy-on", busy); line.hidden = !busy; open.hidden = busy;
+    foot.classList.toggle("tty-busy-on", busy); line.hidden = !busy; open.hidden = busy || inputOpen();
     clearInterval(spin); spin = null;
     if(busy){
       stop(); cloud(true); var i = 0, txt = $("#tty-busy-text");
       var tick = function(){ txt.textContent = (RM.matches ? "\u2026" : SPIN[i++ % SPIN.length]) + " SIMMIE IS ON IT\u2026"; };
       tick(); spin = setInterval(function(){ if(!document.hidden) tick(); }, RM.matches ? 5000 : 120);
-    } else { cloud(false); out().textContent = ""; idle(); }
+    } else { cloud(false); out().textContent = ""; if(!inputOpen()) idle(); }
   }
 
-  function focusMsg(prefix){
-    var ta = document.getElementById("msg"); if(!ta) return;
-    if(prefix && !ta.value.trim()) ta.value = prefix;
-    ta.focus({preventScroll:true});
-    try{ ta.setSelectionRange(ta.value.length, ta.value.length); }catch(e){}
-    ta.dispatchEvent(new Event("input", {bubbles:true}));   // app.js autosizes the box
+  // Typing (Danny 12:20 AWST 24 Oct, t594u: message box + Send removed). Tap the simmie> line -> input opens (keyboard on
+  // phones); Enter hands the text to js/app.js (window.SimmieChatSend: same message, encryption, relay and log entry as the
+  // old Send). Nothing here stores or logs what she types. Her line is cleared once handed over.
+  var sending = false;
+  function inputOpen(){ var f = $("#tty-form"); return !!(f && !f.hidden); }
+  function openInput(prefix){
+    var f = $("#tty-form"), i = $("#tty-in"), o = $("#tty-open"); if(!f || !i) return;
+    if(prefix && !i.value.trim()) i.value = prefix;
+    f.hidden = false; if(o) o.hidden = true; stop();
+    i.focus({preventScroll:true});
+    try{ i.setSelectionRange(i.value.length, i.value.length); }catch(e){}
+  }
+  function closeInput(){
+    var f = $("#tty-form"), o = $("#tty-open"), busy = $("#wx-foot") && $("#wx-foot").classList.contains("tty-busy-on");
+    if(!f || f.hidden) return; f.hidden = true; if(o) o.hidden = busy;
+    if(running && !busy){ out().textContent = ""; idle(); }
   }
   function wire(){
-    var o = $("#tty-open"); if(o) o.addEventListener("click", function(){ focusMsg(""); });
-    var b = $("#ask-dad"); if(b){ b.addEventListener("click", function(){ focusMsg("Dad: "); }); b.classList.add("ready"); }
+    var o = $("#tty-open"); if(o) o.addEventListener("click", function(){ openInput(""); });
+    var b = $("#ask-dad"); if(b){ b.addEventListener("click", function(){ openInput("Dad: "); }); b.classList.add("ready"); }
+    var f = $("#tty-form"), i = $("#tty-in");
+    if(f && i){
+      f.addEventListener("submit", function(e){
+        e.preventDefault(); if(sending) return;
+        var v = i.value.trim(); if(!v || !window.SimmieChatSend) return;
+        sending = true; i.value = "";
+        Promise.resolve(window.SimmieChatSend(v)).catch(function(){}).then(function(){ sending = false; });
+      });
+      i.addEventListener("keydown", function(e){ if(e.key === "Escape"){ i.blur(); } });
+      i.addEventListener("blur", function(){ setTimeout(function(){ if(!i.value.trim() && document.activeElement !== i) closeInput(); }, 150); });
+    }
     var t = $("#typing"); if(t && window.MutationObserver) new MutationObserver(busySync).observe(t, {attributes:true, attributeFilter:["hidden"]});
   }
   document.addEventListener("visibilitychange", function(){ if(!document.hidden && job && !timer && job.step) timer = setTimeout(job.step, 200); });

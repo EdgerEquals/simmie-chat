@@ -79,16 +79,14 @@
     <div id="chat-foot" class="chat-foot">
       <div id="typing" class="typing" hidden><span class="dots"><i></i><i></i><i></i></span> <span id="typing-text">Waiting for Simmie…</span></div>
       <footer class="footer" id="app-foot"><div class="container"><span>Messages are encrypted and sent securely to Simmie</span></div></footer>
-      <form id="send-form" class="composer" autocomplete="off"><div class="container">
-        <textarea id="msg" rows="1" maxlength="1500" placeholder="Type a message…" aria-label="Message"></textarea>
-        <button id="send-btn" class="send" type="submit" aria-label="Send">➤</button>
-      </div></form>
+      <!-- message box + Send removed (Danny 12:20 AWST 24 Oct, t594u): Bonnie taps the simmie> line, types, Enter sends (js/app.js, same encrypted path) -->
   <div id="wx-foot" class="wx-foot" role="region" aria-label="Simmie and status">
     <div id="tty" class="tty">
       <div class="tty-bar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span aria-hidden="true">simmie — tty</span></div>
       <div class="tty-body">
         <span class="tty-cloudwrap"><span class="cl-orbit" aria-hidden="true"><span>🛰️</span></span><svg id="tty-cloud" class="tty-cloud" viewBox="0 0 196 172" aria-hidden="true" focusable="false"><defs><clipPath id="tty-cl"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></clipPath><linearGradient id="tty-sh" x1="0" x2="1"><stop offset="0" stop-opacity="0" style="stop-color:var(--tc-80)"/><stop offset=".5" stop-opacity=".35" style="stop-color:var(--tc-80)"/><stop offset="1" stop-opacity="0" style="stop-color:var(--tc-80)"/></linearGradient></defs><g class="cl-body"><g style="fill:var(--tc-210)"><circle cx="56.3" cy="116.7" r="45.4"/><circle cx="73.2" cy="73.7" r="60.7"/><circle cx="135.3" cy="86.8" r="51.3"/><circle cx="96.7" cy="105.1" r="56.2"/><circle cx="112.4" cy="53.7" r="43.1"/></g><g clip-path="url(#tty-cl)"><rect class="cl-shine" x="-120" y="0" width="90" height="172" fill="url(#tty-sh)"/></g><g class="cl-eyes" style="fill:var(--tc-211)"><rect x="93.10" y="44.4" width="18" height="42" rx="9.0" transform="rotate(-27 102.1 65.4)"/><rect x="130.65" y="34.5" width="16.5" height="42" rx="8.25" transform="rotate(-27 138.9 55.5)"/></g></g></svg></span>
         <button id="tty-open" class="tty-line" type="button" aria-label="Simmie says hello. Tap to type a message to Simmie"><span class="tty-p">simmie&gt;</span> <span id="tty-out" class="tty-out"></span><span class="tty-hint" aria-hidden="true">tap to type to Simmie</span></button>
+        <form id="tty-form" class="tty-form" hidden autocomplete="off"><label for="tty-in" class="tty-p">bonnie&gt;</label><span class="tty-inwrap"><input id="tty-in" class="tty-in" type="text" maxlength="1500" spellcheck="true" enterkeyhint="send" placeholder=" " aria-label="Message to Simmie" style="caret-color:var(--hz-green)"><span class="tty-cursor" aria-hidden="true"></span></span></form>
         <div id="tty-busy" class="tty-line tty-busy" hidden><span class="tty-p">simmie&gt;</span> <span id="tty-busy-text" class="tty-out"></span></div>
         <span id="tty-measure" class="tty-measure" aria-hidden="true">0000000000</span>
       </div>
@@ -109,10 +107,10 @@
 
 </main>
 <script src="js/crypto.js?v=4"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/app.js?v=8"></script>
 <script src="dash/js/chat-dash.js?v=1"></script>
 <script src="dash/js/hud.js?v=1" defer></script>
-<script src="dash/js/chat-term.js?v=1" defer></script>
+<script src="dash/js/chat-term.js?v=2" defer></script>
 <script src="dash/js/ad-plane.js?v=3" defer></script>
 </body>
 </html>

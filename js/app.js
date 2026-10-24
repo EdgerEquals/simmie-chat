@@ -65,7 +65,6 @@
     await loadPending();
     await pollLog();
     startLive();
-    $('msg').focus();
   }
 
   // ---------- pending (sent but not yet in the log) ----------
@@ -209,17 +208,16 @@
   }
 
   // ---------- sending ----------
-  const ta = $('msg');
-  ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 140) + 'px'; });
-  ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && window.matchMedia('(pointer:fine)').matches) { e.preventDefault(); $('send-form').requestSubmit(); } });
-  $('send-form').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const text = ta.value.trim(); if (!text) return;
+  // Message box + Send removed (Danny 12:20 AWST 24 Oct): the footer terminal (dash/js/chat-term.js) calls this on Enter.
+  // Same message shape, same addMsg + deliver (same encryption, relay and log entry) as the old Send button.
+  async function sendText(raw) {
+    const text = String(raw || '').trim(); if (!text || !key || !cfg) return false;
     const m = { id: 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8), ts: Date.now(), from: 'daughter', text };
-    ta.value = ''; ta.style.height = 'auto';
     addMsg(m, 'pending'); render();
     await deliver(m);
-  });
+    return true;
+  }
+  window.SimmieChatSend = sendText;
   async function deliver(m) {
     const rec = msgs.get(m.id); rec.state = 'pending'; render();
     try {
@@ -245,7 +243,7 @@
     log.innerHTML = '';
     if (!list.length) {
       const e = document.createElement('div'); e.className = 'empty';
-      e.innerHTML = '<p class="big">Hi! 👋</p><p>Type a message below and Simmie will reply here. Replies usually take under a minute.</p>';
+      e.innerHTML = '<p class="big">Hi! 👋</p><p>Tap the simmie&gt; line below to type, press Enter to send, and Simmie will reply here. Replies usually take under a minute.</p>';
       log.appendChild(e);
     }
     let day = '';

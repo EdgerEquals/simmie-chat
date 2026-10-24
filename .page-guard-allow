@@ -14,3 +14,9 @@ previews/questionnaire-held/index.html :: script:previews/shared/bonnie-sound.js
 previews/questionnaire-held/index.html :: style:previews/shared/bonnie-sound.css
 # approved by Danny 2026-10-24 11:26: dashboard-held preview header loses Dad's world mark (img.dad-mark + css/dad-mark.css; preview only, live /moderation/ untouched)
 previews/dashboard-held/index.html :: style:css/dad-mark.css
+# approved by Danny 12:20 AWST 24 Oct (t594u): live chat footer message box + Send removed; Bonnie types in the simmie> terminal (Enter sends via js/app.js, same encrypted path)
+index.html :: button:send-btn
+index.html :: id:msg
+index.html :: id:send-btn
+index.html :: id:send-form
+index.html :: landmark:form
