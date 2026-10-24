@@ -260,8 +260,7 @@
       if (m.reply_to) {
         const qm = msgs.get(m.reply_to), q = document.createElement('span'); q.className = 'quote';
         q.textContent = 'Answer to ' + (qm ? senderName(qm.from) : (m.text.match(/^\[Answer to (\w+)/) || [, 'Dad'])[1]); b.appendChild(q);
-        const shown = m.answer === ASK ? ASK_LABEL : m.answer;   // display only; the stored answer stays "Ask more"
-        b.appendChild(document.createTextNode(m.comment ? shown + ': ' + m.comment : (shown || m.text)));
+        b.appendChild(document.createTextNode(m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text)));
       } else b.appendChild(document.createTextNode(m.text));
       if (m.from !== 'daughter' && m.kind === 'question') b.appendChild(questionControls(m));
       const meta = document.createElement('span'); meta.className = 'meta';
@@ -293,7 +292,7 @@
     for (const opt of opts) {
       const btn = document.createElement('button'); btn.type = 'button';
       btn.className = 'choice' + (opt === ASK ? ' ask' : '') + (picked === opt ? ' picked' : '') + (askOpen === m.id && opt === ASK ? ' open' : '');
-      btn.textContent = (picked === opt ? '✓ ' : '') + (opt === ASK ? ASK_LABEL : opt); btn.disabled = ans !== null;
+      btn.textContent = (picked === opt ? '✓ ' : '') + (opt === ASK && picked !== ASK ? ASK_LABEL : opt); btn.disabled = ans !== null;
       btn.onclick = () => {
         if (opt === ASK) { askOpen = askOpen === m.id ? '' : m.id; render(); if (askOpen) { const t = document.querySelector('.ask-box textarea'); if (t) t.focus(); } return; }
         row.querySelectorAll('button').forEach((x) => { x.disabled = true; }); askOpen = ''; answerQuestion(m, opt);
