@@ -1,0 +1,47 @@
+/* Questionnaire pop-up panels (Danny t660u 13:43 AWST 24 Oct 2026, live). Every tappable item in the page chrome (header,
+   status pill, weather, ticker, masthead, footer lights, critters, tide strip, simmie tty) opens ONE floating panel over the
+   layout instead of navigating, re-running or expanding inline. The panel is position:fixed and appended to <body>, so it never
+   takes part in layout: no element anywhere changes width, height or position, and the page is not scroll-locked.
+   The questionnaire's own controls (Start, answer tiles, Reroll, Send/Skip/Back, the note box, the simmie$ typing box) are
+   untouched. Dad's DJ keeps its own pop-up (already a panel). Dad's command-centre palette; terminal readouts in matrix green.
+   Triggers only get cursor + a focus ring (outline, no box change). Reduced motion: no fade. */
+.qp-trig{cursor:pointer;-webkit-tap-highlight-color:rgba(10,242,255,.18)}
+.qp-trig:focus{outline:none}
+.qp-trig:focus-visible{outline:2px solid var(--dpc-accent,#0AF2FF);outline-offset:2px;border-radius:4px}
+.qp-trig[aria-expanded="true"]{outline:1px solid rgba(10,242,255,.55);outline-offset:2px;border-radius:4px}
+
+.qp-pop{position:fixed;left:8px;top:8px;z-index:1000;box-sizing:border-box;width:max-content;max-width:min(330px,calc(100vw - 16px));
+  max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);overflow:auto;overscroll-behavior:contain;
+  margin:0;padding:.7rem .85rem .75rem;border-radius:10px;
+  background:var(--dpc-panel,#040E19);border:1px solid var(--dpc-border,#143A57);color:var(--dpc-text,#85A6BB);
+  box-shadow:0 12px 32px rgba(0,0,0,.78),0 0 0 1px rgba(10,242,255,.08),0 0 18px rgba(10,242,255,.12);
+  font:400 .9rem/1.4 "Alegreya Sans",system-ui,sans-serif;text-align:left;
+  opacity:0;transform:translateY(-3px);transition:opacity .16s ease,transform .16s ease}
+.qp-pop.is-open{opacity:1;transform:none}
+.qp-pop[hidden]{display:none}
+.qp-pop .qp-h{display:flex;align-items:center;gap:.5rem;margin:0 1.9rem .45rem 0;font:700 .95rem/1.2 "Alegreya Sans",system-ui,sans-serif;
+  color:var(--dpc-heading,#9DBCCE);letter-spacing:.3px}
+.qp-pop .qp-h .qp-dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--dpc-accent,#0AF2FF);box-shadow:0 0 5px rgba(10,242,255,.7)}
+.qp-pop .qp-x{position:absolute;top:.4rem;right:.4rem;width:28px;height:28px;display:grid;place-items:center;padding:0;border-radius:50%;cursor:pointer;
+  border:1px solid var(--dpc-border,#143A57);background:var(--dpc-panel-2,#071829);color:var(--dpc-heading,#9DBCCE);font:700 1rem/1 system-ui,sans-serif}
+.qp-pop .qp-x:hover{border-color:var(--dpc-border-hi,#1F5478)}
+.qp-pop .qp-x:focus-visible{outline:2px solid var(--dpc-accent,#0AF2FF);outline-offset:1px}
+.qp-pop p{margin:.3rem 0}
+.qp-pop .qp-kv{display:grid;grid-template-columns:auto 1fr;gap:.2rem .7rem;margin:.35rem 0;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.qp-pop .qp-kv dt{color:var(--dpc-muted,#6A8CA4)}
+.qp-pop .qp-kv dd{margin:0;color:var(--dpc-heading,#9DBCCE);overflow-wrap:anywhere}
+.qp-pop .qp-term{margin:.35rem 0;padding:.45rem .55rem;border-radius:6px;background:#020812;box-shadow:inset 0 0 0 1px var(--dpc-border,#143A57);
+  font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--mx-g,#00FF41);white-space:pre-wrap;overflow-wrap:anywhere}
+.qp-pop .qp-term .r{color:#FF2A4A}.qp-pop .qp-term .m{color:var(--dpc-muted,#6A8CA4)}
+.qp-pop .qp-note{font-size:.8rem;color:var(--dpc-muted,#6A8CA4)}
+.qp-pop .qp-big{font-size:1.6rem;line-height:1.2;letter-spacing:.15em}
+.qp-pop ul.qp-list{margin:.3rem 0;padding:0 0 0 1rem;font-size:.85rem}
+.qp-pop ul.qp-list li{margin:.2rem 0}
+.qp-pop ul.qp-list .src{color:var(--dpc-muted,#6A8CA4)}
+.qp-pop .qp-btn{display:inline-flex;align-items:center;gap:.35rem;margin-top:.45rem;height:28px;padding:0 .7rem;border-radius:999px;cursor:pointer;
+  border:1px solid var(--dpc-accent,#0AF2FF);background:var(--dpc-panel-2,#071829);color:var(--dpc-accent,#0AF2FF);font:700 .8rem/1 "Alegreya Sans",system-ui,sans-serif}
+.qp-pop .qp-btn:focus-visible{outline:2px solid var(--dpc-accent,#0AF2FF);outline-offset:2px}
+.qp-pop .qp-tide{display:block;width:100%;height:auto;max-width:300px;margin:.35rem 0}
+.qp-pop .qp-tide .tsw-line{fill:none;stroke:#0AF2FF;stroke-width:.5}.qp-pop .qp-tide .tsw-area{fill:rgba(10,242,255,.12)}
+.qp-pop .qp-tide .tsw-nowl{stroke:rgba(157,188,206,.5);stroke-width:.3}.qp-pop .qp-tide .tsw-nowd{fill:#F2A541}
+@media(prefers-reduced-motion:reduce){.qp-pop{transition:none;transform:none}}
