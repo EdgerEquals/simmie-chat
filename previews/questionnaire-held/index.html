@@ -503,6 +503,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <script src="previews/shared/bonnie-sound-quiz.js?v=3" defer></script>
 <script src="previews/questionnaire-held/tide-swell.js?v=1" defer></script>
 <script src="previews/shared/dad-autodj-quiz.js?v=2" defer></script>
+<link rel="stylesheet" href="previews/questionnaire-held/dots-glow.css?v=19d4b8ab"><!-- travelling glow on the four footer lights (Danny 10:42 AWST 24 Oct) -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -1059,7 +1060,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
    version.json (same origin, cache-busted, no-store); when the box's qheld_sync has rebuilt the preview from newer held work,
    reload onto the new version. Never while a text field is focused or typed in during the last 20 s (waits, then reloads).
    Nothing else is contacted: one same-origin GET of a static file. */
-(function(){var V='0274fc085427c4ce',U='previews/questionnaire-held/version.json',last=0,pend=null;
+(function(){var V='e2a34107ebf859a2',U='previews/questionnaire-held/version.json',last=0,pend=null;
 function busy(){var a=document.activeElement,t=a&&a.tagName;return !!(a&&(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||a.isContentEditable))||Date.now()-last<20000;}
 addEventListener('input',function(){last=Date.now();},true);addEventListener('keydown',function(){last=Date.now();},true);
 function go(nv){pend=nv;if(busy())return;var k='qheld-reload-'+nv,n=0;try{n=+(sessionStorage.getItem(k)||0);if(n>=3)return;sessionStorage.setItem(k,n+1);}catch(e){}
