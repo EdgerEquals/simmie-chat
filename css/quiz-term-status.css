@@ -20,7 +20,8 @@
   animation:tsBreath 4.778s ease-in-out -0.823s infinite}
 .tstat .ts-w{position:relative;display:inline-block;width:6ch;height:1em}
 .tstat .ts-w b{position:absolute;left:0;top:0;font-weight:400;transition:opacity var(--ts-xf) ease-in-out}
-.tstat .ts-s{opacity:1}.tstat .ts-l{opacity:0}
+.tstat .ts-s{opacity:1;color:var(--mx-g)}.tstat .ts-l{opacity:0;color:var(--mx-r)}
+/* t647u (Danny 13:29 AWST 24 Oct): "live" word in matrix red, "status" stays matrix green; colour swaps with the --ts-xf word cross-fade. */
 .tstat .ts-s i{font-style:normal;display:inline-block;animation:tsPulse 2.618s ease-in-out -1.451s infinite}
 html[data-term-status="live"] .tstat .ts-s{opacity:0}
 html[data-term-status="live"] .tstat .ts-l{opacity:1}
