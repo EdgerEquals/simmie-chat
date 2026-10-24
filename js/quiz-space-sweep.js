@@ -16,7 +16,9 @@
   function orbitExp(ring, moon) { return ring === 0 ? 10 - 0.5 * moon : 9.5 - 0.25 * moon; }
   function pulseExp(j, day) { return 5.25 + 0.5 * day + j / 8; }
   function feeds() { try { return window.RatioPump ? window.RatioPump.feeds() : {}; } catch (e) { return {}; } }
-  var L = document.createElement('div'); L.className = 'qs-layer'; L.setAttribute('aria-hidden', 'true');
+  // 'wx-seq' opts this layer out of the page's PhiTiming weather sweep (it would re-time these loops at iteration boundaries);
+  // the layer runs on its own moon/day feeds instead. The ratio pump + Dad's dial still apply (they skip only [data-phi-js]).
+  var L = document.createElement('div'); L.className = 'qs-layer wx-seq'; L.setAttribute('aria-hidden', 'true');
   var rings = RINGS.map(function (deg) { var r = document.createElement('div'); r.className = 'qs-ring'; r.style.setProperty('--ring', deg + 'deg'); L.appendChild(r); return r; });
   var f0 = feeds(), moon0 = f0.moon != null ? f0.moon : 0.5, day0 = f0.day != null ? f0.day : 0.5;
   var items = SET.map(function (d, j) {
