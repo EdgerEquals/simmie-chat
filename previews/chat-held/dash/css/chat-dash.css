@@ -47,3 +47,8 @@ html #app #screen-chat #app-foot .container{color:var(--muted)}
   #wx-foot .wx-strip .wx-light:nth-child(3) b::before{filter:hue-rotate(180deg)}
   #wx-foot .wx-strip .wx-light:nth-child(4) b::before{filter:hue-rotate(270deg)}
 }
+/* Logo levelled + enlarged (PREVIEW ONLY; Danny 24 Oct 2026 10:27 AWST). Bonnie's hand-lettered logo slopes downhill: measured
+   x-height top line (e/e/a tops, robust fit in headless Chrome) = 5.7deg clockwise, so rotate 5.7deg anti-clockwise about its centre.
+   ~25% bigger: 32 -> 40px tall (phones 26 -> 32px); width = height x 1810/893 so the rotation centre is the ink centre. */
+html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:40px;width:81px;transform:rotate(-5.7deg);transform-origin:50% 50%}
+@media (max-width:575px){html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:32px;width:65px}}
