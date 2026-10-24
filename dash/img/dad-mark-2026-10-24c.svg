@@ -2,7 +2,7 @@
   <title id="dm-t">Dad's world equals mark</title>
   <!-- PREVIEW. Dad's world mark: two equals bars inside two tilted orbit rings (-20deg, +25deg), satellite on ring 1.
        Layers kept separate (dm-rings / dm-bars / dm-sat) so a later vector trace can swap any one of them.
-       COLOURS (Danny t680u 24 Oct 2026): Dad's command-centre palette (css/quiz-dad-head.css --dpc-*): rings #9DBCCE (was #D6ECEF) and #85A6BB (was #F6EBD9),
+       COLOURS (Danny t680u 24 Oct 2026): Dad's command-centre palette (css/quiz-dad-head.css dpc variables): rings #9DBCCE (was #D6ECEF) and #85A6BB (was #F6EBD9),
        top bar #1F5478 (was #0F5C6E), bottom bar + satellite = the one bright accent #0AF2FF (was amber #F2A541). Shape, layers and motion unchanged.
        Motion (Simmie's phi ladder, rule 4): the rings keep their tilt; the satellite travels ring 1 in 22.84 s
        (PHI^8 x PHI^-1.5) and a soft light sweeps ring 2 in 8.72 s (PHI^6 x PHI^-1.5). Golden-angle starts:
