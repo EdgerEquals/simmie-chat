@@ -1,0 +1,49 @@
+/* Chat page fit for the SHARED header/footer (dash/css/dash-shared.css): positions only, no colour values of its own except
+   the logo tint (the chat page's raspberry #B4436C) and the footer-light rainbow (Danny 03:19, see below).
+   The dashboard pins its footer with position:fixed over a scrolling page; the chat page is a full-height column where only
+   the messages scroll, so the same footer stack sits at the bottom of that column instead (same rows, same order). */
+html #app{padding-bottom:0}
+#screen-chat .dash-head{position:relative;top:auto;flex:none}
+#screen-chat .tb-logo-svg{display:block;flex:none;height:32px;width:auto;max-width:40vw;color:#B4436C;fill:currentColor}
+@media (max-width:575px){ #screen-chat .tb-logo-svg{height:26px} }
+#screen-chat .chat-foot{flex:none;position:relative;z-index:30;background:none;border:0;padding:0}
+html #app #screen-chat .il-foot{position:relative;bottom:auto;left:auto;right:auto}
+html #app #screen-chat #app-foot.footer{position:relative;bottom:auto;left:auto;right:auto}
+html #app #screen-chat .wx-foot{position:relative;bottom:auto;left:auto;right:auto}
+#screen-chat .composer{display:block;padding:6px 0;background:#fff;border-top:2px solid var(--line)}
+#screen-chat .composer .container{display:flex;gap:8px;align-items:flex-end}
+#screen-chat .composer textarea{flex:1 1 0;min-width:0}
+#screen-chat .typing{max-width:640px;margin:0 auto;padding:4px 16px 2px}
+/* chat page colour roles for the shared header (Danny 03:10: the chat page's colours must not change): the header keeps the
+   chat header's blush bar + dotted pink edge, Lock keeps its plum-on-line look, the sub-line keeps its muted colour */
+html #app #screen-chat .dash-head,html #app #screen-chat .dash-head .topbar,html #app #screen-chat .dash-head .wx-hud,html #app #screen-chat .dash-head .masthead{background:var(--blush)}
+html #app #screen-chat .dash-head{border-bottom:3px dotted #E58AA6;box-shadow:none}
+html #app #screen-chat #lock-btn.lockbtn{color:var(--heading);background:transparent;border:2px solid var(--line)}
+html #app #screen-chat #status{color:var(--muted)}
+html #app #screen-chat #app-foot .container{color:var(--muted)}
+/* short landscape phones (667x375): the header keeps its top bar + weather/fact row; the tagline row folds away (as the
+   dashboard folds its ticker row when compact) so the messages keep room; the footer keeps its animations */
+@media (orientation:landscape) and (max-height:500px){
+  html #app #screen-chat .dash-head .masthead{display:none}
+  html #app #screen-chat .dash-head .topbar .container{min-height:36px;padding-top:2px;padding-bottom:2px}
+  #screen-chat .composer{padding:3px 0}
+  #screen-chat .composer textarea{padding-top:.4rem;padding-bottom:.4rem}
+}
+/* Rainbow status lights (Danny 03:19): the four footer lights (#wx-foot .wx-strip .wx-light b, SENT/FRESH/LINK/DAD)
+   carry a full-spectrum hue that travels across the four dots in a loop. The spectrum sits on a ::before disc so each
+   light's own state animation (warn blink / blip) still runs on the <b> underneath; labels are untouched text.
+   Period PHI^3.5 = 5.390s (Simmie ladder: Bonnie loop-effect PHI^5 x PHI^-1.5); dot k is offset -k/4 of the period so
+   the hue walks dot to dot. Infinite CSS animation, so PhiTiming's weather sweep re-aligns it at cycle boundaries. */
+#wx-foot .wx-light b{position:relative;overflow:hidden}
+#wx-foot .wx-light b::before{content:"";position:absolute;inset:0;border-radius:50%;background:hsl(0 85% 55%);
+  animation:chat-rainbow 5.390s linear infinite}
+#wx-foot .wx-strip .wx-light:nth-child(2) b::before{animation-delay:-1.3475s}
+#wx-foot .wx-strip .wx-light:nth-child(3) b::before{animation-delay:-2.695s}
+#wx-foot .wx-strip .wx-light:nth-child(4) b::before{animation-delay:-4.0425s}
+@keyframes chat-rainbow{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){
+  #wx-foot .wx-light b::before{animation:none}
+  #wx-foot .wx-strip .wx-light:nth-child(2) b::before{filter:hue-rotate(90deg)}
+  #wx-foot .wx-strip .wx-light:nth-child(3) b::before{filter:hue-rotate(180deg)}
+  #wx-foot .wx-strip .wx-light:nth-child(4) b::before{filter:hue-rotate(270deg)}
+}

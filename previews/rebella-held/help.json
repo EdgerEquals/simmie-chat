@@ -1,0 +1,523 @@
+{
+ "v": 1,
+ "entries": {
+  "_miss": {
+   "title": "Drop me on something",
+   "text": "Drag the orb onto anything that glows, like a button, a picture or a link."
+  },
+  "greeting": {
+   "title": "Your hello",
+   "text": "This line says hello when you arrive. If you choose a nickname, it greets you by that name.",
+   "try": "Tap 'Want me to call you something?' at the top or bottom of the page, or in the menu, and pick a name that feels like you."
+  },
+  "name-prompt": {
+   "title": "Your nickname",
+   "text": "You can give Rebella a nickname to call you. Up to 20 letters, spaces or hyphens. It stays in this browser on this device only. It is never sent to us or anyone else. 'Forget my name' wipes it straight away.",
+   "try": "It's totally optional. Skip it if you'd rather stay a mystery."
+  },
+  "cookies": {
+   "title": "Cookies and your device",
+   "text": "Cookies are little notes a website saves in your browser. Rebella doesn't set any. It saves a couple of things on your device only, like your nickname and your mood board, and never sends them to us. Read the whole story at edgerequals.github.io/rebella/cookies",
+   "try": "Open your browser's settings and find where it lists site data. It's like peeking in your own pocket."
+  },
+  "nav": {
+   "title": "The section menu",
+   "text": "These are Rebella's sections. Each one is a different kind of reading: making things, big questions, books, feelings and more.",
+   "try": "Pick the one that pulls at you most today, not the one you think you should."
+  },
+  "menu-burger": {
+   "title": "Menu button",
+   "text": "All of Rebella's sections live in here, plus Create, Recommendations and your name. Tap it to open the menu, and tap the X to close it."
+  },
+  "search": {
+   "title": "Search",
+   "text": "Type a word you're curious about to look for it on Rebella. Search is still being built, so for now it's a preview."
+  },
+  "create-pill": {
+   "title": "Make a board",
+   "text": "Opens the Create page, where you can make a mood board, collage or vision board with stickers, photos and your own words.",
+   "try": "Make a board about a day that felt really good."
+  },
+  "picks-link": {
+   "title": "Picks",
+   "text": "The Picks page has a song of the week, someone famous for the right reasons, a quote and a goal for everyone.",
+   "try": "Read the quote of the week and notice how it sits with you."
+  },
+  "all-articles": {
+   "title": "All articles",
+   "text": "Every Rebella article in one list, sorted by section."
+  },
+  "submit": {
+   "title": "Share your work",
+   "text": "Soon you'll be able to share your art, writing and projects. A grown-up editor checks everything first, to keep it safe and kind."
+  },
+  "article-card": {
+   "title": "Article card",
+   "text": "Each card is one article. The coloured band shows its section. Tap the picture or the title to read it.",
+   "try": "Choose by the picture that catches your eye first."
+  },
+  "fact-band": {
+   "title": "Fact band",
+   "text": "A band of quick, true facts that slide past. Each one is checked before it goes on Rebella.",
+   "try": "Spot a fact that makes you go 'wow' and tell someone about it."
+  },
+  "quote": {
+   "title": "Rebel quote",
+   "text": "A quote from someone who did things their own way. It changes every time you load a page.",
+   "try": "Read it slowly, twice. Does it feel true for you?"
+  },
+  "stickers": {
+   "title": "Stickers",
+   "text": "Original Rebella stickers. On the Create page you can drag them onto your board.",
+   "try": "Pick the sticker that matches your mood right now."
+  },
+  "weather-faces": {
+   "title": "Weather faces",
+   "text": "Little faces that show the weather outside. They change slowly with the sky."
+  },
+  "picks": {
+   "title": "Picks",
+   "text": "This page is full of picks: a song, a person, a quote, a goal and more. They change every week.",
+   "try": "Pick one thing here and notice why it speaks to you."
+  },
+  "about-me": {
+   "title": "About me",
+   "text": "A short hello from the person who started Rebella, in her own words. It's why the site exists."
+  },
+  "newsletter": {
+   "title": "Newsletter",
+   "text": "A preview of the Rebella newsletter sign-up. Nothing is sent yet, and nothing you type is saved."
+  },
+  "create-type": {
+   "title": "Board type",
+   "text": "Choose a mood board, a collage or a vision board. Each one has a slightly different feel.",
+   "try": "Choose the one that feels right, not the one that looks hardest."
+  },
+  "create-bg": {
+   "title": "Background colour",
+   "text": "Sets the colour behind your board. Tap a swatch or pick any colour you like."
+  },
+  "create-tabs": {
+   "title": "Stickers, photos and words",
+   "text": "Switch between stickers, photos and text. Tap or drag things onto your board."
+  },
+  "create-text": {
+   "title": "Your words",
+   "text": "Type a short phrase, up to 80 letters, then add it to your board.",
+   "try": "Write one word you want more of this week."
+  },
+  "create-font": {
+   "title": "Font",
+   "text": "Changes the style of your words, from neat to handwritten to bold."
+  },
+  "create-tools": {
+   "title": "Arrange tools",
+   "text": "Move a picked item forward or back, copy it, add a white frame or delete it."
+  },
+  "create-save": {
+   "title": "Save",
+   "text": "Saves your board in this browser on this device, so it's here next time. It isn't sent anywhere."
+  },
+  "create-download": {
+   "title": "Download",
+   "text": "Saves your board as a picture on your device, ready to print or keep."
+  },
+  "create-clear": {
+   "title": "Clear",
+   "text": "Empties your board so you can start again."
+  },
+  "board": {
+   "title": "Your board",
+   "text": "This is your canvas. Drag things around, pinch or use the handles to resize, and make it yours. There's no right or wrong board."
+  },
+  "escape": {
+   "title": "Get me out",
+   "text": "If you ever need to leave fast, tap this. It jumps straight to the Rebella home page."
+  },
+  "footer-links": {
+   "title": "More from Rebella",
+   "text": "Links to every section, plus places you can get help any time, like Kids Helpline on 1800 55 1800, ReachOut and headspace."
+  },
+  "start": {
+   "title": "Wake the sound",
+   "text": "Browsers keep quiet until you tap something. This wakes the Playground's sound.",
+   "try": "Tap it, then tap Hear it on any instrument."
+  },
+  "mute": {
+   "title": "Mute everything",
+   "text": "Silences the Playground and the radio. It remembers your choice next time.",
+   "try": "Flick it on when someone needs quiet."
+  },
+  "dial": {
+   "title": "The genre dial",
+   "text": "Turn it like an old radio. Between stations you hear static, and each click is a station.",
+   "try": "Turn it slowly and stop where it feels right."
+  },
+  "player": {
+   "title": "The radio player",
+   "text": "Music from YouTube plays here, but only channels Dad has said yes to.",
+   "try": "Turn the dial to see which stations have music yet."
+  },
+  "reading": {
+   "title": "Reading music",
+   "text": "Quiet music for when you've got a book open. It plays in the radio player.",
+   "try": "Pick a book, tap this, and see how it feels."
+  },
+  "follow": {
+   "title": "Follow the radio",
+   "text": "Your band picks up the station's tempo and key, so it plays along. It goes by labels, not by listening.",
+   "try": "Turn the dial with your band playing."
+  },
+  "tap-tempo": {
+   "title": "Tap tempo",
+   "text": "Tap along to a beat and the band speeds up or slows down to match you.",
+   "try": "Tap four times to your heartbeat."
+  },
+  "line-up": {
+   "title": "Line up",
+   "text": "Tap right on a beat you hear and the band starts its bar right there.",
+   "try": "Wait for a big beat on the radio, then tap."
+  },
+  "nudge": {
+   "title": "Nudge",
+   "text": "Shifts your band a whole beat, or a tiny 10 milliseconds, earlier or later.",
+   "try": "Use the tiny nudges until it sounds glued together."
+  },
+  "latency": {
+   "title": "Latency",
+   "text": "Bluetooth speakers and headphones can run a little late. This slides your band to make up for it.",
+   "try": "Slide it until claps on screen and in your ears match."
+  },
+  "flavour": {
+   "title": "Sound flavour",
+   "text": "Changes the patterns your band plays: Lo-fi, Chiptune, Ambient, Pop or Nature.",
+   "try": "Leave the band the same and just change the flavour."
+  },
+  "presets": {
+   "title": "Band moods",
+   "text": "Ready-made bands named after a feeling. Each one swaps in a few instruments.",
+   "try": "Pick the one that matches your day."
+  },
+  "play": {
+   "title": "Play",
+   "text": "Starts and stops your band.",
+   "try": "Press play, then take instruments in and out."
+  },
+  "swing": {
+   "title": "Swing",
+   "text": "Makes the beat bounce instead of marching. More swing, more bounce.",
+   "try": "Slide it slowly while the drums play."
+  },
+  "humanise": {
+   "title": "Loose",
+   "text": "Lets the notes land a little early or late and play a little softer or louder, like real people playing.",
+   "try": "Turn it right up, then right down, and listen for the difference."
+  },
+  "ensemble": {
+   "title": "Your band",
+   "text": "Up to four instruments on a phone, or six on a bigger screen. Each one has a part to play.",
+   "try": "Give two instruments the same part and see what happens."
+  },
+  "slot": {
+   "title": "Band member",
+   "text": "Choose its part (bass, chords, melody or rhythm), mute it, solo it or change how loud it is in the mix.",
+   "try": "Solo each one to hear what it's doing on its own."
+  },
+  "fx-filter": {
+   "title": "Filter sweep",
+   "text": "Slowly opens and closes the sound, like a door to a room with music in it.",
+   "try": "Use it on a pad and close your eyes."
+  },
+  "fx-delay": {
+   "title": "Tape-style echo",
+   "text": "Repeats notes a bit later, fading each time, like an old tape echo.",
+   "try": "Try it on the pluck."
+  },
+  "fx-chorus": {
+   "title": "Chorus",
+   "text": "Makes one instrument sound like a few playing together.",
+   "try": "Switch it on with the electric piano."
+  },
+  "fx-phaser": {
+   "title": "Phaser",
+   "text": "A slow, swirly whoosh moving through the sound.",
+   "try": "Turn it on and listen to the hats."
+  },
+  "fx-crush": {
+   "title": "Bitcrush",
+   "text": "Makes the sound crunchy and old-video-game-ish.",
+   "try": "Pair it with Chiptune."
+  },
+  "bend": {
+   "title": "Bend time",
+   "text": "Slows the band down and drops the pitch for a moment, then lets it spring back.",
+   "try": "Press it right before the drums come back in."
+  },
+  "soon": {
+   "title": "Coming soon",
+   "text": "A looper, sample pads, stutter and chop, all made from the Playground's own sound.",
+   "try": "Keep playing with the effects for now."
+  },
+  "pump-time": {
+   "title": "Time of day",
+   "text": "Later in the day, Dad's music gets slower, softer and fades more gently.",
+   "try": "Slide it to Deep night and watch the readout."
+  },
+  "pump-weather": {
+   "title": "Weather",
+   "text": "Hot and sunny days speed things up, fog and rain slow them down.",
+   "try": "Try Foggy, then Hot."
+  },
+  "pump-urgency": {
+   "title": "Hurry",
+   "text": "When something needs attention, the music quickens and goes quieter.",
+   "try": "Slide it to Urgent and see the volume drop."
+  },
+  "pump-mood": {
+   "title": "Mood",
+   "text": "Each mood nudges the pace and picks a kind of music for Dad.",
+   "try": "Find the mood you're in right now."
+  },
+  "ladder-readout": {
+   "title": "The readout",
+   "text": "Shows the steps added up (s), the beats per minute, how long the fade is, the volume and the kind of music.",
+   "try": "Move one slider at a time and watch which number changes."
+  },
+  "crossfade": {
+   "title": "Drift to the next part",
+   "text": "Slowly fades your band into a slightly different part, over the fade time shown in the readout.",
+   "try": "Press it with the band playing and listen to the melody lift."
+  },
+  "auto-dj": {
+   "title": "Let it drift",
+   "text": "Keeps drifting between parts on its own, at the ladder's pace.",
+   "try": "Switch it on and just listen for a while."
+  },
+  "inst-acid": {
+   "title": "Acid bass",
+   "text": "A squelchy, rubbery bass that bubbles along. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Turn on the filter sweep with it."
+  },
+  "inst-sub": {
+   "title": "Sub bass",
+   "text": "A deep, round bass you feel more than hear. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Try it on headphones."
+  },
+  "inst-ep": {
+   "title": "Electric piano",
+   "text": "Soft, bell-like piano chords. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Pair it with Sunday morning."
+  },
+  "inst-pad": {
+   "title": "Warm pad",
+   "text": "A slow, cosy cloud of sound that fades in gently. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Let it hold under everything else."
+  },
+  "inst-lead": {
+   "title": "Lead",
+   "text": "A bright, buzzy synth for melodies. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Give it the melody part."
+  },
+  "inst-pluck": {
+   "title": "Pluck",
+   "text": "Like a string being picked. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Add the tape-style echo."
+  },
+  "inst-bells": {
+   "title": "Bells",
+   "text": "Shiny, ringing metal tones. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Try them with Soft rain."
+  },
+  "inst-strings": {
+   "title": "Strings",
+   "text": "A swell of string-like sound that rises slowly. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Give it the chords part."
+  },
+  "inst-kit": {
+   "title": "Drum kit (808-style)",
+   "text": "Kick, snare, clap and hi-hats in one. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Make it the rhythm, then add swing."
+  },
+  "inst-shaker": {
+   "title": "Shaker",
+   "text": "A soft shaker that fills the gaps. Tap Hear it to listen, Add to put it in your band.",
+   "try": "Add it to Barefoot."
+  },
+  "radio-play": {
+   "title": "Bonnie's playlist",
+   "text": "Plays Bonnie's own playlist in a small YouTube player. Nothing loads from YouTube until you press it.",
+   "try": "Press it when you feel like a soundtrack."
+  },
+  "radio-mute": {
+   "title": "Mute the radio",
+   "text": "Silences the dial's static and clicks and the YouTube player. It remembers your choice.",
+   "try": "Mute it, then turn the dial and feel the clicks instead."
+  },
+  "radio-mini": {
+   "title": "Rebella radio",
+   "text": "A little radio dial. Turn it to choose a station, then press it to go to the radio on the Music Playground with that station ready. It never starts playing by itself.",
+   "try": "Turn it slowly and feel each click."
+  },
+  "help-orb": {
+   "title": "The help orb",
+   "text": "That's me. Drag me onto anything with a glow and I'll explain it in a little box. Or tap me, then tap the thing you're curious about.",
+   "try": "Drag me onto the radio dial."
+  },
+  "fb-status": {
+   "title": "The status lights",
+   "text": "Three little lights. Time is the time of day where you are, and the gauge shows how far through your day it is. Radio glows while the radio plays, and the wave follows its beat. Device glows when your nickname is kept on this device. The Perth weather lives at the top of the page now."
+  },
+  "fb-device": {
+   "title": "What stays on your device",
+   "text": "Rebella sets no cookies and has no accounts. Your nickname, your mood board and your Pause choice are kept on this device only, and never sent anywhere. The full story is on the Cookies and your device page: edgerequals.github.io/rebella/cookies",
+   "try": "Tap forget my name at the bottom to wipe your nickname straight away."
+  },
+  "fb-facts": {
+   "title": "Fun facts",
+   "text": "A new fun fact every few seconds. Now and then it shows the radio station you picked."
+  },
+  "fb-pause": {
+   "title": "Pause motion",
+   "text": "Stops everything moving at the bottom of the page: the facts, the animals, the lights and the wave. Your device remembers your choice.",
+   "try": "Press it again to start things moving."
+  },
+  "hd-emoji": {
+   "title": "Today's emoji",
+   "text": "A little emoji mood for the weather in Perth, where Rebella is made, and the time of day on your device. It only changes when the weather or the part of the day changes. It's worked out on your device."
+  },
+  "db-hello": {
+   "title": "Your time of day",
+   "text": "Good morning, afternoon or evening, with the time on your device. It's worked out on your device and never sent anywhere."
+  },
+  "db-weather": {
+   "title": "Perth weather",
+   "text": "The weather in Perth right now, where Rebella is made, with a tip for what to wear. It comes from Open-Meteo, for Perth only. Rebella never asks where you are. Tap it to open the Bureau of Meteorology's Perth forecast in a new tab.",
+   "try": "Check if it's a hoodie day or an ice-cream day."
+  },
+  "hd-facts": {
+   "title": "Fun facts for you",
+   "text": "A slow line of fun facts picked for you, with the Perth weather now and then. If you've told Rebella your name, it uses it. 'Pause motion' at the bottom stops it.",
+   "try": "Catch one you didn't know and tell someone about it today."
+  },
+  "tagline": {
+   "title": "Learn what you love",
+   "text": "That's what Rebella is for: finding the things you love and learning more about them, your way."
+  },
+  "fb-critters": {
+   "title": "Critters",
+   "text": "A little parade of animals and critters. The Moon's phase tonight decides who leads, worked out on your device from the date, and they stroll along slowly. 'Pause motion' stops them.",
+   "try": "Check back in a few days: when the Moon changes, the line-up changes too."
+  }
+ },
+ "targets": [
+  [
+   ".mainnav .menu",
+   "nav"
+  ],
+  [
+   "#burger",
+   "menu-burger"
+  ],
+  [
+   "#search-btn",
+   "search"
+  ],
+  [
+   ".mainnav .create-pill:not(.recs-pill)",
+   "create-pill"
+  ],
+  [
+   ".mainnav .recs-pill",
+   "picks-link"
+  ],
+  [
+   ".card",
+   "article-card"
+  ],
+  [
+   ".fact-band, [data-fact-band]",
+   "fact-band"
+  ],
+  [
+   "[data-rebel-quote]",
+   "quote"
+  ],
+  [
+   ".cp-stickers, #grid-stickers",
+   "stickers"
+  ],
+  [
+   ".wx-chip, .weather-face, [data-weather-face]",
+   "weather-faces"
+  ],
+  [
+   ".about-me",
+   "about-me"
+  ],
+  [
+   ".nl-widget",
+   "newsletter"
+  ],
+  [
+   ".recs-page, main.recs, [data-picks]",
+   "picks"
+  ],
+  [
+   "label:has(input[name=btype])",
+   "create-type"
+  ],
+  [
+   "#bg-swatches",
+   "create-bg"
+  ],
+  [
+   "[role=tablist]:has(#tab-stickers)",
+   "create-tabs"
+  ],
+  [
+   "#txt-input",
+   "create-text"
+  ],
+  [
+   "#txt-font",
+   "create-font"
+  ],
+  [
+   ".tool",
+   "create-tools"
+  ],
+  [
+   "#save-btn",
+   "create-save"
+  ],
+  [
+   "#download-btn",
+   "create-download"
+  ],
+  [
+   "#clear-btn",
+   "create-clear"
+  ],
+  [
+   "#board",
+   "board"
+  ],
+  [
+   "[data-escape]",
+   "escape"
+  ],
+  [
+   ".footer-cols",
+   "footer-links"
+  ],
+  [
+   "#help-orb",
+   "help-orb"
+  ]
+ ],
+ "fb-tide": {
+  "title": "Tide and dolphins",
+  "text": "Today's tide in the sea off Fremantle, near Perth: the line is the water going up and down through the day, and the dot is right now. The dolphins jump faster when the swell is bigger. It comes from Open-Meteo's free sea forecast (CC BY 4.0), for Fremantle only, never where you are. It's an estimate, so never use it for boating or swimming. 'Pause motion' stops the dolphins.",
+  "try": "Look again tonight: the dot will have moved along the line."
+ }
+}

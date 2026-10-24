@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="dm-t">
+  <title id="dm-t">Dad's world equals mark (preview)</title>
+  <!-- PREVIEW. Dad's world mark: two equals bars inside two tilted orbit rings (-20deg, +25deg), satellite on ring 1.
+       Layers kept separate (dm-rings / dm-bars / dm-sat) so a later vector trace can swap any one of them.
+       RING SET: dark backgrounds (#D6ECEF, #F6EBD9). dad-mark-light.svg is the same file with rings #0A3F4C.
+       Motion (Simmie's phi ladder, rule 4): the rings keep their tilt; the satellite travels ring 1 in 22.84 s
+       (PHI^8 x PHI^-1.5) and a soft light sweeps ring 2 in 8.72 s (PHI^6 x PHI^-1.5). Golden-angle starts:
+       k=1 0.618 x 22.84 = -14.12 s, k=2 0.236 x 8.72 = -2.06 s. Everything stops under prefers-reduced-motion. -->
+  <style>
+    #dm-sat{offset-path:path('M61,32 A29,11 0 1,1 3,32 A29,11 0 1,1 61,32');offset-rotate:0deg;animation:dm-orbit 22.84s linear -14.12s infinite}
+    #dm-sweep{animation:dm-sweep 8.72s linear -2.06s infinite}
+    @keyframes dm-orbit{from{offset-distance:0%}to{offset-distance:100%}}
+    @keyframes dm-sweep{to{stroke-dashoffset:-126}}
+    @media (prefers-reduced-motion:reduce){#dm-sat,#dm-sweep{animation:none}}
+  </style>
+  <g id="dm-rings" fill="none" stroke-linecap="round">
+    <ellipse id="dm-ring1" cx="32" cy="32" rx="29" ry="11" stroke="#D6ECEF" stroke-width="2" transform="rotate(-20 32 32)"/>
+    <g transform="rotate(25 32 32)">
+      <ellipse id="dm-ring2" cx="32" cy="32" rx="26" ry="14" stroke="#F6EBD9" stroke-width="1.6" opacity="0.7"/>
+      <ellipse id="dm-sweep" cx="32" cy="32" rx="26" ry="14" stroke="#F6EBD9" stroke-width="1.6" stroke-dasharray="18 108"/>
+    </g>
+  </g>
+  <g id="dm-bars">
+    <rect id="dm-bar-top" x="17" y="22.5" width="30" height="8" rx="4" fill="#0F5C6E" stroke="#D6ECEF" stroke-width="1"/>
+    <rect id="dm-bar-bot" x="17" y="33.5" width="30" height="8" rx="4" fill="#F2A541"/>
+  </g>
+  <g transform="rotate(-20 32 32)">
+    <circle id="dm-sat" cx="0" cy="0" r="3.2" fill="#F2A541" stroke="#D6ECEF" stroke-width="1"/>
+  </g>
+</svg>

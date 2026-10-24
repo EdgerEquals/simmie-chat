@@ -1,0 +1,112 @@
+/* Rebella header in the DASHBOARD LAYOUT (live 24 Oct 2026, Danny 03:01-03:03 AWST: "match the dashboard one, but with the
+   appropriate colours for Rebella. Everything else is the same"). Rows, order and sizes copied from Bonnie's Dashboard
+   (moderation/index.html #dash-head + moderation/css/night.css, hud.css, dash-foot-lock.css, sticky-head.css):
+     top bar 50px  : logo (32px tall, 26px on phones) left | keys right (dashboard music pill / Lock / Ask Dad ->
+                     Rebella Music pill / radio dial / search / menu), keys styled like the dashboard's Lock key
+     ticker band 29px: monospace fun-fact ticker | emoji set + Perth weather chip (the dashboard's chip shape)
+     bottom row 42px : tagline in the dashboard tagline style | greeting chip (+ the occasional inline name prompt)
+   Locked at the top like before (css/bars.css #app-head: position fixed, content padded clear by js/bars.js).
+   COLOURS: the dashboard's colour roles mapped to Rebella's own palette (css/styles.css :root + css/bars.css):
+     bar background (#000)             -> #FFFFFF white            logo #B0275A on it 6.4:1
+     text (#F3EAF0)                    -> #3A2B35 ink               13.3:1
+     top bar rule (teal 1px)           -> #EFA9BB rose 1px          (decorative)
+     ticker band rule (line 1px)       -> #F8CFDB blush 1px         (decorative)
+     bottom dotted rule (2px)          -> #EFA9BB rose 2px dotted   (decorative)
+     tagline (#F8CFDB blush on black)  -> #B4436C raspberry          5.3:1
+     ticker text (sand)                -> #5B3A50 plum               9.7:1
+     ticker weather line (teal key)    -> #22696A aqua deep          6.4:1
+     ticker stars (amber)              -> #B4436C raspberry          5.3:1
+     chips (deep bg / teal-hi border)  -> #FDEEF2 pale pink / #EFA9BB, text #5B3A50 8.6:1
+     keys (Lock: aqua on black, dotted)-> #5B3A50 icons 9.7:1, #B4436C dotted outline 5.3:1, hover #FDEEF2
+     focus ring                        -> #8E2350 berry              8.4:1
+     name prompt Save                  -> #FFFFFF on #8E2350         8.4:1
+   Only the ticker moves (slow PHI^10 s loop, js/dashbars.js); Pause motion and reduced motion stop it. */
+#app-head.rb-dash{--dh-bg:#FFFFFF;--dh-ink:#3A2B35;--dh-plum:#5B3A50;--dh-rule:#EFA9BB;--dh-rule2:#F8CFDB;--dh-tag:#B4436C;--dh-teal:#22696A;
+  --dh-chip:#FDEEF2;--dh-berry:#8E2350;--dh-logo:#B0275A;--bar-focus:#8E2350;
+  --dh-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--dh-bg);color:var(--dh-ink);box-shadow:0 1px 0 rgba(58,43,53,.08),0 6px 14px rgba(58,43,53,.10)}
+#app-head.rb-dash .container{max-width:1230px}
+/* --- top bar --- */
+#app-head.rb-dash .topbar{background:var(--dh-bg);color:var(--dh-ink);border-bottom:1px solid var(--dh-rule)}
+#app-head.rb-dash .topbar .container{display:flex;justify-content:space-between;align-items:center;gap:.6rem;min-height:49px;padding-top:3px;padding-bottom:3px}   /* + 1px rule = the dashboard's 50px top bar */
+#app-head.rb-dash .tb-logo{display:inline-flex;align-items:center;line-height:0;flex:none}
+#app-head.rb-dash .wm-logo .bl-head{display:block;height:32px;width:65px;color:var(--dh-logo)}   /* dashboard logo height 32px */
+#app-head.rb-dash .nav-right{display:flex;align-items:center;gap:.6rem;margin-left:auto;flex:none}
+#app-head.rb-dash .tb-key{display:inline-flex;align-items:center;justify-content:center;width:40px;height:31px;padding:0;color:var(--dh-plum);
+  background:transparent;border:2px dotted var(--dh-tag);border-radius:6px;cursor:pointer}
+#app-head.rb-dash .tb-key svg{width:18px;height:18px}
+#app-head.rb-dash .tb-key:hover,#app-head.rb-dash .tb-key[aria-expanded=true]{background:var(--dh-chip);color:var(--dh-berry)}
+#app-head.rb-dash .burger{display:inline-flex}            /* the menu key shows at every width now (the section row lives in the menu) */
+#app-head.rb-dash .create-pill{min-height:31px;font-size:.95rem;padding:.25rem .75rem .2rem}
+#app-head.rb-dash .create-pill:hover,#app-head.rb-dash .create-pill[aria-current]{transform:none}
+/* --- ticker band --- */
+#app-head.rb-dash .wx-hud{position:relative;background:var(--dh-bg);color:var(--dh-plum);border-bottom:1px solid var(--dh-rule2)}
+#app-head.rb-dash .wx-hud .container{display:flex;align-items:center;gap:.5rem;min-height:28px;padding-top:2px;padding-bottom:2px}
+#app-head.rb-dash .hd-ticker{flex:1;min-width:0;overflow:hidden;white-space:nowrap;font:.74rem/1.5 var(--dh-mono);color:var(--dh-plum);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+#app-head.rb-dash .hd-tick-track{display:inline-flex;will-change:transform;
+  animation:hd-scroll var(--hd-tick-t,122.99s) linear var(--hd-tick-d,-76.01s) infinite!important}   /* the one moving thing in the header */
+#app-head.rb-dash.hd-paused .hd-tick-track{animation-play-state:paused!important}
+#app-head.rb-dash .hd-tick-half{padding-right:2rem;white-space:nowrap}
+#app-head.rb-dash .hd-tick-sep{color:var(--dh-tag)}
+#app-head.rb-dash .hd-tick-w{color:var(--dh-teal);font-weight:700}
+@keyframes hd-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+#app-head.rb-dash .hd-emoji{flex:none;font-size:.9rem;line-height:1;letter-spacing:.12em;white-space:nowrap;user-select:none;margin:0 .4rem}
+#app-head.rb-dash [hidden]{display:none!important}
+#app-head.rb-dash .db-chip{flex:none;display:inline-flex;align-items:center;gap:.25rem;font:700 .78rem/1 var(--dh-mono);letter-spacing:0;color:var(--dh-plum);
+  background:var(--dh-chip);border:1px solid var(--dh-rule);border-radius:999px;padding:.22rem .55rem;white-space:nowrap;text-decoration:none}
+#app-head.rb-dash a.db-wx:hover{color:var(--dh-berry);text-decoration:underline;text-underline-offset:2px}
+#app-head.rb-dash .db-wx-s{display:none}
+@media(min-width:1100px){#app-head.rb-dash .db-wx-s{display:inline}#app-head.rb-dash .db-wx-c{display:none}}
+/* --- bottom row --- */
+#app-head.rb-dash .masthead{background:var(--dh-bg);border-bottom:2px dotted var(--dh-rule)}
+#app-head.rb-dash .masthead .container{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:nowrap;min-height:40px;padding-top:.25rem;padding-bottom:.25rem}
+#app-head.rb-dash .brand{display:flex;align-items:center;gap:.55rem;min-width:0;flex:0 1 auto}
+#app-head.rb-dash .mh-tagline{display:block;min-width:0;font-family:var(--f-hand);font-size:1rem;letter-spacing:1.5px;color:var(--dh-tag);
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+#app-head.rb-dash .mh-right{display:flex;align-items:center;gap:.5rem;min-width:0;flex:0 1 auto;justify-content:flex-end}
+#app-head.rb-dash .db-greet{min-width:0;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.1}
+#app-head.rb-dash .masthead.asking .db-greet,#app-head.rb-dash .masthead.asking .db-hello{display:none!important}
+/* inline name prompt (part of the row, not a pop-up; same height as the row) */
+#app-head.rb-dash .hd-ask{display:flex;align-items:center;gap:.45rem;min-width:0;font:.85rem/1.2 var(--f-body);color:var(--dh-ink)}
+#app-head.rb-dash .hd-ask-q{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#app-head.rb-dash .hd-ask-q .sm{display:none}
+#app-head.rb-dash .hd-ask-q.err{color:var(--dh-berry);font-weight:700}
+#app-head.rb-dash .hd-ask-in{width:9.5em;min-width:64px;flex:0 1 auto;font:1rem/1.2 var(--f-body);color:var(--dh-ink);background:#FFFFFF;border:0;
+  border-bottom:2px solid var(--dh-tag);border-radius:0;padding:.15rem .2rem}
+#app-head.rb-dash .hd-ask-in:focus{outline:none;border-bottom-color:var(--dh-berry);background:var(--dh-chip)}
+#app-head.rb-dash .hd-ask-b{flex:none;font:700 .78rem/1 var(--f-body);letter-spacing:.5px;border-radius:999px;padding:.4rem .7rem;cursor:pointer;white-space:nowrap}
+#app-head.rb-dash .hd-ask-save{background:var(--dh-berry);color:#FFFFFF;border:1px solid var(--dh-berry)}
+#app-head.rb-dash .hd-ask-no{background:transparent;color:var(--dh-plum);border:1px solid var(--dh-rule)}
+#app-head.rb-dash .hd-ask-b:hover{text-decoration:underline}
+/* search bar opens inside the locked header */
+#app-head.rb-dash .searchbar{background:var(--dh-bg);border-top:0;border-bottom:2px dotted var(--dh-rule)}
+#app-head.rb-dash .searchbar form{padding:.6rem 0}
+#app-head.rb-dash .searchbar input{font-size:1.2rem}
+#app-head.rb-dash .searchbar .btn{font-size:1rem;padding:.35rem 1rem .3rem}
+/* phone menu: your name line */
+.drawer .dr-you{margin:.9rem 0 0;font:1rem/1.4 var(--f-body);color:#3A2B35}
+.drawer .dr-you-b{font:inherit;background:none;border:0;padding:0;color:#8E2350;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+/* --- widths --- */
+@media(max-width:1099px){#app-head.rb-dash .db-hello{display:none!important}}
+@media(max-width:767px){#app-head.rb-dash .db-wx-l,#app-head.rb-dash .db-wx-go{display:none}#app-head.rb-dash .hd-emoji .g1,#app-head.rb-dash .hd-emoji .g2{display:none}
+  #app-head.rb-dash .hd-ask-q .lg{display:none}#app-head.rb-dash .hd-ask-q .sm{display:inline}}
+@media(max-width:575px){
+  #app-head.rb-dash .wm-logo .bl-head{height:26px;width:53px}                 /* dashboard phone logo height 26px */
+  #app-head.rb-dash .nav-right{gap:.4rem}
+  #app-head.rb-dash .db-wx-p{display:none}
+  #app-head.rb-dash .db-chip{font-size:.7rem;padding:.2rem .45rem}
+  #app-head.rb-dash .mh-tagline{font-size:.78rem;letter-spacing:1px}
+  #app-head.rb-dash .masthead.asking .brand{display:none}
+  #app-head.rb-dash .masthead.asking .mh-right{flex:1 1 auto;justify-content:space-between}
+  #app-head.rb-dash .hd-ask{flex:1 1 auto;gap:.35rem;font-size:.78rem}
+  #app-head.rb-dash .hd-ask-q{flex:none;max-width:42vw}
+  #app-head.rb-dash .hd-ask-in{flex:1 1 auto;width:auto;min-width:60px;font-size:.95rem}
+  #app-head.rb-dash .hd-ask-b{padding:.36rem .55rem;font-size:.74rem}
+}
+@media(max-width:374px){#app-head.rb-dash .hd-emoji{display:none!important}}
+@media (prefers-reduced-motion:reduce){
+  #app-head.rb-dash .hd-tick-track{animation:none!important;will-change:auto}
+  #app-head.rb-dash .hd-ticker{overflow-x:auto;-webkit-mask-image:none;mask-image:none;scrollbar-width:none}
+}
+@media print{#app-head.rb-dash .wx-hud{display:none}}

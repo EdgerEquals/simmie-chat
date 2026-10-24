@@ -1,0 +1,5 @@
+/* HELD-WORK PREVIEW only: the labelled band above the shared header (chat page colours: plum on blush) */
+.preview-band{flex:none;position:relative;z-index:60;text-align:center;font:700 12px/1.2 "Alegreya Sans",system-ui,sans-serif;letter-spacing:.06em;
+  padding:5px 10px;background:#5B3A50;color:#FFF8F4}
+.preview-toast{position:fixed;left:50%;top:44px;transform:translateX(-50%);z-index:90;background:#5B3A50;color:#FFF8F4;border-radius:10px;
+  padding:6px 12px;font:600 13px/1.3 "Alegreya Sans",system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.2)}
