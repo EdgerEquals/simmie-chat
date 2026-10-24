@@ -46,3 +46,7 @@
    overshoot read too far left, so the tagline text sits 2px right of the Q's ink. Padding 3px -> 5px; the orange bar stays where it was. */
 .q-head .qh-mast .dh-sub{padding-left:5px}
 @media (max-width:575px){.q-head .qh-mast .dh-sub{padding-left:5px}}
+/* Orange bar back under the title (Danny t688u 18:35 AWST 24 Oct: "it's the vertical slash"): the bar's left edge lines up with the
+   title's Q and the tagline text starts right of it with the original ~6px gap (.4rem padding). Replaces the -5px pull-out / 5px nudge. */
+.q-head .qh-mast .dh-sub{margin-left:0;padding-left:6px}
+@media (max-width:575px){.q-head .qh-mast .dh-sub{margin-left:0;padding-left:6px}}
