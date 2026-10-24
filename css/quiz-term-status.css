@@ -1,0 +1,44 @@
+/* Questionnaire only (Danny 13:18 AWST 24 Oct 2026, t637u/t638u/t639u, live, no preview).
+   1) The header's "From Dad · age 13" tag (#ttag, phone + desktop) is hidden (element kept, its text no longer shown) and replaced by a
+      terminal-style status pill (#tstat): small monospace text like the simmie$ prompt, cycling "status" <-> "live", with a breathing
+      teal dot (Dad's accent #0AF2FF). Words are stacked in a fixed 6ch box, so swapping them never shifts the layout.
+   2) Matrix terminal colours on the terminal elements only: matrix green #00FF41 for text + prompt, matrix red #FF0033 for accents
+      (input-focus underline, text selection, and the footer cursor while the status reads "live"). Rest of Dad's palette unchanged.
+   3) Footer simmie$ light (the block cursor after the prompt): pulses matrix green; turns matrix red while the pill reads "live".
+      Both follow html[data-term-status] set by js/quiz-term-status.js, so they flip together.
+   Timing (phi rules; CSS animations are scaled by the ratio pump, Dad's dial 0.75): "status" pulse PHI^2 = 2.618 s; dot breath
+   PHI^3.25 = 4.778 s; cursor blink unchanged (--phi-cursor, PHI^0.5 = 1.272 s); word cross-fade PHI^0.25 = 1.128 s / pump rate
+   (set by the JS, transitions are not pump-scaled); dwell status PHI^5.5 = 14.107 s, live PHI^5.25 = 12.508 s (JS, / pump rate).
+   Reduced motion: "status" shown statically, dot steady, no pulse. Paused with the page (body.paused). */
+:root{--mx-g:#00FF41;--mx-r:#FF0033;--ts-xf:1.504s}
+
+/* ---- 1) header status pill ---- */
+#ttag{display:none!important}
+.tick .tstat{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;padding:3px 6px;border-radius:4px;background:#020812;box-shadow:inset 0 0 0 1px #143A57;
+  font:400 11px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.2px;color:var(--mx-g);white-space:nowrap}
+.tstat .ts-dot{position:relative;flex:none;width:6px;height:6px;border-radius:50%;background:#0AF2FF;box-shadow:0 0 4px rgba(10,242,255,.65);
+  animation:tsBreath 4.778s ease-in-out -0.823s infinite}
+.tstat .ts-w{position:relative;display:inline-block;width:6ch;height:1em}
+.tstat .ts-w b{position:absolute;left:0;top:0;font-weight:400;transition:opacity var(--ts-xf) ease-in-out}
+.tstat .ts-s{opacity:1}.tstat .ts-l{opacity:0}
+.tstat .ts-s i{font-style:normal;display:inline-block;animation:tsPulse 2.618s ease-in-out -1.451s infinite}
+html[data-term-status="live"] .tstat .ts-s{opacity:0}
+html[data-term-status="live"] .tstat .ts-l{opacity:1}
+@keyframes tsPulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes tsBreath{0%,100%{transform:scale(.8);opacity:.7;box-shadow:0 0 2px rgba(10,242,255,.4)}50%{transform:scale(1.1);opacity:1;box-shadow:0 0 6px 1px rgba(10,242,255,.75)}}
+@media(max-width:480px){.tick .tstat{font-size:10.5px;padding:3px 5px;gap:4px}}
+
+/* ---- 2) matrix terminal colours (bottom tty only) ---- */
+.foot .ttyl,.foot .tin input,.foot .tout .lp,.foot .tout .lc{color:var(--mx-g)}
+.foot .ttyl .pr{color:var(--mx-g);text-shadow:0 0 4px rgba(0,255,65,.45)}
+.foot .tout .ts{color:var(--mx-g);opacity:.6}
+.foot .ttybar .tt{color:var(--mx-g);opacity:.7}
+.foot .tin:focus-within{box-shadow:0 1px 0 0 var(--mx-r)}
+.foot .ttyl ::selection,.foot .tin input::selection{background:var(--mx-r);color:#000}
+
+/* ---- 3) footer simmie$ light: green, red while the status reads "live" ---- */
+.foot .tin .blk{background:var(--mx-g);box-shadow:0 0 4px rgba(0,255,65,.6);transition:background-color var(--ts-xf) ease-in-out,box-shadow var(--ts-xf) ease-in-out}
+html[data-term-status="live"] .foot .tin .blk{background:var(--mx-r);box-shadow:0 0 5px rgba(255,0,51,.7)}
+
+body.paused .tstat .ts-dot,body.paused .tstat .ts-s i{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.tstat .ts-dot,.tstat .ts-s i{animation:none!important}.tstat .ts-w b,.foot .tin .blk{transition:none!important}}
