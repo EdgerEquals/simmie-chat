@@ -1,0 +1,34 @@
+/* Front orbit layer (Danny 13:22-13:24 AWST 24 Oct, t641u/t642u/t643u/t644u). js/quiz-front-orbit.js builds it.
+   4 space emojis that orbit IN FRONT of the greeting ("Hey Bonnie ... from Dad"), the heading and Simmie's avatar:
+     star     tilted -20deg tall ellipse across the glowing "from Dad" line, top -> bottom, reaching up under the header
+     rocket   +25deg wide ellipse around the heading
+     sparkles -20deg tall ellipse through the avatar, reaching down under the footer
+     globe    +25deg ellipse around the avatar + intro row
+   Elliptical motion = two sine-eased alternating CSS animations (x and y, a quarter period apart) inside a rotated box,
+   so js/ratio-pump.js + Dad's dial 0.75 scale them automatically. Travel PHI^8.125/8.375/8.625/8.875, opacity
+   PHI^5.04/5.10/5.16/5.22 (0.06 -> peak 0.70, mostly low); golden-angle starts. Opts out of the weather sweep (wx-seq).
+   Z-ORDER + CLIP: the layer is position:absolute in the document (scrolls with the greeting, not the viewport), z-index 4:
+   above the content panel (positioned, z auto) but BELOW the pinned header (.q-head sticky z 40) and the fixed footer
+   (.foot z 5), so the emojis slide UNDER both edges. On top of that the JS keeps a clip-path inset on the layer equal to
+   the header's bottom edge and the footer's top edge, so nothing ever draws over them even where they are translucent.
+   pointer-events none, aria-hidden. Paused with the tab hidden / body.paused / html.wx-paused; hidden for reduced motion.
+   SCROLL FADE (t643u/t644u): html.qorb-away (set by the JS once scrollY > innerHeight/12) fades BOTH orbit layers
+   (this one + .qs-layer) out over PHI^-1 s, and back in when scrolled back above it. Other emojis are untouched. */
+.qf-layer{position:absolute;left:0;top:0;width:100%;height:var(--qf-h,100vh);z-index:4;pointer-events:none;overflow:hidden;
+  clip-path:inset(var(--qf-ct,0px) 0 var(--qf-cb,0px) 0);transition:opacity .618s ease}
+.qf-orb{position:absolute;left:var(--cx,50%);top:var(--cy,50%);width:0;height:0;transform:rotate(var(--tilt,-20deg))}
+.qf-x{position:absolute;left:0;top:0;animation:qfX var(--qf-half,25s) cubic-bezier(.3642,0,.6358,1) var(--dx,0s) infinite alternate}
+.qf-y{display:block;animation:qfY var(--qf-half,25s) cubic-bezier(.3642,0,.6358,1) var(--dy,0s) infinite alternate}
+.qf-up{display:block;transform:translate(-50%,-50%) rotate(var(--untilt,20deg))}
+.qf-op{display:block;font-size:20px;line-height:1;opacity:.06;animation:qfPulse var(--qf-pulse,11s) ease-in-out var(--pdel,0s) infinite;
+  text-shadow:0 0 6px rgba(10,242,255,.35)}
+@keyframes qfX{from{transform:translateX(calc(-1 * var(--rx,60px)))}to{transform:translateX(var(--rx,60px))}}
+@keyframes qfY{from{transform:translateY(calc(-1 * var(--ry,40px)))}to{transform:translateY(var(--ry,40px))}}
+@keyframes qfPulse{0%,100%{opacity:.06}30%{opacity:.18}50%{opacity:.7}70%{opacity:.18}}
+@media (max-width:575px){.qf-op{font-size:17px}}
+.qf-layer.qf-paused *,body.paused .qf-layer *,html.wx-paused .qf-layer *{animation-play-state:paused!important}
+.qf-layer[hidden]{display:none}
+/* scroll fade for both orbit layers */
+.qs-layer{transition:opacity .618s ease}
+html.qorb-away .qf-layer,html.qorb-away .qs-layer{opacity:0}
+@media (prefers-reduced-motion:reduce){.qf-layer{display:none}}
