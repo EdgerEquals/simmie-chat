@@ -541,11 +541,6 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     <details class="dj-demo"><summary>try the pumps</summary><p class="dj-pumps" id="dj-pumps"></p><div class="dj-chips" id="dj-chips"></div></details>
   </section>
   </div></div>
-  <!-- bottom row (Danny 02:59 AWST): where the dashboard's masthead carries the mark; the questionnaire's own tagline sits here -->
-  <header class="qh-mast"><div class="qh-c">
-    <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=3" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
-    <p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p>
-  </div></header>
 </div>
 <main class="wrap">
   <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><div id="vol-sound"></div></aside>
@@ -1064,7 +1059,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
    version.json (same origin, cache-busted, no-store); when the box's qheld_sync has rebuilt the preview from newer held work,
    reload onto the new version. Never while a text field is focused or typed in during the last 20 s (waits, then reloads).
    Nothing else is contacted: one same-origin GET of a static file. */
-(function(){var V='1b0e358fa9746ed1',U='previews/questionnaire-held/version.json',last=0,pend=null;
+(function(){var V='05b995e32e0c4f2c',U='previews/questionnaire-held/version.json',last=0,pend=null;
 function busy(){var a=document.activeElement,t=a&&a.tagName;return !!(a&&(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||a.isContentEditable))||Date.now()-last<20000;}
 addEventListener('input',function(){last=Date.now();},true);addEventListener('keydown',function(){last=Date.now();},true);
 function go(nv){pend=nv;if(busy())return;var k='qheld-reload-'+nv,n=0;try{n=+(sessionStorage.getItem(k)||0);if(n>=3)return;sessionStorage.setItem(k,n+1);}catch(e){}
