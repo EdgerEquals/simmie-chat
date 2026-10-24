@@ -77,7 +77,7 @@
     if(busy){
       stop(); cloud(true); var i = 0, txt = $("#tty-busy-text");
       var tick = function(){ txt.textContent = (RM.matches ? "\u2026" : SPIN[i++ % SPIN.length]) + " SIMMIE IS ON IT\u2026"; };
-      tick(); spin = setInterval(function(){ if(!document.hidden) tick(); }, RM.matches ? 5000 : 120);
+      tick(); spin = setInterval(function(){ if(!document.hidden) tick(); }, RM.matches ? 5000 : Math.round(120 / ((window.RatioPump && window.RatioPump.rate()) || 1)));   // spinner on the ratio pump + site dial
     } else { cloud(false); out().textContent = ""; if(!inputOpen()) idle(); }
   }
 

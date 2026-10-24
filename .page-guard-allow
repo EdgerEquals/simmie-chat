@@ -20,3 +20,7 @@ index.html :: id:msg
 index.html :: id:send-btn
 index.html :: id:send-form
 index.html :: landmark:form
+# approved by Danny 12:15 AWST 24 Oct (t588u): chat header loses the "Replies usually take under a minute" line (#status) and Dad's world mark to its left; the now-empty masthead row goes with them
+index.html :: id:chat-head
+index.html :: id:status
+index.html :: landmark:header
