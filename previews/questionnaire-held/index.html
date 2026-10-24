@@ -1,0 +1,1064 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<base href="../../"><!-- HELD-WORK PREVIEW (previews/questionnaire-held/): every relative path resolves from the site root, same files as the live questionnaire -->
+<script id="phi-timing">
+/* PHI TIMING (shared module; same file on every Bonnie site/preview).
+   Standing rules: /home/box/.config/phi-timing-rules.md (set by Danny, 2026-10-23). Summary, follow it in future builds:
+   1. PHI = 1.6180339887; every timed interval is PHI^n seconds. Fast elements make small moves, slow ones big moves.
+   2. Start offsets: element k (fixed order below) starts at period * frac(k * 0.6180339887), the golden angle.
+      CSS uses a negative animation-delay (var(--phi-NAME-d)) so nothing waits blank on load.
+   3. Bonnie's ladder: blinks PHI^2 2.618 / weather faces PHI^2,3,4 / facts PHI^4 6.854 / loop effect PHI^5 11.09 /
+      animals PHI^5 11.09 / offering story PHI^6 17.94 / sticker sway PHI^7 29.03 / slow drift PHI^8 46.98 s.
+   4. Simmie's palette runs 1.5 phi steps faster: period = Bonnie slot * PHI^-1.5 (~0.486), so the two ladders never
+      share a period and never lock into a repeating alignment (space set 8.72, cloud orbit + space drift 22.84,
+      mission log ambient 5.39, Ask Dad glow 2.06, Ask Dad satellite 3.33, cursor + status blinks 1.27 s).
+   5. New elements: give them a Bonnie slot by role; Simmie's elements get * PHI^-1.5. Respect reduced motion.
+   6. Weather sweep: the weather loop (faces, offering story + loop effect, sticker/chip sway) never changes; the weather
+      state shifts every OTHER element's exponent by s steps: hot -1, sun -0.5, storm 0, cloud 0, rain +0.5, fog +1,
+      clear night +1.5, deep night (00:00-05:00 Perth) +2. Same s for Bonnie and Simmie (still 1.5 steps apart),
+      offsets kept, a new s lands at each element's next cycle boundary, reduced motion ignores it. No weather data: s=0.
+      Preview override: ?weather=hot|sun|storm|cloud|rain|fog|night|deep.
+   7. Message-status layer (separate pump, never changes weather or swept elements): a soft pulse ring on the terminal
+      LED, Chat/Ask Dad buttons and the feed edge: idle PHI^5 11.09, new PHI^3 4.24, unread from Dad PHI^2 2.62,
+      urgent (Ask Dad waiting / unanswered question) PHI^1 1.62 s. Only where messages exist (chat + dashboard
+      previews and side copies), never on Rebella; it never reads or shows message text. Preview: ?msg=idle|new|dad|urgent.
+   Functional timers (network polls, debounces, passcode back-off, one-shot event feedback) are not animations and
+   stay as they were. */
+(function(root){
+  "use strict";
+  var PHI = 1.6180339887, G = 0.6180339887, SIM = Math.pow(PHI, -1.5);
+  // [name, Bonnie-ladder exponent, Simmie palette?]  ORDER IS THE k NUMBERING: append new elements, never reorder.
+  var E = [
+    ["light-queue",2,1],["light-fresh",2,1],["light-link",2,1],["light-sky",2,1],["cursor",2,1],
+    ["face-a",2,0,1],["face-b",3,0,1],["face-c",4,0,1],
+    ["askdad-glow",3,1],["askdad-orbit",4,1],
+    ["fact",4,0],["loop-effect",5,0,1],["mlog-ambient",5,1],["animals",5,0],["space",6,1],["story",6,0,1],
+    ["sway",7,0,1],["cloud-orbit",8,1],["bg-drift",8,1],
+    // other timers found, on the nearest readable step for their role
+    ["cloud-breathe",2,1],["cloud-blink",4,1],["cloud-shine",5,1],["cloud-bob",0,1],
+    ["wave",4,1],["wave-busy",1,1],["marquee",8,0,1],["chip-drift",7,0,1],["panel-dot",2,1],
+    ["gait-trot",-2,0],["gait-hop",-1,0],["gait-dog",2,0],["gait-fly",0,0],["gait-glow",0,0],["animal-cross",4,0],
+    ["space-cross",5,1],["space-ring",3,1],["space-ring-slow",4,1],["space-spark",2,1],
+    ["tty-hold",4,1],["tty-hold-multi",3,1],["tty-gap",1,1],["mlog-pace",2,1],
+    ["band-sway",7,0,1],
+    ["askdad-breathe",5,1],   // Ask Dad circle breathing: Simmie slot PHI^5 * PHI^-1.5 = 5.39 s (swept)
+    // questionnaire preview
+    ["offer-cycle",2,0,1],["cloud-wobble",4,1],["beacon",2,1],["beacon-chk",1,1],["beacon-down",0,1],
+    ["bg-fall",6,0],["bg-float",5,0],["bg-sail",7,0],["bg-twinkle",2,0],["bg-cross",6,0],["bg-spin",8,0],["bg-bob",2,0],["bg-pulse",5,0],
+    ["rain",5,0],["code-panel",9,1]
+  ];
+  var T = {}, list = [];
+  E.forEach(function(e, i){
+    var k = i + 1, n = e[2] ? e[1] - 1.5 : e[1], s = Math.pow(PHI, n), f = (k * G) % 1;
+    T[e[0]] = {k:k, n:n, simmie:!!e[2], weather:!!e[3], base:s, frac:f};
+    list.push(e[0]);
+  });
+  var SWEEP = {hot:-1, sun:-0.5, storm:0, cloud:0, rain:0.5, fog:1, night:1.5, deep:2};
+  var MSG = {idle:5, "new":3, dad:2, urgent:1};
+  var sw = 0, msgState = null, msgForced = null, wxForced = null;
+  var RM = (typeof window !== "undefined" && window.matchMedia) ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
+  try{ var q = new URLSearchParams(location.search); wxForced = q.get("weather"); if(!(wxForced in SWEEP)) wxForced = null;
+    msgForced = q.get("msg"); if(!(msgForced in MSG)) msgForced = null; }catch(e){}
+  function g(name){ var t = T[name]; if(!t) throw new Error("phi-timing: unknown element " + name); return t; }
+  function shift(t){ return (t.weather || RM.matches) ? 0 : sw; }
+  function per(name){ var t = g(name); return t.base * Math.pow(PHI, shift(t)); }
+  function perthHour(){ try{ return +new Date().toLocaleString("en-AU", {timeZone:"Australia/Perth", hour:"2-digit", hour12:false}) % 24; }catch(e){ return new Date().getHours(); } }
+  var weatherKey = null;   // last weather mood the page reported (null = no weather state on this page)
+  function sweepFor(key){ if(wxForced) return SWEEP[wxForced];   // ?weather= preview wins exactly (use ?weather=deep for deep night)
+    if(key == null) return 0; var h = perthHour(); if(h >= 0 && h < 5) key = "deep"; return SWEEP[key] || 0; }
+  var api = {
+    PHI:PHI, list:list, SWEEP:SWEEP, MSG:MSG,
+    s:per, ms:function(n){ return Math.round(per(n) * 1000); },
+    base:function(n){ return g(n).base; },
+    off:function(n){ return per(n) * g(n).frac; }, offMs:function(n){ return Math.round(api.off(n) * 1000); },
+    info:function(n){ var t = g(n); return {k:t.k, n:t.n, simmie:t.simmie, weather:t.weather, base:t.base, s:per(n), off:api.off(n), shift:shift(t)}; },
+    sweep:function(){ return RM.matches ? 0 : sw; },
+    // repeating timer: first tick at the golden-angle offset, then one per period; re-reads the period every cycle,
+    // so a new sweep lands at the next cycle boundary. returns {stop}
+    every:function(n, fn){ var h = {t:null, dead:false};
+      function tick(){ if(h.dead) return; fn(); h.t = setTimeout(tick, api.ms(n)); }
+      h.t = setTimeout(tick, api.offMs(n)); h.stop = function(){ h.dead = true; clearTimeout(h.t); }; return h; },
+    // the page tells the module its weather mood (sun|hot|cloud|fog|rain|storm|night) or null when it has none
+    setWeather:function(key){ weatherKey = key || null; setSweep(sweepFor(weatherKey)); },
+    weatherOverride:function(){ return wxForced; },
+    // message-status layer (rule 7): idle|new|dad|urgent; ?msg= wins
+    setMsg:function(state){ setMsg(state); }, msg:function(){ return msgState; },
+    // for JS-managed animations (mark the element data-phi-js): change the period at a cycle boundary without a jump
+    retime:function(a, ms){ retime(a, ms); }
+  };
+  root.PhiTiming = api;
+
+  // ---------- CSS side ----------
+  var doc = (typeof document !== "undefined") ? document : null, rootStyle = doc && doc.documentElement.style;
+  function writeVars(){ list.forEach(function(n){ var t = T[n]; rootStyle.setProperty("--phi-" + n, per(n).toFixed(3) + "s"); rootStyle.setProperty("--phi-" + n + "-d", (-api.off(n)).toFixed(3) + "s"); }); }
+  // which keyframes belong to the weather loop (never swept) or the message layer (own pump)
+  var FIXED = /^(wx-drift|wx-sway|wx-fadein|wx-blip|bw-|msg-pulse)/;
+  function sweepable(a){ return a && a.animationName && !FIXED.test(a.animationName) && a.effect && a.effect.getTiming().iterations === Infinity &&
+    !(a.effect.target && a.effect.target.closest && a.effect.target.closest(".wx-mq-track,.wx-seq,.wx-icon,#wx-mq-track,.bw-sticker,[data-phi-js]")); }
+  // retime a running CSS animation at an iteration boundary without a visible jump
+  function retime(a, D){ var t = a.effect.getTiming(), ct = a.currentTime; if(ct == null || !t.duration) return;
+    var it = Math.round((ct - t.delay) / t.duration); a.effect.updateTiming({duration:D, delay:t.delay}); a.currentTime = t.delay + it * D; }
+  function setSweep(next){
+    if(RM.matches) next = 0;
+    if(next === sw) return; var f = Math.pow(PHI, next - sw);
+    if(doc && doc.getAnimations){ doc.getAnimations().forEach(function(a){ if(!sweepable(a)) return;
+      var t = a.effect.getTiming(); if(a._phiD == null){ a.effect.updateTiming({duration:t.duration, delay:t.delay}); a._phiD = t.duration; }   // pin to its current period
+      a._phiNext = (a._phiNext || a._phiD) * f; }); }
+    sw = next; if(rootStyle) writeVars();   // new elements start on the new periods
+    if(doc) doc.documentElement.setAttribute("data-phi-sweep", String(sw));
+  }
+  if(doc){
+    writeVars();
+    doc.addEventListener("animationiteration", function(ev){
+      var el = ev.target; if(!el.getAnimations) return;
+      el.getAnimations().forEach(function(a){
+        if(a.animationName !== ev.animationName) return;
+        if(a._phiNext != null){ retime(a, a._phiNext); a._phiD = a._phiNext; a._phiNext = null; }
+        if(a.animationName === "msg-pulse" && a._msgNext != null){ retime(a, a._msgNext); a._msgNext = null; }
+      });
+    }, true);
+    // deep night starts/ends on the Perth clock (functional check once a minute, not an animation)
+    setInterval(function(){ if(weatherKey || wxForced) setSweep(sweepFor(weatherKey)); }, 60000);
+    if(wxForced) setTimeout(function(){ setSweep(sweepFor(null)); }, 0);
+    if(RM.addEventListener) RM.addEventListener("change", function(){ setSweep(sweepFor(weatherKey)); });
+  }
+  // ---------- message-status layer ----------
+  function msgPer(st){ return Math.pow(PHI, MSG[st]); }
+  function setMsg(state){
+    if(msgForced) state = msgForced; if(!(state in MSG)) state = "idle";
+    if(state === msgState || !doc) return; msgState = state; var D = msgPer(state) * 1000;
+    rootStyle.setProperty("--phi-msg", (D/1000).toFixed(3) + "s");
+    doc.documentElement.setAttribute("data-msg", state);
+    if(doc.getAnimations) doc.getAnimations().forEach(function(a){ if(a.animationName === "msg-pulse"){
+      var t = a.effect.getTiming(); if(!a._msgPinned){ a.effect.updateTiming({duration:t.duration, delay:t.delay}); a._msgPinned = true; } a._msgNext = D; } });
+  }
+  if(typeof module !== "undefined") module.exports = api;
+})(typeof window !== "undefined" ? window : this);
+</script>
+<script>
+/* ALL wording for this page lives here. Curated for a reader aged 13 (age dial ~/.config/rebella-age-dial.json, field "age").
+   To regenerate older/younger, rewrite these strings only. {n} {total} {a} {b} {x} are filled in by the page. */
+window.QUIZ_COPY = {
+  pageTitle: "Questionnaire preview for Bonnie",
+  intro: "Hey Bonnie, here's a questionnaire I prepared for you,",
+  from: "from Dad",
+  instruction: "Pick the one you like better, tap Reroll under a choice to swap in a different topic, or type a question or comment in the box under each one.",
+  start: "Start questionnaire",
+  progress: "Question {n} of {total}",
+  label: "Which one would you prefer?",
+  weatherQ: "Do you want a weather icon up the top that reflects the weather locally for the person who's viewing the website?",
+  yes: "Yes",
+  no: "No",
+  weatherSum: "Weather icon up the top",
+  ageNote: "Hey Bonnie, we've set up an age dial for your page. Right now it's on 13, so everything is curated for someone your age. It goes from 10 up to 16. If things ever feel too babyish or too grown-up, just ask Simmie to turn it up or down by one or two years. Then refresh your moderation tab to see a sample of the new style. You can change it any time.",
+  ageQ: "Would you like this?",
+  ageSum: "Age dial for your page",
+  reroll: "\uD83C\uDFB2 Reroll",
+  askLabel: "Type a question or comment",
+  askPlaceholder: "Got a question or an idea about this one? Type it here\u2026",
+  send: "Send",
+  saved: "Saved \u2713 (preview: kept on this page, not sent)",
+  empty: "Type something first!",
+  back: "\u2190 Back",
+  skip: "Skip",
+  backRight: "Back \u2192",
+  sumTitle: "\u2728 You did it, Bonnie! \u2728",
+  sumLead: "Here are your picks. Nice choices!",
+  skipped: "Skipped",
+  over: "over {x}",
+  either: "{a} or {b}",
+  again: "Start again",
+  footer: "Preview only, nothing is sent",
+  credit: "Made by Dad, with help from Simmie",
+  tickerLabel: "Fun facts from Dad",
+  tag: "From Dad",
+  headTitle: "Questions for Bonnie",
+  headPill: "from Dad",
+  headSub: "Go with whatever feels right to you. There are no wrong answers.",
+  ageTag: "age {age}",
+  place: "Perth"
+};
+
+/* Header ticker + Simmie terminal facts come from facts.json (sourced, verified, filtered by the age dial). */
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Questionnaire preview for Bonnie (held header + footer)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
+<link rel="stylesheet" href="css/dad-palette.css?v=2">
+<style>
+/* PREVIEW ONLY. Nothing Bonnie types is sent anywhere: no forms, no POSTs. Answers live in page memory and vanish on reload.
+   Only reads: age-dial.json (same site) for the ticker age, and Open-Meteo current weather for fixed Perth coordinates (GET, no key, no geolocation), cached 30 min in localStorage; and the Open-Meteo Marine API for fixed Fremantle coordinates (tide + swell strip in the footer, dash/js/tide-swell.js, GET, no key, cached 60 min). */
+/* Dark Dad theme: only Dad palette colours (css/dad-palette.css) plus darker/lighter tints of them. No Bonnie pastels on this page. */
+:root{--bg:#161B1F;--bg-top:#0A3F4C;--surface:#11303A;--surface-2:#0E252D;--line:rgba(78,170,190,.32);--teal-hi:#2A8FA3;--ink:var(--dad-sand);--heading:var(--dad-sand);--accent:var(--dad-amber);--deep:#B9762A;
+  --f-body:"Alegreya Sans",Helvetica,Arial,sans-serif;--f-hand:"Gochi Hand",cursive;--f-script:"Kaushan Script",cursive;--f-serif:"Lora",Georgia,serif;--shadow:0 8px 24px rgba(0,0,0,.35)}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;font-family:var(--f-body);font-size:1.15rem;line-height:1.5;color:var(--ink);background:linear-gradient(180deg,var(--bg-top) 0,#0F2A33 38%,var(--bg) 100%) fixed var(--bg);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,var(--bg-top) 0,#0F2A33 38%,var(--bg) 100%),radial-gradient(ellipse at 80% 0,rgba(242,165,65,.10),transparent 55%)}
+/* Themed animated layers (decorative): two layers so a theme can cross-fade */
+.fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .8s ease}
+.fx.on{opacity:1}
+.p{position:absolute;top:0;left:0;will-change:transform;font-size:var(--s,34px);line-height:1;opacity:var(--o,.6)}
+.p svg{display:block;width:var(--s,34px);height:var(--s,34px)}
+@keyframes fall{from{transform:translate3d(var(--x),-12vh,0) rotate(0)}to{transform:translate3d(calc(var(--x) + var(--dx)),112vh,0) rotate(var(--r))}}
+@keyframes rise{from{transform:translate3d(var(--x),110vh,0) scale(.8)}to{transform:translate3d(calc(var(--x) + var(--dx)),-14vh,0) scale(1.1)}}
+@keyframes floaty{0%,100%{transform:translate3d(var(--x),var(--y),0) rotate(-6deg)}50%{transform:translate3d(calc(var(--x) + var(--dx)),calc(var(--y) - 3vh),0) rotate(8deg)}}
+@keyframes drift{from{transform:translate3d(-20vw,var(--y),0) rotate(-4deg)}to{transform:translate3d(115vw,calc(var(--y) + var(--dy)),0) rotate(6deg)}}
+@keyframes twinkle{0%,100%{opacity:.15;transform:translate3d(var(--x),var(--y),0) scale(.7)}50%{opacity:var(--o,.7);transform:translate3d(var(--x),var(--y),0) scale(1.15)}}
+@keyframes cross{0%{transform:translate3d(-25vw,60vh,0) rotate(-25deg);opacity:0}8%{opacity:var(--o,.6)}60%{opacity:var(--o,.6)}75%,100%{transform:translate3d(120vw,8vh,0) rotate(-25deg);opacity:0}}
+@keyframes spin{to{transform:translate3d(var(--x),var(--y),0) rotate(360deg)}}
+@keyframes bob{0%,100%{transform:translate3d(var(--x),var(--y),0)}50%{transform:translate3d(var(--x),calc(var(--y) - 6vh),0)}}
+@keyframes pulse{0%,100%{opacity:.12}50%{opacity:.32}}
+.m-fall{animation:fall var(--d,16s) linear var(--del,0s) infinite}
+.m-rise{animation:rise var(--d,16s) linear var(--del,0s) infinite}
+.m-float{animation:floaty var(--d,9s) ease-in-out var(--del,0s) infinite}
+.m-drift{animation:drift var(--d,28s) linear var(--del,0s) infinite}
+.m-twinkle{animation:twinkle var(--d,4s) ease-in-out var(--del,0s) infinite}
+.m-cross{animation:cross var(--d,14s) linear var(--del,0s) infinite}
+.m-spin{animation:spin var(--d,30s) linear infinite}
+.m-bob{animation:bob var(--d,3s) ease-in-out var(--del,0s) infinite}
+.maplines{position:absolute;inset:0;width:100%;height:100%;animation:pulse var(--phi-bg-pulse) ease-in-out var(--phi-bg-pulse-d) infinite}
+.paused .p,.paused .maplines{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+  .p,.maplines{animation:none!important;transform:translate3d(var(--x),var(--y,30vh),0)!important}
+  .fx{transition:none}
+}
+/* Rain layer: 4 big soft translucent streaks, transform-only, looping slowly */
+.rain{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.rain i{position:absolute;top:0;width:10px;height:46vh;border-radius:10px;background:linear-gradient(to bottom,rgba(214,236,239,0),rgba(214,236,239,.10) 70%,rgba(214,236,239,.18));
+  transform:translate3d(0,-60vh,0) rotate(12deg);animation:rain var(--d) linear var(--del) infinite;will-change:transform}
+.rain i{--d:var(--phi-rain)}   /* every drop on PHI^5 = 11.09 s; staggered on golden-angle fractions of the period */
+.rain i:nth-child(1){left:12%;--del:calc(var(--phi-rain) * -.618)}.rain i:nth-child(2){left:38%;--del:calc(var(--phi-rain) * -.236);width:8px}
+.rain i:nth-child(3){left:66%;--del:calc(var(--phi-rain) * -.854)}.rain i:nth-child(4){left:88%;--del:calc(var(--phi-rain) * -.472);width:7px}
+@keyframes rain{from{transform:translate3d(0,-60vh,0) rotate(12deg)}to{transform:translate3d(-14vw,130vh,0) rotate(12deg)}}
+.paused .rain i{animation-play-state:paused}
+/* Sparkle burst on tiles: nothing at rest; short burst on hover (mouse) or tap */
+.tile{position:relative}
+.tile .sp{position:absolute;width:18px;height:18px;opacity:0;pointer-events:none;transform:scale(.2);
+  background:var(--dad-amber);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
+.tile .sp:nth-child(1){top:8%;left:10%}.tile .sp:nth-child(2){top:12%;right:10%;background:var(--dad-sand)}
+.tile .sp:nth-child(3){bottom:12%;left:16%;background:var(--dad-sand)}.tile .sp:nth-child(4){bottom:8%;right:14%}
+@keyframes spk{0%{opacity:0;transform:scale(.2) rotate(0)}40%{opacity:1;transform:scale(1.2) rotate(40deg)}100%{opacity:0;transform:scale(.4) rotate(90deg)}}
+@media(hover:hover){.tile:hover .sp{animation:spk .7s ease-out 1}}
+.tile.burst .sp{animation:spk .7s ease-out 1}
+.tile .sp:nth-child(2),.tile .sp:nth-child(3){animation-delay:.08s!important}
+/* Layout */
+.wrap{max-width:860px;margin:0 auto;padding:1rem 18px 132px}
+.panel{background:rgba(17,48,58,.9);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:1.6rem 1.6rem 1.4rem}
+h1{font-family:var(--f-hand);font-weight:400;color:var(--heading);font-size:2.2rem;line-height:1.2;text-align:center;margin:.3rem 0 .8rem}
+.from{display:block;font-family:var(--f-script);color:var(--accent);font-size:1.6rem;margin-top:.3rem}
+.lead{text-align:center;max-width:560px;margin:0 auto 1.6rem}
+.btn{font:inherit;font-family:var(--f-hand);letter-spacing:1px;text-transform:uppercase;border:0;border-radius:999px;cursor:pointer;color:var(--dad-ocean-deep);background:var(--dad-sky);padding:.55rem 1.2rem;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(.96)}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible,.tile:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.big{display:block;margin:0 auto;font-size:1.5rem;padding:.9rem 2.2rem;background:var(--accent);color:#fff;box-shadow:0 6px 0 var(--deep)}
+.big:active{transform:translateY(3px);box-shadow:0 3px 0 var(--deep)}
+.stars{display:flex;justify-content:center;gap:4px;margin:0 0 .3rem;flex-wrap:wrap}
+.stars i{width:20px;height:20px;display:block;background:#2C4D56;clip-path:polygon(50% 0,62% 35%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 35%)}
+.stars i.done{background:var(--teal-hi)}.stars i.now{background:var(--dad-amber)}
+.count{text-align:center;font-family:var(--f-hand);color:var(--dad-amber);margin:0 0 .8rem;letter-spacing:1px}
+.qlabel{text-align:center;font-family:var(--f-hand);font-weight:400;font-size:1.9rem;color:var(--heading);margin:0 0 1.2rem}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;align-items:start}
+.choice{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.or{display:none}
+.tile{width:100%;min-height:200px;border:3px solid transparent;border-radius:16px;cursor:pointer;font:inherit;color:var(--ink);background:var(--c,#123F47);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:1.2rem 1rem;box-shadow:0 5px 0 rgba(0,0,0,.35);transition:transform .15s,border-color .15s}
+.tile:hover{transform:translateY(-3px);border-color:var(--teal-hi)}
+.tile.picked{border-color:var(--accent);box-shadow:0 0 0 4px var(--surface),0 0 0 7px var(--accent)}
+.tile .emo{font-size:3.4rem;line-height:1}
+.tile .txt{font-weight:700;font-size:1.3rem;line-height:1.25;text-align:center}
+.tile.swap{animation:swap .35s ease}
+@keyframes swap{0%{transform:scale(.94);opacity:.4}100%{transform:none;opacity:1}}
+.reroll{font-size:.95rem;padding:.35rem .9rem;background:var(--dad-sky);color:var(--dad-ocean-deep)}
+.ask{background:var(--dad-sky)}
+.askbox{display:block;margin-top:1.2rem}
+.askbox label{display:block;font-weight:700;margin-bottom:.35rem}
+textarea{width:100%;min-height:90px;font:inherit;font-size:1.05rem;border:2px solid #2A5D69;border-radius:10px;padding:.7rem;color:var(--dad-sand);background:var(--surface-2);resize:vertical}
+.btnrow{display:flex;flex-wrap:nowrap;justify-content:center;gap:8px;margin:.7rem auto 0;max-width:520px}
+.btnrow .btn{flex:1 1 0;min-width:0;white-space:nowrap;font-size:1rem;padding:.55rem .4rem;text-align:center}
+.btnrow .btn:disabled{opacity:.4;cursor:default;filter:grayscale(1)}
+.saved{display:block;text-align:center;min-height:1.4em;margin-top:.4rem}
+@media(max-width:400px){.btnrow{gap:5px}.btnrow .btn{font-size:.9rem;padding:.5rem .2rem;letter-spacing:.5px}}
+.send{background:var(--accent);color:var(--dad-charcoal)}
+.saved{font-size:.95rem;color:#5B8FFF;font-weight:700}
+.notes{list-style:none;padding:0;margin:.6rem 0 0}
+.notes li{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:.4rem .7rem;margin-top:.3rem;font-size:1rem}
+.sum h2{font-family:var(--f-hand);font-weight:400;font-size:2rem;color:var(--heading);text-align:center;margin:0 0 .3rem}
+.sum .yay{text-align:center;margin:0 0 1.2rem}
+.sum ol{list-style:none;padding:0;margin:0 0 1.4rem;display:grid;gap:.6rem}
+.sum li{display:flex;gap:.8rem;align-items:flex-start;background:var(--c,#123F47);border:1px solid var(--line);border-radius:12px;padding:.7rem .9rem}
+.sum .n{flex:0 0 auto;width:2rem;height:2rem;border-radius:50%;background:var(--dad-ocean);display:grid;place-items:center;font-weight:700;color:var(--dad-sand);box-shadow:inset 0 0 0 2px var(--teal-hi)}
+.sum .e{font-size:1.7rem;line-height:1}
+.sum .vs{display:block;font-size:.95rem;color:#D9CDB9}
+.sum .note{display:block;font-size:.98rem;margin-top:.2rem;background:rgba(246,235,217,.08);border-radius:6px;padding:.2rem .5rem}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:5;margin:0;padding:4px 8px 5px;background:rgba(10,24,30,.97);border-top:2px dashed var(--teal-hi);color:var(--dad-sand);font-size:.8rem;display:flex;flex-direction:column;gap:3px;max-height:112px}
+.foot a{color:var(--dad-amber)}
+.foot .strip{display:flex;align-items:center;gap:8px;font:700 9.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.4px;color:#A9C3C8;white-space:nowrap;overflow:hidden;max-width:860px;width:100%;margin:0 auto}
+.foot .lt{display:inline-flex;align-items:center;gap:3px}.foot .lt b{color:var(--dad-sand)}
+.foot .lt i{width:6px;height:6px;border-radius:50%;background:var(--lc,#3D7BFF);box-shadow:0 0 5px var(--lc,#3D7BFF);animation:lblink var(--lp,1.272s) ease-in-out var(--ld,0s) infinite}
+.foot .lt.warn{--lc:#F2A541}.foot .lt.bad{--lc:#E5484D}.foot .lt.idle{--lc:#5C7378}
+.foot .lt.blip i{animation:lblip .6s ease-out 1}
+@keyframes lblink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes lblip{0%{transform:scale(1)}40%{transform:scale(1.9)}100%{transform:scale(1)}}
+.foot .ro{margin-left:auto;color:#E0A251}
+.foot .tty{max-width:860px;width:100%;margin:0 auto;background:#0B1215;border:1px solid rgba(78,170,190,.35);border-radius:7px;overflow:hidden}
+.ttybar{display:flex;align-items:center;gap:4px;height:14px;padding:0 6px;background:#16222A;font:9.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#A9C3C8}
+.ttybar i{width:6px;height:6px;border-radius:50%;background:#F4B6B6}.ttybar i:nth-child(2){background:#F6E3A1}.ttybar i:nth-child(3){background:#3D7BFF}
+.ttybar .tt{flex:1;text-align:center}.ttybar .sat{font-size:9px}
+.ttybody{display:flex;align-items:center;gap:7px;padding:3px 7px 4px 5px}
+.ttybody .simmie{--sz:30px}
+.ttyl{flex:1;min-width:0;font:12px/1.35 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5B8FFF;text-align:left}
+.ttyl .pr{color:var(--dad-amber)}
+.tout{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.35em}
+.tin{display:flex;align-items:center;gap:6px;cursor:text}
+.tfield{position:relative;flex:1;min-width:0;display:flex;align-items:center}
+.tin input{flex:1;min-width:0;width:100%;border:0;outline:0;background:transparent;color:#5B8FFF;font:inherit;padding:0;caret-color:transparent}
+.tin .blk{position:absolute;left:var(--cx,0);top:50%;width:.6em;height:1.1em;margin-top:-.55em;background:#5B8FFF;animation:cblink var(--phi-cursor) steps(1) var(--phi-cursor-d) infinite;pointer-events:none}
+@keyframes cblink{50%{opacity:0}}
+.tin:focus-within{box-shadow:0 1px 0 0 var(--dad-amber)}
+.simmie.talk{animation:sTalk var(--phi-cloud-bob) ease-in-out infinite}
+@keyframes sTalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-8%)}}
+.foot .note{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:.78rem;white-space:nowrap}
+.foot .note .dot{opacity:.6}
+.foot .fcr{font-size:.85rem}
+body.paused .foot .lt i,body.paused .tin .blk,body.paused .simmie.talk{animation-play-state:paused}
+@media(max-width:400px){.foot .note{font-size:.7rem;gap:4px}.foot .strip{gap:6px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.foot .lt i,.tin .blk,.simmie.talk,.foot .lt.blip i{animation:none!important}}
+[hidden]{display:none!important}
+
+/* see ticker block below */
+
+/* ---- Header ticker: code-style fun facts tuned to the age dial; weather chip + reaction for Perth ---- */
+.tick{display:flex;align-items:center;gap:6px;height:36px;margin:0 0 1rem;padding:0 8px;background:linear-gradient(90deg,#0A3F4C,#1C2328);border:1px solid var(--teal-hi);border-radius:8px;overflow:hidden;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1;white-space:nowrap}
+.tick .tag{flex:0 0 auto;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:var(--dad-charcoal);background:var(--dad-amber);border-radius:4px;padding:4px 5px}
+.tick .tag i{font-style:normal;font-weight:400;opacity:.85}
+.tick .wx{flex:0 0 auto;font-size:11px;color:var(--dad-sand);border:1px solid rgba(242,165,65,.55);border-radius:999px;padding:3px 6px}
+.tick .wx b{color:var(--dad-amber);font-weight:700}
+.wxr{flex:0 0 auto;display:inline-flex;gap:2px;line-height:1}
+.fcr{flex:0 0 auto;display:inline-block;width:5.6em;overflow:hidden;line-height:1.2;white-space:nowrap;vertical-align:middle;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.fcr .ct{display:inline-flex;animation:fcr-scroll var(--phi-marquee) linear var(--phi-marquee-d) infinite}.fcr .ct>span{padding-right:.3em}
+@keyframes fcr-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(max-width:460px){.fcr{width:2.6em}}
+@media(prefers-reduced-motion:reduce){.fcr .ct{animation:none}}
+.wxr .fs,.wxr .os{position:relative;display:inline-block;width:1.2em;height:1.2em}
+.wxr .fs>span,.wxr .os>span{position:absolute;left:0;top:0;width:100%;text-align:center;opacity:0;transition:opacity .6s ease}
+.wxr .on{opacity:1!important}
+.tick .wxr{font-size:15px}
+.tick .tview{flex:1 1 auto;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(90deg,transparent,#000 12px,#000 calc(100% - 12px),transparent)}
+.ttrack{display:inline-flex;will-change:transform;animation:tickmove var(--td,82.25s) linear var(--tdl,0s) infinite}
+.ttrack>span{padding-right:2.5em}
+@keyframes tickmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk{color:#6CC6D4}.tc{color:#8FA9AE}.ts{color:#E8DCC8}.tp{color:#E0A251}
+body.paused .ttrack{animation-play-state:paused}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tick.static{height:auto;min-height:36px;padding:6px 8px;flex-wrap:wrap;white-space:normal;row-gap:5px}
+.tick.static .ttrack{animation:none;display:block;transition:opacity .8s ease;line-height:1.4}
+.tick.static .tview{flex-basis:100%;-webkit-mask-image:none;mask-image:none}
+
+/* REBELLA status beacon (right end of the ticker). Live = teal breathing, checking/slow = amber, down = red faster. */
+.beacon{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;margin-left:2px;font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.4px;color:var(--dad-sand);background:#0E1A1F;border:1px solid var(--bc,#2A8FA3);border-radius:999px;padding:4px 7px 4px 6px;cursor:pointer;box-shadow:0 0 8px -2px var(--bc,#2A8FA3)}
+.beacon i{position:relative;width:8px;height:8px;border-radius:50%;background:var(--bc);box-shadow:0 0 6px var(--bc)}
+.beacon i::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--bc);opacity:0;animation:bring var(--bp,1.272s) ease-out infinite}
+.beacon i{animation:bdot var(--bp,1.272s) ease-in-out infinite}
+.beacon.live{--bc:#3D7BFF;--bp:var(--phi-beacon)}.beacon.chk{--bc:#F2A541;--bp:var(--phi-beacon-chk)}.beacon.down{--bc:#E5484D;--bp:var(--phi-beacon-down)}
+@keyframes bdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
+@keyframes bring{0%{opacity:.6;transform:scale(.6)}100%{opacity:0;transform:scale(1.6)}}
+.beacon:focus-visible{outline:2px solid var(--dad-amber);outline-offset:2px}
+body.paused .beacon i,body.paused .beacon i::after{animation-play-state:paused}
+@media(max-width:480px){.beacon .bn{display:none}}
+/* Narrow phones (iPhone SE): status items on the first line, the ticker gets its own full-width line underneath */
+@media(max-width:480px){.tick{flex-wrap:wrap;height:auto;padding:5px 7px;row-gap:5px}.tick .tview{order:9;flex:1 0 100%;height:18px;display:flex;align-items:center;border-top:1px solid rgba(78,170,190,.22);padding-top:5px}.tick .beacon{margin-left:auto}.tick{gap:4px}.tick .tag{font-size:10px;padding:3px 4px}.tick .wx{font-size:10.5px;padding:2px 5px}.tick.static .tview{height:auto;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.beacon i,.beacon i::after{animation:none}}
+
+/* ---- Interlude lanes: Bonnie's animals and Simmie's space crew take turns (9 s vs 12 s polyrhythm) ---- */
+.lane{position:relative;height:16px;overflow:hidden;pointer-events:none}
+#laneH{margin:-.75rem 0 .35rem}
+.lane .it{position:absolute;left:0;bottom:0;font-size:13px;line-height:1;will-change:transform}
+.lane .g{display:inline-block;will-change:transform}
+.lane .fl{display:inline-block}
+.lane .bird{filter:drop-shadow(0 0 3px rgba(110,170,255,.9))}
+.lane .cli{font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#5B8FFF;white-space:pre}
+.row1{position:relative;height:13px}
+.row1 .lane{position:absolute;inset:0;height:13px;opacity:0;transition:opacity .5s}
+.row1 .strip{transition:opacity .5s}
+.row1.swap .lane{opacity:1}.row1.swap .strip{opacity:0}
+.tout{height:2.7em;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.tout .lp,.tout .lc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tout .lp{opacity:.45;transition:opacity .6s}
+.tout .lc.wrap{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tout .ts{color:#C79A55}
+body.paused .lane *{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.lane{display:none}.row1 .lane{display:none}}
+/* ---- Simmie avatar (PREVIEW ONLY): brown cloud traced from Simmie's app avatar. Fill #8C6640, eyes #1E1E1E (sampled).
+   Gentle: breathing squash/stretch 4s, tiny lobe wobble, soft sheen sweep ~every 7s, blink every 5-8s, hop on each new step.
+   transform/opacity only; paused when the tab is hidden; completely still under prefers-reduced-motion. ---- */
+.simmie{display:inline-block;flex:0 0 auto;width:var(--sz,56px);height:calc(var(--sz,56px)*.878);line-height:0;filter:drop-shadow(0 0 5px rgba(246,235,217,.16))}
+.simmie svg{display:block;width:100%;height:100%;overflow:visible}
+.simmie .s-body{transform-box:fill-box;transform-origin:50% 100%;animation:sBreathe var(--phi-cloud-breathe) ease-in-out var(--phi-cloud-breathe-d) infinite}
+.simmie .lobe{transform-box:fill-box;transform-origin:50% 50%;animation:sWob calc(var(--phi-cloud-wobble) / 2) ease-in-out var(--wl,0s) infinite alternate}
+.simmie .s-eyes{transform-box:fill-box;transform-origin:50% 50%}
+.simmie.blink .s-eyes{animation:sBlink .15s ease-in-out 1}
+.simmie .s-sheen{opacity:0;animation:sSheen var(--phi-cloud-shine) ease-in-out var(--phi-cloud-shine-d) infinite}
+.simmie.hop{animation:sHop .5s cubic-bezier(.3,.7,.4,1) 1}
+@keyframes sBreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,1.03)}}
+@keyframes sWob{from{transform:scale(1)}to{transform:scale(1.018)}}
+@keyframes sBlink{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.12)}}
+@keyframes sSheen{0%{transform:translateX(-70px);opacity:0}6%{opacity:1}26%{transform:translateX(250px);opacity:1}30%,100%{transform:translateX(250px);opacity:0}}
+@keyframes sHop{0%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-22%) scale(.96,1.05)}62%{transform:translateY(0) scale(1.05,.95)}100%{transform:translateY(0) scale(1,1)}}
+body.paused .simmie,body.paused .simmie *{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.simmie,.simmie *{animation:none!important}.simmie .s-sheen{opacity:0}}
+.leadrow{display:flex;align-items:center;justify-content:center;gap:.8rem;max-width:560px;margin:0 auto 1.6rem}
+.leadrow .lead{margin:0;text-align:left}
+/* ---- Dad palette for the "from Dad" parts (css/dad-palette.css); Bonnie's pastel tiles and themed backgrounds stay ---- */
+#start.panel,#quiz.panel,#summary.panel{border-top:8px solid var(--teal-hi);}
+#start h1,.sum h2{color:var(--dad-sand)}
+#start .from{color:var(--dad-amber)}
+#start .lead{color:var(--dad-sand)}
+.qlabel{color:var(--dad-sand)}.count{color:var(--dad-amber)}
+.big{background:var(--dad-ocean);color:#fff;box-shadow:0 6px 0 var(--dad-ocean-deep)}
+.big:active{box-shadow:0 3px 0 var(--dad-ocean-deep)}
+.btnrow .btn.send{background:var(--dad-amber);color:var(--dad-charcoal)}
+.btnrow .btn.skip{background:var(--dad-sky);color:var(--dad-ocean-deep)}
+.btnrow .bk{background:var(--dad-sand);color:var(--dad-ocean-deep);box-shadow:inset 0 0 0 2px var(--dad-ocean)}
+.askbox label{color:var(--dad-sand)}
+textarea::placeholder{color:#B9AE9C;opacity:1}
+textarea:focus-visible{border-color:var(--dad-amber);outline:3px solid var(--dad-amber)!important;outline-offset:2px}
+.yn .tile{color:var(--dad-charcoal)}
+.yn #t0{background:var(--dad-sky)!important;border-color:var(--dad-ocean)}
+.yn #t1{background:var(--dad-sand)!important;border-color:var(--dad-amber)}
+.yn .tile.picked{box-shadow:0 0 0 4px var(--surface),0 0 0 7px var(--dad-amber)}
+.btn:focus-visible,.tile:focus-visible{outline-color:var(--dad-amber)}
+/* ---- Code-drift trial (PREVIEW ONLY): faint made-up log lines drifting up inside Dad-palette elements.
+   Generic dummy text, opacity .12, clipped to each element, under a scrim; transform-only, paused when hidden, still for reduced motion. ---- */
+:root{--code-dark:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22240%22%3E%3Cg font-family=%22monospace%22 font-size=%2211%22 fill=%22%23142849%22%3E%3Ctext x=%226%22 y=%2214%22%3E%5Bok%5D worker-3 heartbeat 200 12ms%3C/text%3E%3Ctext x=%226%22 y=%2234%22%3EGET /api/v1/items%3Fpage=4 200%3C/text%3E%3Ctext x=%226%22 y=%2254%22%3Ecache hit ratio=0.93 keys=4096%3C/text%3E%3Ctext x=%226%22 y=%2274%22%3Ejob%234821 queued -%3E running%3C/text%3E%3Ctext x=%226%22 y=%2294%22%3Esync batch 17/40 done%3C/text%3E%3Ctext x=%226%22 y=%22114%22%3EINFO tick 0x3fa2 latency=8ms%3C/text%3E%3Ctext x=%226%22 y=%22134%22%3Eretry 1/3 ... ok%3C/text%3E%3Ctext x=%226%22 y=%22154%22%3Ebuild step 5/9 passed%3C/text%3E%3Ctext x=%226%22 y=%22174%22%3Eping node-b 4ms ttl=58%3C/text%3E%3Ctext x=%226%22 y=%22194%22%3EINFO pool size=12 idle=7%3C/text%3E%3Ctext x=%226%22 y=%22214%22%3E%5Bok%5D checksum 9f3c a1e0 7b21%3C/text%3E%3Ctext x=%226%22 y=%22234%22%3Eflush queue len=0%3C/text%3E%3C/g%3E%3C/svg%3E");--code-light:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22240%22%3E%3Cg font-family=%22monospace%22 font-size=%2211%22 fill=%22%239FF0D8%22%3E%3Ctext x=%226%22 y=%2214%22%3E%5Bok%5D worker-3 heartbeat 200 12ms%3C/text%3E%3Ctext x=%226%22 y=%2234%22%3EGET /api/v1/items%3Fpage=4 200%3C/text%3E%3Ctext x=%226%22 y=%2254%22%3Ecache hit ratio=0.93 keys=4096%3C/text%3E%3Ctext x=%226%22 y=%2274%22%3Ejob%234821 queued -%3E running%3C/text%3E%3Ctext x=%226%22 y=%2294%22%3Esync batch 17/40 done%3C/text%3E%3Ctext x=%226%22 y=%22114%22%3EINFO tick 0x3fa2 latency=8ms%3C/text%3E%3Ctext x=%226%22 y=%22134%22%3Eretry 1/3 ... ok%3C/text%3E%3Ctext x=%226%22 y=%22154%22%3Ebuild step 5/9 passed%3C/text%3E%3Ctext x=%226%22 y=%22174%22%3Eping node-b 4ms ttl=58%3C/text%3E%3Ctext x=%226%22 y=%22194%22%3EINFO pool size=12 idle=7%3C/text%3E%3Ctext x=%226%22 y=%22214%22%3E%5Bok%5D checksum 9f3c a1e0 7b21%3C/text%3E%3Ctext x=%226%22 y=%22234%22%3Eflush queue len=0%3C/text%3E%3C/g%3E%3C/svg%3E")}
+#start.panel,#quiz.panel,#summary.panel,.big,.btnrow .btn,.yn .tile{position:relative;overflow:hidden;isolation:isolate;--code:var(--code-dark);--scrim:rgba(246,235,217,.45)}
+#start.panel,#quiz.panel,#summary.panel{--code:var(--code-light);--scrim:rgba(17,48,58,.55)}
+.big{--code:var(--code-light);--scrim:rgba(15,92,110,.35)}
+.btnrow .btn.send{--scrim:rgba(242,165,65,.4)}.btnrow .btn.skip,.yn #t0{--scrim:rgba(214,236,239,.4)}
+#start.panel::before,#quiz.panel::before,#summary.panel::before,.big::before,.btnrow .btn::before,.yn .tile::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(100% + 240px);z-index:-2;pointer-events:none;background:var(--code) 0 0/320px 240px repeat;opacity:.12;animation:codeup var(--phi-code-panel) linear var(--phi-code-panel-d) infinite;will-change:transform}
+#start.panel::before,#quiz.panel::before,#summary.panel::before{opacity:.1}
+.btnrow .btn::before,.big::before,.yn .tile::before{animation-duration:var(--phi-bg-drift);animation-delay:var(--phi-bg-drift-d);opacity:.14}
+#start.panel::after,#quiz.panel::after,#summary.panel::after,.big::after,.btnrow .btn::after,.yn .tile::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,var(--scrim) 35%,transparent 100%)}
+@keyframes codeup{from{transform:translateY(0)}to{transform:translateY(-240px)}}
+body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #summary.panel::before,body.paused .big::before,body.paused .btnrow .btn::before,body.paused .yn .tile::before{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){#start.panel::before,#quiz.panel::before,#summary.panel::before,.big::before,.btnrow .btn::before,.yn .tile::before{animation:none}}
+
+.agenote{background:#1E3A3A;color:var(--dad-sand);border-left:8px solid var(--dad-amber);border-radius:12px;padding:1rem 1.2rem;margin:0 auto 1.2rem;max-width:640px;font-size:1.15rem;line-height:1.55}
+.yn .reroll{display:none!important}
+.yn .qlabel{font-size:1.6rem;line-height:1.3;max-width:640px;margin-left:auto;margin-right:auto}
+@media(max-width:600px){.yn .qlabel{font-size:1.3rem}}
+@media(max-width:600px){
+  .panel{padding:1.2rem 1rem 1.1rem}
+  h1{font-size:1.75rem}
+  .choices{gap:.7rem}
+  .tile{min-height:160px;padding:.9rem .5rem}
+  .tile .emo{font-size:2.7rem}.tile .txt{font-size:1.08rem}
+  .qlabel{font-size:1.55rem}
+  .stars i{width:17px;height:17px}
+}
+@media(prefers-reduced-motion:reduce){.rain{display:none}.tile .sp{display:none!important}.tile.swap{animation:none}.btn,.tile{transition:none}}
+/* ---- Space loop background (trial, preview only): fixed full-page video at 30% behind all content; poster only for reduced motion ---- */
+.bgloop,.bgloop-still{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none;opacity:.3}
+.bgloop{object-fit:cover}
+.bgloop-still{display:none;background:url("media/space-loop-poster.webp") center/cover no-repeat}
+@media(prefers-reduced-motion:reduce){.bgloop{display:none}.bgloop-still{display:block}}
+</style>
+<link rel="stylesheet" href="previews/shared/bonnie-sound.css?v=3">
+<link rel="stylesheet" href="previews/shared/command-centre.css?v=2">
+<link rel="stylesheet" href="previews/shared/command-centre-quiz.css?v=3">
+<link rel="stylesheet" href="previews/shared/dad-dj-quiz.css?v=2">
+<link rel="stylesheet" href="previews/questionnaire-held/dad-head.css?v=1"><!-- Dad's palette (Danny 24 Oct 08:38 AWST: the questionnaire is from Dad, so it always uses his palette) -->
+<link rel="stylesheet" href="previews/shared/quiz-foot-lock.css?v=1">
+<link rel="stylesheet" href="previews/questionnaire-held/tide-swell.css?v=1"><!-- tide + swell after the critters (Danny 24 Oct 2026 03:43 AWST, HELD) -->
+<style>
+/* inline volume note (not a pop-up): first thing on the page; the sound switch lives inside it */
+/* light sapphire (Danny 02:49 AWST: "more opaque and much lighter"; harmonised with the chat palette 02:50): was the radiant
+   translucent #3D7BFF .86 -> #185AD4 .88 -> #0F52BA .90 with a strong glow (47687f8). Now near-opaque pale sapphire
+   #C9D9FF .97 -> #AFC6FB .98 -> #9DBBFF .98, hairline #7FA6F5, soft proportionate glow; text deep sapphire #0A2F6E
+   (6.7:1 on #9DBBFF, 7.5:1 on #AFC6FB, 9.0:1 on #C9D9FF); chips/switch inside the box recoloured to match (below). */
+.vol-note{margin:0 0 .8rem;padding:.55rem .8rem .5rem;color:#0A2F6E;border:1px solid #7FA6F5;border-radius:12px;line-height:1.3;background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 50%),linear-gradient(135deg,rgba(201,217,255,.97) 0%,rgba(175,198,251,.98) 25%,rgba(157,187,255,.98) 100%);box-shadow:0 0 14px rgba(157,187,255,.45),0 0 4px rgba(201,217,255,.4),inset 0 1px 0 rgba(255,255,255,.6)}
+.vol-note .vn-top{text-shadow:none}
+/* sound switch + flavour chips inside the light box: deep sapphire on pale sapphire, selected = chat accent #B4436C with white (5.3:1);
+   the row wraps instead of side-scrolling, so no chip is cut off at 375 px */
+.vol-note .bs-row{color:#0A2F6E;flex-wrap:wrap;white-space:normal;overflow:visible;row-gap:5px}
+.vol-note .bs-flav{flex-wrap:wrap;row-gap:4px;flex:1 1 auto;max-width:100%;min-width:0}
+.vol-note .bs-flav legend{color:#0A2F6E}
+.vol-note .bs-flav span{border-color:rgba(10,47,110,.5);color:#0A2F6E;background:rgba(255,255,255,.35)}
+.vol-note .bs-flav input:checked + span{background:#B4436C;border-color:#B4436C;color:#FFFFFF}
+.vol-note .bs-flav input:focus-visible + span,.vol-note .bs-toggle:focus-visible{outline:3px solid #B4436C}
+.vol-note .bs-toggle{border-color:#0A2F6E;color:#0A2F6E}
+.vol-note .bs-toggle[aria-pressed="true"]{border-color:#7A2448;color:#7A2448;background:rgba(255,255,255,.45)}
+.vol-note .vn-top{margin:0 0 .3rem;font-weight:700;font-size:1rem;display:flex;align-items:center;gap:.45rem}
+.vol-note .vn-spk{color:#F2A541;display:inline-block;font-size:1.15rem;animation:vnBreathe 4.236s ease-in-out infinite}  /* PHI^3 s */
+.vol-note .bs-row{padding:2px 0;font-size:.76rem}
+@keyframes vnBreathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.12);opacity:1}}
+@media(prefers-reduced-motion:reduce){.vol-note .vn-spk{animation:none}}
+</style>
+<script src="previews/shared/bonnie-sound.js?v=4" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
+<script src="previews/shared/bonnie-sound-quiz.js?v=3" defer></script>
+<script src="previews/questionnaire-held/tide-swell.js?v=1" defer></script>
+<script src="previews/shared/dad-autodj-quiz.js?v=2" defer></script>
+</head>
+<body>
+<video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
+<script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();})();</script>
+<div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
+<!-- Questionnaire header (Danny 24 Oct 2026 02:50 AWST): the live Bonnie's Dashboard header STRUCTURE (rebella 517e809 moderation/:
+     top bar with logo + right-side key, weather chip / fun-fact ticker row, Dad's DJ, then the bottom masthead row with the mark,
+     title, pill and the tagline (Danny 02:59 AWST: tagline in the bottom row, not a line under the header)),
+     HELD-WORK PREVIEW: in Dad's palette (previews/questionnaire-held/dad-head.css, Danny 08:38 AWST) and pinned like the dashboard header; no Create button,
+     no Lock / Ask Dad keys (they would do nothing here); the only key is the existing REBELLA status beacon.
+     Replaces Dad's-palette header 53b7cda (restore from that commit: header.dad-head, previews/shared/dad-head-quiz.css). -->
+<div class="q-head dad-head" id="q-head">
+  <div class="qh-top"><div class="qh-c">
+    <svg class="qh-logo" viewBox="413 534 1810 893" width="97" height="38" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Rebella" focusable="false"><use href="img/bonnies-logo.svg?v=1#bonnies-logo"/></svg>
+    <span class="qh-right"><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
+  </div></div>
+  <div class="qh-hud"><div class="qh-c">
+    <div class="tick" id="tick" role="region" aria-label="Fun facts from Dad">
+      <span class="tag" id="ttag">From Dad &middot; age 13</span>
+      <span class="wx" id="wx" hidden><span id="wxIcon"></span> <span id="wxText"></span></span>
+      <span class="wxr" id="wxr" aria-hidden="true" hidden></span>
+      <div class="tview" aria-hidden="true"><div class="ttrack" id="ttrack"></div></div>
+      <span class="sr" id="tsr"></span>
+    </div>
+    <div class="lane" id="laneH" aria-hidden="true"></div>
+  </div></div>
+  <div class="qh-dj"><div class="qh-c">
+  <!-- Dad's auto-DJ (phi rule 10): generated in the browser, plays only after a tap; the sound switch below is the master mute -->
+  <section class="dad-dj" id="dad-dj" data-guard="dad-dj" aria-label="Dad's music">
+    <div class="dj-row">
+      <button type="button" class="dj-play" id="dj-play" aria-pressed="false"><span class="dj-led" aria-hidden="true"></span><span class="dj-lbl">Dad&rsquo;s DJ</span></button>
+      <label class="dj-vol"><span>music vol</span><input type="range" id="dj-vol" min="0" max="100" step="1" value="80"></label>
+      <output class="dj-read" id="dj-read" aria-live="off"></output>
+    </div>
+    <details class="dj-demo"><summary>try the pumps</summary><p class="dj-pumps" id="dj-pumps"></p><div class="dj-chips" id="dj-chips"></div></details>
+  </section>
+  </div></div>
+  <!-- bottom row (Danny 02:59 AWST): where the dashboard's masthead carries the mark; the questionnaire's own tagline sits here -->
+  <header class="qh-mast"><div class="qh-c">
+    <div class="dh-brand"><img class="dad-mark" src="previews/dad-mark/dad-mark.svg?v=3" width="32" height="32" alt=""><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span></div>
+    <p class="dh-sub" data-copy="headSub">Go with whatever feels right to you. There are no wrong answers.</p>
+  </div></header>
+</div>
+<main class="wrap">
+  <aside class="vol-note" aria-label="Sound note"><p class="vn-top"><span class="vn-spk" aria-hidden="true">&#x1F50A;</span><span>Hey Bonnie, turn your volume up! There are little sounds along the way.</span></p><div id="vol-sound"></div></aside>
+
+  <section class="panel" id="start">
+    <h1><span data-copy="intro">Hey Bonnie, here's a questionnaire I prepared for you,</span> <span class="from" data-copy="from">from Dad</span></h1>
+    <div class="leadrow"><span class="simmie" data-simmie style="--sz:56px"></span><p class="lead" data-copy="instruction">Pick the one you like better, tap Reroll under a choice to swap in a different topic, or type a question or comment in the box under each one.</p></div>
+    <button class="btn big" id="go" data-copy="start">Start questionnaire</button>
+  </section>
+
+  <section class="panel" id="quiz" hidden aria-live="polite">
+    <div class="stars" id="stars" aria-hidden="true"></div>
+    <p class="count" id="count"></p>
+    <p class="agenote" id="agenote" hidden></p>
+    <h2 class="qlabel" data-copy="label">Which one would you prefer?</h2>
+    <div class="choices">
+      <div class="choice"><button class="tile" id="t0"><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="emo" aria-hidden="true"></span><span class="txt"></span></button><button class="btn reroll" data-i="0" data-copy="reroll">&#x1F3B2; Reroll</button></div>
+      <div class="choice"><button class="tile" id="t1"><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="sp" aria-hidden="true"></span><span class="emo" aria-hidden="true"></span><span class="txt"></span></button><button class="btn reroll" data-i="1" data-copy="reroll">&#x1F3B2; Reroll</button></div>
+    </div>
+    <div class="askbox" id="askbox">
+      <label for="note" data-copy="askLabel">Type a question or comment</label>
+      <textarea id="note" placeholder="Anything you want to ask or tell Dad about this one…"></textarea>
+      <div class="btnrow"><button class="btn bk" id="back" data-copy="back">&larr; Back</button><button class="btn send" id="send" data-copy="send">Send</button><button class="btn skip" id="skip" data-copy="skip">Skip</button><button class="btn bk" id="back2" data-copy="backRight">Back &rarr;</button></div>
+      <span class="saved" id="saved" role="status"></span>
+      <ul class="notes" id="notes"></ul>
+    </div>
+  </section>
+
+  <section class="panel sum" id="summary" hidden>
+    <h2 data-copy="sumTitle">&#x2728; You did it, Bonnie! &#x2728;</h2>
+    <p class="yay" data-copy="sumLead">Here's what you picked:</p>
+    <ol id="sumlist"></ol>
+    <button class="btn big" id="again" data-copy="again">Start again</button>
+  </section>
+</main>
+<div class="foot" id="foot">
+  <div class="row1"><div class="lane" id="laneF" aria-hidden="true"></div>
+  <div class="strip" aria-label="Page status">
+    <span class="lt" id="ltStep" style="--lp:var(--phi-light-queue);--ld:var(--phi-light-queue-d)"><i></i>STEP <b id="vStep">--</b></span>
+    <span class="lt" id="ltDone" style="--lp:var(--phi-light-fresh);--ld:var(--phi-light-fresh-d)"><i></i>DONE <b id="vDone">0</b></span>
+    <span class="lt" id="ltSky" style="--lp:var(--phi-light-sky);--ld:var(--phi-light-sky-d)"><i></i>SKY <b id="vSky">&hellip;</b></span>
+    <span class="lt" id="ltLink" style="--lp:var(--phi-light-link);--ld:var(--phi-light-link-d)"><i></i>LINK <b id="vLink">&hellip;</b></span>
+    <span class="ro" id="ro" aria-hidden="true"></span>
+  </div></div>
+  <div class="tty" id="tty">
+    <div class="ttybar" aria-hidden="true"><i></i><i></i><i></i><span class="tt">simmie &mdash; tty</span><span class="sat">&#x1F6F0;&#xFE0F;</span></div>
+    <div class="ttybody">
+      <span class="simmie" data-simmie id="footSimmie"></span>
+      <div class="ttyl">
+        <div class="tout" id="tout"><div class="lp" id="tprev" aria-hidden="true"></div><div class="lc" id="tcur" aria-live="polite"></div></div>
+        <label class="tin"><span class="pr">simmie$</span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
+      </div>
+    </div>
+  </div>
+  <div class="note"><span data-copy="footer">Preview only, nothing is sent</span><span class="dot" aria-hidden="true">&middot;</span><span data-copy="credit">Made by Dad, with help from Simmie</span><span class="fcr" id="fcr" aria-hidden="true"></span><span class="tsw" id="fts" data-ts-key="dadQuizTide" hidden></span></div>
+</div>
+<script>
+(function(){
+  'use strict';
+  var C=window.QUIZ_COPY||{};
+  function fmt(k,v){return String(C[k]||'').replace(/\{(\w+)\}/g,function(_,n){return v&&v[n]!=null?v[n]:'';});}
+  document.title=C.pageTitle||document.title;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'),function(el){var k=el.getAttribute('data-copy');if(C[k]!=null)el.textContent=C[k];});
+  if(C.askPlaceholder)document.getElementById('note').placeholder=C.askPlaceholder;
+  // ---- Options: text, emoji, tile colour, background theme ----
+  var O=function(t,e,c,th){return {t:t,e:e,c:c,th:th};};
+  var PAIRS=[
+    [O('Crafts and how-tos','\u2702\uFE0F','#FCD5B5','craft'),O('Nature and plants','\uD83C\uDF3F','#C6E9D2','nature'),'craft'],
+    [O('Feelings and mental health','\uD83D\uDC97','#F8C8D5','feelings'),O('Health and the body','\uD83E\uDEC0','#B5E3E0','body'),'feelings'],
+    [O('Recipes and food','\uD83E\uDDC1','#FCD5B5','food'),O('Sport and outdoors','\u26BD','#C6E9D2','sport'),'food'],
+    [O('Short quick reads','\u26A1','#FBE6A2','quick'),O('Longer deep-dive articles','\uD83D\uDCDA','#DCD0F2','deep'),'quick'],
+    [O('Videos','\uD83C\uDFAC','#F8C8D5','video'),O('Articles with photos','\uD83D\uDCF8','#B5E3E0','photo'),'video'],
+    [O('Quizzes','\u2753','#DCD0F2','quiz'),O('Weekly challenges','\uD83C\uDFC6','#FBE6A2','challenge'),'quiz'],
+    [O('Stories about real people you look up to','\uD83C\uDF1F','#F8C8D5','people'),O('Big questions about how the world works','\uD83C\uDF0D','#B5E3E0','bigq'),'people'],
+    [O('History and how people lived long ago','\uD83D\uDCDC','#FCD5B5','history'),O('Science and new discoveries','\uD83D\uDD2C','#C6E9D2','science'),'history'],
+    [O('Dinosaurs and fossils','\uD83E\uDD95','#FBE6A2','dino'),O('The cosmos','\uD83E\uDE90','#DCD0F2','cosmos'),'cosmos'],
+    [O('New content every day','\u2600\uFE0F','#FBE6A2','daily'),O('A big batch once a week','\uD83D\uDCE6','#DCD0F2','weekly'),'daily'],
+    {yn:'weather'}, // Q11: plain Yes / No (no Reroll)
+    {yn:'age'}      // Q12: age dial note + Yes / No
+  ];
+  var POOL=[
+    O('Parenting','\uD83D\uDC6A','#F8C8D5','family'),O('Strategies for dealing with school','\uD83C\uDF92','#B5E3E0','school'),
+    O('Strategies for dealing with friends','\uD83E\uDD1D','#C6E9D2','friends'),O('The history of giants','\uD83D\uDC63','#FCD5B5','giants'),
+    O('How whales communicate through song','\uD83D\uDC0B','#B5E3E0','whales'),O('Tutorials on how electricity works','\uD83D\uDCA1','#FBE6A2','electric'),
+    O('Building your own webpage','\uD83D\uDCBB','#DCD0F2','web'),O('Music','\uD83C\uDFB5','#F8C8D5','music'),O('Pop music','\uD83C\uDFA4','#F8C8D5','pop'),
+    O('Classical music','\uD83C\uDFBB','#DCD0F2','classical'),O('Using AI in a healthy way','\uD83E\uDD16','#C6E9D2','ai'),O('Teens using AI','\uD83D\uDCF1','#B5E3E0','ai'),
+    O('Teen experience','\uD83C\uDF08','#F8C8D5','teen'),O('Young adult literature','\uD83D\uDCD6','#DCD0F2','ya'),O('Fire','\uD83D\uDD25','#FCD5B5','fire'),
+    O('Ancient or historical craft','\uD83C\uDFFA','#FCD5B5','ancient'),O('Human rights','\u270A','#FBE6A2','rights'),
+    O('Aboriginal Australia','\uD83E\uDD98','#FCD5B5','australia'),O('The future','\uD83D\uDE80','#DCD0F2','future')
+  ];
+  // ---- Background themes (decorative). Max ~14 elements per layer; transform/opacity animations only. ----
+  function btn(c){return '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="'+c+'" stroke="#24292E" stroke-width="3"/><circle cx="14" cy="14" r="3" fill="#24292E"/><circle cx="26" cy="14" r="3" fill="#24292E"/><circle cx="14" cy="26" r="3" fill="#24292E"/><circle cx="26" cy="26" r="3" fill="#24292E"/></svg>';}
+  function scrap(c){return '<svg viewBox="0 0 40 30"><path d="M2 3 37 1 39 27 4 29Z" fill="'+c+'"/><path d="M8 10h22M8 16h18M8 22h20" stroke="#24292E" stroke-width="2"/></svg>';}
+  function parch(){return '<svg viewBox="0 0 60 44"><path d="M4 4Q30 0 56 4L54 40Q30 44 6 40Z" fill="#E9D3A8" stroke="#B98D52" stroke-width="2"/><path d="M12 14h34M12 21h30M12 28h26" stroke="#B98D52" stroke-width="1.6" stroke-dasharray="3 3"/></svg>';}
+  function star(){return '<svg viewBox="0 0 20 20"><path d="M10 0 12.5 7.5 20 10 12.5 12.5 10 20 7.5 12.5 0 10 7.5 7.5Z" fill="#F2A541"/></svg>';}
+  function clock(){return '<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="#F6EBD9" stroke="#F2A541" stroke-width="4"/><path d="M30 30V12" stroke="#0A3F4C" stroke-width="4" stroke-linecap="round"/><path d="M30 30h12" stroke="#0F5C6E" stroke-width="3" stroke-linecap="round"/></svg>';}
+  var MAP='<svg class="maplines" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="#B98D52" stroke-width="1.6"><path d="M10 80C60 40 110 120 170 70S280 30 390 90" stroke-dasharray="6 5"/><path d="M20 220c50-30 90 10 140-20s120-50 220 10" stroke-dasharray="2 6"/><path d="M60 0v300M160 0v300M260 0v300M360 0v300M0 60h400M0 160h400M0 260h400" stroke-opacity=".35" stroke-width="1"/><circle cx="300" cy="200" r="30"/><path d="M300 160v80M260 200h80"/></g></svg>';
+  var CUSTOM={
+    craft:function(){var c=['#F2A541','#2A8FA3','#F6EBD9','#0F5C6E','#D6ECEF'],a=[];
+      for(var i=0;i<5;i++)a.push({h:btn(c[i]),m:'fall',s:30});
+      for(i=0;i<4;i++)a.push({h:scrap(c[(i+2)%5]),m:'fall',s:40});
+      a.push({h:'\uD83E\uDDF6',m:'float',s:44},{h:'\uD83E\uDDF6',m:'float',s:36},{h:'\u2702\uFE0F',m:'float',s:40},{h:'\uD83E\uDEA1',m:'float',s:32});return a;},
+    cosmos:function(){var a=[];for(var i=0;i<9;i++)a.push({h:star(),m:"twinkle",s:16+(i%3)*8,o:.9});
+      a.push({h:'\u2728',m:'drift',s:24},{h:'\uD83E\uDE90',m:'drift',s:40,d:46},{h:'\uD83D\uDE80',m:'cross',s:40,d:15},{h:'\u2604\uFE0F',m:'cross',s:34,d:21,del:-9});return a;},
+    history:function(){var a=[{map:1}];for(var i=0;i<6;i++)a.push({h:parch(),m:'drift',s:56,d:34});
+      a.push({h:'\uD83E\uDDED',m:'spin',s:54,d:40},{h:'\uD83C\uDFDB\uFE0F',m:'float',s:34},{h:'\u23F3',m:'float',s:30});return a;},
+    daily:function(){var a=[{h:clock(),m:'spin',s:70,d:60}];
+      a.push({h:'\u2600\uFE0F',m:'float',s:46},{h:'\uD83D\uDCC5',m:'float',s:34},{h:'\uD83D\uDCC5',m:'float',s:30},{h:'\u2615',m:'float',s:30});
+      for(var i=0;i<5;i++)a.push({h:'\u2B50',m:'twinkle',s:16,o:.6});return a;},
+    food:function(){var e=['\uD83C\uDF6A','\uD83E\uDDC1','\uD83C\uDF53','\uD83E\uDD5E','\uD83C\uDF4B','\uD83C\uDF69'],a=[];
+      for(var i=0;i<10;i++)a.push({h:e[i%e.length],m:'fall',s:30+(i%3)*6});a.push({h:'\uD83E\uDD44',m:'float',s:40});return a;}
+  };
+  var SIMPLE={ // emoji + motion
+    nature:['\uD83C\uDF43\uD83C\uDF3F\uD83C\uDF38\uD83C\uDF3C','fall'], feelings:['\uD83D\uDC97\uD83D\uDC9C\uD83D\uDC9B\uD83E\uDEE7','rise'],
+    body:['\uD83D\uDCA7\uD83C\uDF4E\uD83E\uDDD8\uD83D\uDCAA','float'], sport:['\u26BD\uD83C\uDFD0\uD83C\uDFBE\uD83C\uDFC3\u200D\u2640\uFE0F','bob'],
+    quick:['\u26A1\uD83D\uDCC4\u23F1\uFE0F','drift'], deep:['\uD83D\uDCDA\uD83D\uDD0D\uD83D\uDCD6','float'], video:['\uD83C\uDFAC\u25B6\uFE0F\uD83C\uDF7F','drift'],
+    photo:['\uD83D\uDCF7\uD83D\uDDBC\uFE0F\uD83C\uDF1E','float'], quiz:['\u2753\u2705\u2754','rise'], challenge:['\uD83C\uDFC6\uD83C\uDFAF\uD83E\uDD47','bob'],
+    people:['\uD83C\uDF1F\u2B50\uD83D\uDCAB','twinkle'], bigq:['\uD83C\uDF0D\u2754\uD83C\uDF00','drift'], science:['\uD83D\uDD2C\uD83E\uDDEA\u269B\uFE0F\uD83E\uDDEC','float'],
+    dino:['\uD83E\uDD95\uD83E\uDD96\uD83E\uDDB4\uD83C\uDF0B','drift'], weather:['\uD83C\uDF24\uFE0F\u2601\uFE0F\uD83C\uDF27\uFE0F\u2744\uFE0F\uD83C\uDF08','float'], weekly:['\uD83D\uDCE6\uD83D\uDDD3\uFE0F\uD83C\uDF81','fall'],
+    family:['\uD83D\uDC6A\uD83C\uDFE1\uD83D\uDC9E','float'], school:['\uD83C\uDF92\u270F\uFE0F\uD83D\uDCD0\uD83D\uDCDA','fall'], friends:['\uD83E\uDD1D\uD83D\uDCAC\uD83D\uDC9B','rise'],
+    giants:['\uD83D\uDC63\u26F0\uFE0F\uD83C\uDFF0','drift'], whales:['\uD83D\uDC0B\uD83C\uDFB5\uD83E\uDEE7','rise'], electric:['\u26A1\uD83D\uDCA1\uD83D\uDD0B','twinkle'],
+    web:['\uD83D\uDCBB\uD83D\uDDB1\uFE0F\u2728','float'], music:['\uD83C\uDFB5\uD83C\uDFB6\uD83C\uDFB8','rise'], pop:['\uD83C\uDFA4\uD83D\uDCBF\u2728','bob'],
+    classical:['\uD83C\uDFBB\uD83C\uDFBC\uD83C\uDFB9','rise'], ai:['\uD83E\uDD16\uD83D\uDCF1\uD83D\uDC9A','float'], teen:['\uD83C\uDF08\uD83D\uDCAD\uD83C\uDF1F','float'],
+    ya:['\uD83D\uDCD6\u2728\uD83D\uDD8B\uFE0F','fall'], fire:['\uD83D\uDD25\u2728','rise'], ancient:['\uD83C\uDFFA\uD83E\uDDF6\uD83E\uDEA1','float'],
+    rights:['\u270A\uD83D\uDD4A\uFE0F\uD83D\uDC9C','rise'], australia:['\uD83E\uDD98\uD83C\uDF0F\uD83C\uDF05\uD83C\uDF3F','drift'], future:['\uD83D\uDE80\uD83D\uDD2E\uD83E\uDE90','cross']
+  };
+  // Dark Dad tile surfaces: each option's pastel family maps to a dark Dad tone (sand text >= 9:1 on all)
+  var DK={'#FCD5B5':'#3A2E22','#C6E9D2':'#123F47','#F8C8D5':'#2A363C','#B5E3E0':'#0F4A57','#FBE6A2':'#3B3320','#DCD0F2':'#1F3440'};
+  function dk(c){return DK[c]||'#123F47';}
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function items(th){
+    if(CUSTOM[th])return CUSTOM[th]();
+    var s=SIMPLE[th]||SIMPLE.teen, em=Array.from(s[0]).filter(function(ch){return !/[\u200D\uFE0F\u2640]/.test(ch);});
+    // Array.from splits on code points; rebuild ZWJ sequences crudely by using whole-string segments when available
+    if(window.Intl&&Intl.Segmenter){em=[];for(var seg of new Intl.Segmenter('en',{granularity:'grapheme'}).segment(s[0]))em.push(seg.segment);}
+    var a=[],n=s[1]==='cross'?5:10;
+    for(var i=0;i<n;i++)a.push({h:em[i%em.length],m:s[1],s:26+(i%3)*8});
+    if(s[1]==='cross')for(i=0;i<5;i++)a.push({h:'\u2B50',m:'twinkle',s:14,o:.6});
+    return a;
+  }
+  var layers=[document.getElementById('fxA'),document.getElementById('fxB')],cur=0,curTheme=null,clearT=null;
+  function build(el,th){
+    var a=items(th),h='';
+    a.forEach(function(it,i){
+      if(it.map){h+=MAP;return;}
+      var PHI_FALLBACK=11.09,PT=window.PhiTiming,nm={fall:'bg-fall',rise:'bg-fall',float:'bg-float',drift:'bg-sail',twinkle:'bg-twinkle',cross:'bg-cross',spin:'bg-spin',bob:'bg-bob'}[it.m];
+      var d=it.d||(nm?PT.s(nm):PHI_FALLBACK);   // every background mover on a PHI^n period (was random 2.5-40 s)
+      var st='--x:'+rnd(2,92).toFixed(1)+'vw;--y:'+rnd(6,88).toFixed(1)+'vh;--dx:'+rnd(-10,10).toFixed(1)+'vw;--dy:'+rnd(-12,12).toFixed(1)+'vh;--r:'+rnd(-200,200).toFixed(0)+'deg;--s:'+(it.s||34)+'px;--d:'+d.toFixed(3)+'s;--del:'+(it.del!=null?it.del:-d*(((PT.info(nm||'bg-float').k+i)*0.6180339887)%1)).toFixed(2)+'s'+(it.o?';--o:'+it.o:'');
+      h+='<span class="p m-'+it.m+'" style="'+st+'">'+it.h+'</span>';
+    });
+    el.innerHTML=h;
+  }
+  function theme(th){
+    if(th===curTheme)return; curTheme=th;
+    var next=layers[1-cur],old=layers[cur];
+    build(next,th); next.classList.add('on'); old.classList.remove('on'); cur=1-cur;
+    clearTimeout(clearT); clearT=setTimeout(function(){if(!old.classList.contains('on'))old.innerHTML='';},900);
+  }
+
+  // ---- Simmie avatar (decorative motion, labelled "Simmie" for screen readers) ----
+  var SIM_LOBES=[[56.3,116.7,45.4],[73.2,73.7,60.7],[135.3,86.8,51.3],[96.7,105.1,56.2],[112.4,53.7,43.1]];
+  var SIM_EYES=[[102.1,65.4,18,42],[138.9,55.5,16.5,42]]; // cx, cy, width, length; tilted 27deg
+  var simN=0,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function simmieSVG(){
+    var id='simClip'+(++simN),c='',k='';
+    SIM_LOBES.forEach(function(l,i){c+='<circle class="lobe" style="--wl:-'+(window.PhiTiming.s('cloud-wobble')/2*(((window.PhiTiming.info('cloud-wobble').k+i)*0.6180339887)%1)).toFixed(3)+'s" cx="'+l[0]+'" cy="'+l[1]+'" r="'+l[2]+'"/>';k+='<circle cx="'+l[0]+'" cy="'+l[1]+'" r="'+l[2]+'"/>';});
+    var e='';SIM_EYES.forEach(function(q){e+='<rect x="'+(q[0]-q[2]/2)+'" y="'+(q[1]-q[3]/2)+'" width="'+q[2]+'" height="'+q[3]+'" rx="'+q[2]/2+'" transform="rotate(-27 '+q[0]+' '+q[1]+')"/>';});
+    return '<svg viewBox="0 0 196 172" aria-hidden="true" focusable="false"><defs><clipPath id="'+id+'">'+k+'</clipPath>'+
+      '<linearGradient id="'+id+'g" x1="0" x2="1"><stop offset="0" stop-color="#F6EBD9" stop-opacity="0"/><stop offset=".5" stop-color="#F6EBD9" stop-opacity=".22"/><stop offset="1" stop-color="#F6EBD9" stop-opacity="0"/></linearGradient></defs>'+
+      '<g class="s-body"><g fill="#8C6640">'+c+'</g><g clip-path="url(#'+id+')"><rect class="s-sheen" x="-10" y="-40" width="56" height="260" fill="url(#'+id+'g)" transform-origin="0 0" style="transform-box:view-box"/></g>'+
+      '<g class="s-eyes" fill="#1E1E1E">'+e+'</g></g></svg>';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-simmie]'),function(el){el.setAttribute('role','img');el.setAttribute('aria-label','Simmie');el.innerHTML=simmieSVG();});
+  function simBlinkLoop(){setTimeout(function(){
+    if(!document.hidden&&!reduce)Array.prototype.forEach.call(document.querySelectorAll('.simmie'),function(el){if(el.offsetParent===null&&!el.closest('.foot'))return;el.classList.remove('blink');void el.getBoundingClientRect();el.classList.add('blink');setTimeout(function(){el.classList.remove('blink');},200);});
+    },0);}
+  window.PhiTiming.every('cloud-blink',simBlinkLoop);   // Simmie's eyes blink every PHI^2.5 = 3.33 s (was 5-8 s random)
+  function simHop(){if(reduce||document.hidden)return;var el=$('footSimmie');el.classList.remove('hop');void el.getBoundingClientRect();el.classList.add('hop');}
+  document.addEventListener('visibilitychange',function(){document.body.classList.toggle('paused',document.hidden);});
+
+
+  // ---- Header ticker (age-dial facts) ----
+  var $=function(id){return document.getElementById(id);};
+  var qs=new URLSearchParams(location.search),BANK=[],tickAge=13,tickTimer=null;
+  window.SIM_FACTS=function(age){return BANK.filter(function(f){return f.age_min<=age&&age<=f.age_max;});};
+  function clampAge(v){v=parseInt(v,10);return v>=10&&v<=16?v:null;}
+  function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function factHTML(f,age){return '<span><span class="tk">fact</span><span class="tp">['+age+'].</span><span class="tk">'+f.topic+'</span><span class="tp"> = </span><span class="ts">"'+esc(f.text)+'"</span><span class="tp">; </span><span class="tc">// '+esc(f.source)+'</span></span>';}
+  function setTicker(age){
+    tickAge=age;var list=window.SIM_FACTS(age).slice();
+    for(var z=list.length-1;z>0;z--){var r=Math.floor(Math.random()*(z+1)),tmp=list[z];list[z]=list[r];list[r]=tmp;}
+    list=list.slice(0,12);
+    $('ttag').innerHTML=esc(C.tag)+' <i>&middot; '+esc(fmt('ageTag',{age:age}))+'</i>';
+    var tr=$('ttrack');clearInterval(tickTimer);
+    if(reduce){ // one static fact, changes every 10 s with a fade
+      $('tick').classList.add('static');var i=0;
+      var showF=function(){tr.style.opacity=0;setTimeout(function(){tr.innerHTML=factHTML(list[i%list.length],age);$('tsr').textContent=list[i%list.length].text;tr.style.opacity=1;i++;},400);};
+      if(!list.length){tr.innerHTML='';return;}tr.innerHTML=factHTML(list[0],age);$('tsr').textContent=list[0].text;i=1;tickTimer=setInterval(showF,window.PhiTiming.ms('fact'));return; // reduced motion: one fact per PHI^4 (no sweep)
+    }
+    var one=list.map(function(f){return factHTML(f,age);}).join('');
+    tr.innerHTML=one+one;
+    $('tsr').textContent=list.map(function(f){return f.text+' ('+f.source+')';}).join(' ');
+    var chars=list.reduce(function(n,f){return n+f.topic.length+f.text.length+f.source.length+22;},0);
+    tr.style.setProperty('--td',(list.length*window.PhiTiming.s('fact')).toFixed(2)+'s');tr.style.setProperty('--tdl',(-window.PhiTiming.off('fact')).toFixed(3)+'s'); // one fact passes per PHI^4 = 6.854 s (times the weather sweep)
+  }
+  var urlAge=clampAge(qs.get('age'));tickAge=urlAge||13;
+  window.SIM_AGE=function(){return tickAge;};
+  var factsP=fetch('facts.json').then(function(r){return r.ok?r.json():{facts:[]};}).then(function(j){BANK=(j&&j.facts)||[];}).catch(function(){BANK=[];});
+  var ageP=urlAge?Promise.resolve(urlAge):fetch('age-dial.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(j){return (j&&clampAge(j.age))||13;}).catch(function(){return 13;});
+  window.SIM_AGE_SRC=urlAge?'url':'age-dial.json';
+  Promise.all([factsP,ageP]).then(function(v){setTicker(v[1]);});
+
+  // ---- Weather chip + caring reaction (fixed Perth coords, Open-Meteo, no geolocation, cached 30 min) ----
+  // Three faces per condition on PHI^2 / PHI^3 / PHI^4 = 2.618 / 4.236 / 6.854 s (irrational ratios: never realign);
+  // offerings hand over one at a time every PHI^2. The weather loop never sweeps (phi rule 6).
+  var U=function(c){return String.fromCodePoint(c);};
+  var WX={
+    sun:  {i:'\u2600\uFE0F',f:['\uD83D\uDE04','\uD83E\uDD29','\uD83D\uDE0E'],o:['\uD83D\uDD76\uFE0F','\uD83C\uDF66','\uD83C\uDF3B'],say:'sunny'},
+    hot:  {i:'\uD83C\uDF1E',f:['\uD83D\uDE04','\uD83E\uDD29','\uD83D\uDE0E'],o:['\uD83C\uDFD6\uFE0F','\uD83C\uDF66','\uD83D\uDD76\uFE0F'],say:'hot, so plenty of water'},
+    cloud:{i:'\u26C5',f:['\uD83D\uDE10','\uD83E\uDDD0','\uD83D\uDE34'],o:['\u26C5','\uD83C\uDF24\uFE0F'],say:'cloudy'},
+    fog:  {i:'\uD83C\uDF2B\uFE0F',f:['\uD83D\uDE0C','\uD83E\uDD14','\uD83D\uDE34'],o:['\uD83C\uDF2B\uFE0F','\uD83E\uDDCB'],say:'foggy'},
+    rain: {i:'\uD83C\uDF27\uFE0F',f:['\uD83E\uDD7A','\uD83E\uDD14','\uD83E\uDD79'],o:['\u2602\uFE0F','\uD83C\uDF38','\uD83C\uDF81','\u2615'],say:'rainy, a good day for something warm'},
+    storm:{i:'\u26C8\uFE0F',f:['\uD83E\uDD17','\uD83E\uDEE3','\uD83D\uDE2E'],o:['\uD83E\uDEC2','\uD83D\uDD6F\uFE0F','\uD83D\uDECB\uFE0F'],say:'stormy, cosy inside'},
+    night:{i:'\uD83C\uDF19',f:['\uD83D\uDE0C','\uD83E\uDD70','\uD83E\uDD29'],o:['\uD83C\uDF19','\u2728'],say:'clear tonight'},
+    snow: {i:'\u2744\uFE0F',f:['\uD83D\uDE42','\uD83E\uDDD0','\uD83D\uDE0C'],o:['\u2744\uFE0F','\u2603\uFE0F'],say:'snowy'}
+  };
+  window.SIM_WX={status:'loading'};
+  function wmo(code,day,temp){ // WMO weather codes -> condition
+    if(code===0||code===1)return day?(temp!=null&&temp>=30?'hot':'sun'):'night';
+    if(code===2||code===3)return 'cloud';
+    if(code===45||code===48)return 'fog';
+    if((code>=51&&code<=67)||(code>=80&&code<=82))return 'rain';
+    if((code>=71&&code<=77)||code===85||code===86)return 'snow';
+    if(code>=95&&code<=99)return 'storm';
+    return null;
+  }
+  var wxTimers=[];
+  function reaction(el,w){ // el gets a face slot (3 stacked faces) + an offering slot
+    el.innerHTML='<span class="fs">'+w.f.map(function(e){return '<span>'+e+'</span>';}).join('')+'</span><span class="os">'+w.o.map(function(e){return '<span>'+e+'</span>';}).join('')+'</span>';
+    el.hidden=false;
+    var faces=el.querySelector('.fs').children,offs=el.querySelector('.os').children;
+    faces[0].classList.add('on');offs[0].classList.add('on');
+    if(reduce)return;
+    var PT=window.PhiTiming,P=['face-a','face-b','face-c'].map(PT.ms),O=['face-a','face-b','face-c'].map(PT.offMs),t0=Date.now(),cur=0,k=0;
+    wxTimers.push(setInterval(function(){ // most recent beat wins: face i beats at O[i] + n*P[i]
+      if(document.hidden)return; var t=Date.now()-t0,best=-1,bt=-1;
+      for(var i=0;i<3;i++){if(t<O[i])continue;var last=O[i]+Math.floor((t-O[i])/P[i])*P[i];if(last>bt){bt=last;best=i;}}
+      if(best>=0&&best!==cur){faces[cur].classList.remove('on');faces[best].classList.add('on');cur=best;}
+    },100));
+    var oc=PT.every('offer-cycle',function(){if(document.hidden)return;offs[k].classList.remove('on');k=(k+1)%offs.length;offs[k].classList.add('on');});wxTimers.push(oc);
+  }
+  (function footCritters(){ // footer emojis (Danny 03:17/03:18): animals & critters only (none are in this header's weather set);
+    // own feed, not the weather: the Moon's phase, worked out on the device from the date (days since a known new moon, 29.53-day
+    // cycle, no request), sets the order; the strip scrolls on the PHI^8 = 46.98 s marquee clock (--phi-marquee) and a new order
+    // lands at the next loop boundary. Same source, epoch and loop as the Rebella / dashboard / chat footers. Reduced motion: still.
+    var el=$('fcr');if(!el)return;
+    var L=['\uD83E\uDD8A','\uD83D\uDC28','\uD83E\uDD98','\uD83D\uDC19','\uD83E\uDD8E','\uD83D\uDC1E','\uD83D\uDC38','\uD83E\uDD94','\uD83D\uDC0C','\uD83E\uDD89'],last=-1;
+    function moon(){var a=((Date.now()-Date.UTC(2000,0,6,18,14))/864e5)%29.530588853;if(a<0)a+=29.530588853;return Math.floor(a/29.530588853*L.length);}
+    el.innerHTML='<span class="ct"></span>';var tr=el.firstChild;
+    function fill(){var m=moon();if(m===last)return;last=m;var row=L.slice(m).concat(L.slice(0,m)).join(' ')+' ';tr.innerHTML='<span>'+row+'</span><span>'+row+'</span>';}
+    tr.addEventListener('animationiteration',fill);fill();
+  })();
+  function showWx(cond,temp){
+    var w=WX[cond];if(!w)return;
+    window.SIM_WX.cond=cond;window.SIM_WX.temp=temp;window.SIM_WX.say=w.say;
+    $('wxIcon').textContent=w.i;$('wxText').innerHTML=esc(C.place)+(temp!=null?' <b>'+Math.round(temp)+'\u00B0</b>':'');
+    $('wx').hidden=false;$('wx').setAttribute('aria-label',C.place+' weather'+(temp!=null?' '+Math.round(temp)+' degrees':''));
+    wxTimers.forEach(function(t){if(t&&t.stop)t.stop();else clearInterval(t);});wxTimers=[];
+    window.PhiTiming.setWeather(cond);   // weather state drives the phi sweep for everything outside the weather loop
+    reaction($('wxr'),w);   // weather lives in the header only (Danny 03:15): no footer weather reaction
+    document.dispatchEvent(new Event('simwx'));
+  }
+  (function(){
+    var force=(qs.get('weather')||'').toLowerCase();if(!WX[force]||force==='snow')force=null;window.SIM_WX.forced=force;
+    var KEY='dadWxPerth',url='https://api.open-meteo.com/v1/forecast?latitude=-31.95&longitude=115.86&current=weather_code,temperature_2m,is_day&timezone=Australia%2FPerth';
+    function use(d){window.SIM_WX.status=d?'ok':'fail';var cond=force||(d?wmo(d.code,d.day,d.temp):null);if(cond)showWx(cond,d?d.temp:null);else document.dispatchEvent(new Event('simwx'));}
+    var cached=null;try{cached=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+    if(cached&&Date.now()-cached.t<30*60*1000){use(cached);return;}
+    try{fetch(url,{cache:'no-store',referrerPolicy:'no-referrer'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){
+      var c=j&&j.current;if(!c||typeof c.weather_code!=='number')throw 0;
+      var d={t:Date.now(),code:c.weather_code,temp:c.temperature_2m,day:c.is_day===1};
+      try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}
+      use(d);
+    }).catch(function(){use(null);});}catch(e){use(null);}
+  })();
+
+  // ---- REBELLA status beacon: reads the live Rebella home page (same origin), on load, every 60 s, and on tap ----
+  (function(){
+    var b=$('beacon'),st=b.querySelector('.bs'),force=(qs.get('rebella')||'').toLowerCase(),busy=false;
+    function stamp(){try{return new Date().toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit',timeZone:'Australia/Perth'}).toUpperCase()+' AWST';}catch(e){return new Date().toLocaleTimeString();}}
+    function set(state,label,note){window.SIM_BEACON={state:state,label:label};b.className='beacon '+state;st.textContent=label;var t='Rebella '+label.toLowerCase()+(note?' ('+note+')':'');b.title=t;b.setAttribute('aria-label',t+'. Tap to check again.');}
+    function check(){
+      if(busy)return;busy=true;var t0=Date.now(),slow=setTimeout(function(){set('chk','CHECKING','slow, still waiting');},3000);
+      set('chk','CHECKING','checking now');
+      var done=function(ok,why){clearTimeout(slow);busy=false;var when='Checked '+stamp();if(window.MLOG_READY)MLOG.log('link: rebella '+(ok?'up '+(Date.now()-t0)+'ms':'down'+(why?' ('+why+')':'')));if(ok)set('live','LIVE',when);else set('down','DOWN',when+(why?', '+why:''));};
+      if(force==='down'){setTimeout(function(){done(false,'preview: forced down');},400);return;}
+      var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort();},8000);
+      try{fetch('https://edgerequals.github.io/rebella/',{cache:'no-store',signal:ctl?ctl.signal:undefined}).then(function(r){clearTimeout(to);done(r.ok,r.ok?'':'HTTP '+r.status);}).catch(function(){clearTimeout(to);done(false,'no response');});}
+      catch(e){clearTimeout(to);done(false,'no response');}
+    }
+    b.addEventListener('click',check);
+    check();setInterval(function(){if(!document.hidden)check();},60000);
+  })();
+
+  // ---- Footer status lights: real page state (STEP, DONE, SKY, LINK) + readout ----
+  var lastDone=0;
+  function light(id,cls,val){var el=$(id);el.classList.remove('warn','bad','idle');if(cls)el.classList.add(cls);el.querySelector('b').textContent=val;}
+  window.SIM_LIGHTS=function(){
+    var q=$('quiz'),sm=$('summary'),total=state?state.length:12;
+    light('ltStep',(q.hidden&&sm.hidden)?'idle':'',!q.hidden?(qi+1)+'/'+total:(!sm.hidden?total+'/'+total:'--'));
+    var done=state?state.filter(function(x){return x.pick!=null;}).length:0;
+    light('ltDone',done?'':'idle',String(done));
+    if(done>lastDone){var d=$('ltDone');d.classList.remove('blip');void d.offsetWidth;d.classList.add('blip');}
+    lastDone=done;
+    var w=window.SIM_WX||{};light('ltSky',w.status==='ok'?'':(w.status==='fail'?'bad':'warn'),w.status==='ok'?'OK':(w.status==='fail'?'N/A':'\u2026'));
+    light('ltLink',navigator.onLine?'':'bad',navigator.onLine?'ON':'OFF');
+  };
+  function clock(){try{return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Australia/Perth'});}catch(e){return '';}}
+  function readout(){$('ro').textContent='AWST '+clock()+' \u00B7 AGE '+(window.SIM_AGE?window.SIM_AGE():13);}
+  window.addEventListener('online',function(){SIM_LIGHTS();});window.addEventListener('offline',function(){SIM_LIGHTS();});
+  document.addEventListener('simwx',function(){SIM_LIGHTS();});
+  setInterval(function(){if(!document.hidden)readout();},15000);
+
+  // ---- Simmie terminal + MISSION LOG (display only: nothing is sent; typed text is never logged) ----
+  var MLOG=(function(){
+    var prev=$('tprev'),cur=$('tcur'),inp=$('tinp'),blk=document.querySelector('.tin .blk'),sim=$('footSimmie');
+    var SPIN=['\u280B','\u2819','\u2839','\u2838','\u283C','\u2834','\u2826','\u2827','\u2807','\u280F'];
+    var REPLIES=['got it. (preview only, not sent)','thanks, Bonnie. this is just a preview, so nothing went anywhere.','noted. in the real version, Dad would see this.','understood. preview mode, so it stays on this page.'];
+    var IDLE=['all quiet on deck.','steady as she goes.','take your time.','proud of you.','no rush. pick whatever feels right.'];
+    var q=[],busy=false,typing=null,lastAt=Date.now(),beat=0,factN=0,holdUntil=0;
+    function hms(){try{return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Australia/Perth'});}catch(e){return '';}}
+    function html(l){return l.kind==='sim'?'<span class="pr">simmie&gt;</span> ':'<span class="ts">'+l.t+'</span> ';}
+    function show(l,done){
+      prev.innerHTML=cur.innerHTML;cur.classList.toggle('wrap',l.text.length>44);prev.style.opacity=l.text.length>44?0:'';
+      var head=html(l);clearInterval(typing);
+      if(reduce){cur.innerHTML=head+esc(l.text);setTimeout(done,window.PhiTiming.ms('tty-hold-multi'));return;}
+      var i=0;sim.classList.add('talk');cur.innerHTML=head;var span=document.createElement('span');cur.appendChild(span);
+      typing=setInterval(function(){if(document.hidden)return;i++;span.textContent=l.text.slice(0,i);if(i>=l.text.length){clearInterval(typing);sim.classList.remove('talk');setTimeout(done,Math.max(window.PhiTiming.ms('tty-hold-multi'),l.hold||0));}},26);
+    }
+    function pump(){
+      if(busy||!q.length||document.hidden)return; busy=true;var l=q.shift();
+      show(l,function(){busy=false;lastAt=Date.now();pump();});
+    }
+    function log(text){q.push({kind:'log',t:hms(),text:text});if(q.length>8)q.splice(0,q.length-8);pump();}
+    function say(text,hold){q.push({kind:'sim',text:text,hold:hold});pump();}
+    // talk box: Enter clears, spinner ~1.5 s, then a canned reply typed out (jumps the queue)
+    function measure(){var c=document.createElement('canvas').getContext('2d');c.font=getComputedStyle(inp).font;var k=(inp.offsetWidth&&inp.getBoundingClientRect().width/inp.offsetWidth)||1;blk.style.setProperty('--cx',Math.min(c.measureText(inp.value).width*k,inp.clientWidth*k-8)+'px');} /* k: iOS draws the 16px input at .75 (quiz-foot-lock.css) */
+    inp.addEventListener('input',measure);
+    inp.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;e.preventDefault();var v=inp.value.trim();inp.value='';measure();if(!v)return;
+      clearInterval(typing);busy=true;var f=0;prev.innerHTML=cur.innerHTML;cur.classList.remove('wrap');
+      if(reduce){cur.innerHTML='<span class="pr">simmie&gt;</span> \u2026';}else{sim.classList.add('talk');typing=setInterval(function(){cur.innerHTML='<span class="pr">simmie&gt;</span> '+SPIN[f++%SPIN.length];},90);}
+      setTimeout(function(){clearInterval(typing);show({kind:'sim',text:REPLIES[Math.floor(Math.random()*REPLIES.length)]},function(){busy=false;holdUntil=Date.now()+30000;lastAt=Date.now();pump();});},1500);
+    });
+    function factLine(){var fs=window.SIM_FACTS?window.SIM_FACTS(window.SIM_AGE()):[];if(!fs.length)return null;var i=(factN++*7)%fs.length,f=fs[i];return {n:BANK.indexOf(f)+1,f:f};}
+    function report(){
+      var L=['SYSTEM REPORT '+clock()+' AWST'],b=window.SIM_BEACON;
+      L.push('rebella: '+(b&&b.state!=='chk'?b.label:'n/a'));
+      var pA=fetch('https://edgerequals.github.io/rebella/sitemap.xml',{cache:'no-cache'}).then(function(r){return r.ok?r.text():null;}).then(function(t){if(!t)return;var n=(t.match(/<loc>[^<]*\/articles\/[^<]+<\/loc>/g)||[]).length;if(n)L.push('articles: '+n+' published');}).catch(function(){});
+      var pS=fetch('https://edgerequals.github.io/rebella/moderation/pipeline-stats.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+        if(!j||!j.generated_at)return;var g=Date.parse(j.generated_at);if(!(g>0)||Date.now()-g>3*3600*1000)return;
+        var parts=[];if(j.passed!=null)parts.push(j.passed+' passed filters');if(j.waiting!=null)parts.push(j.waiting+' waiting for Bonnie');
+        if(parts.length)L.push('pipeline: '+parts.join(' \u00B7 '));
+        try{L.push('last scan: '+new Date(g).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Australia/Perth'})+' AWST');}catch(e){}
+      }).catch(function(){});
+      Promise.all([pA,pS]).then(function(){
+        L.push('age dial: '+window.SIM_AGE()+(window.SIM_AGE_SRC==='url'?' (preview ?age)':''));
+        L.forEach(function(x){say(x);});
+      });
+    }
+    // heartbeat: if nothing for PHI^3.5 = 5.39 s, a quiet line; every few beats a fact, a calm phrase or the system report
+    setInterval(function(){
+      if(document.hidden||busy||q.length||document.activeElement===inp||Date.now()<holdUntil||Date.now()-lastAt<window.PhiTiming.ms('mlog-ambient'))return;   // ambient line at most every PHI^3.5 = 5.39 s (Simmie); real events log at once
+      beat++;
+      if(beat%8===0){report();return;}
+      if(beat%4===2){var fl=factLine();if(fl){say('FACT \u00B7 '+fl.f.source+': '+fl.f.text,window.PhiTiming.ms('tty-hold'));log('fact #'+fl.n+' loaded ('+fl.f.source.toLowerCase()+')');return;}}
+      if(beat%4===3){var pool=IDLE.slice();say(pool[beat%pool.length]);return;}
+      log('\u00B7 all systems nominal');
+    },1000);
+    cur.innerHTML='<span class="pr">simmie&gt;</span> hello, Bonnie.';
+    return {log:log,say:say};
+  })();
+  window.MLOG_READY=true;
+  // Mission-log sources: real local events only
+  // (Danny 03:15) weather lives in the header only: the footer mission log no longer prints 'wx:' lines
+  if((window.SIM_WX||{}).cond||(window.SIM_WX||{}).status==='fail')document.dispatchEvent(new Event('simwx'));
+  document.addEventListener('visibilitychange',function(){if(document.hidden)MLOG.log('tab hidden \u2014 holding');else MLOG.log('tab visible \u2014 resuming');});
+  (function(){var t=null,lw=innerWidth,lh=innerHeight;function rs(kind){clearTimeout(t);t=setTimeout(function(){if(innerWidth===lw&&innerHeight===lh)return;lw=innerWidth;lh=innerHeight;MLOG.log((kind==='o'?'rotated: ':'resized: ')+(lw>lh?'landscape ':'portrait ')+lw+'\u00D7'+lh);},500);}
+    addEventListener('resize',function(){rs('r');});addEventListener('orientationchange',function(){rs('o');});})();
+  (function(){var v=$('bgloop'),lt=0,n=0;if(!v)return;v.addEventListener('timeupdate',function(){if(v.currentTime+0.5<lt){n++;if(n%3===1)MLOG.log('space loop wrapped ('+n+')');}lt=v.currentTime;});})();
+  (function(){var tr=$('ttrack'),n=0;tr.addEventListener('animationiteration',function(){n++;MLOG.log('ticker loop '+n+' \u00B7 age '+window.SIM_AGE()+' facts');});})();
+
+  // ---- Interludes: Bonnie's animals every PHI^5 = 11.09 s vs Simmie's space crew every PHI^4.5 = 8.72 s (phi rules 3-4):
+  //      an irrational ratio, so they never settle into a common beat; if both fall due in the same tick they split the bands ----
+  (function(){
+    if(reduce)return;
+    var lanes={header:$('laneH'),footer:$('laneF')},row1=document.querySelector('.row1');
+    var ANIMALS=[{e:'\uD83D\uDC0E',n:'horse',g:'trot'},{e:'\uD83D\uDC07',n:'rabbit',g:'hop'},{e:'\uD83D\uDC15',n:'dog',g:'collie'},{e:'\uD83D\uDC26',n:'bird',g:'fly'}];
+    var SPACE=['sat','rocket','comet','moon','cli'],CLI=['>_\u258D','$ ping rebella','[ OK ]','0101'];
+    var aN=0,sN=0,satN=0,t0=Date.now(),lastA=-1,lastS=-1,dir=1;
+    function W(l){return l.clientWidth||300;}
+    function el(lane,h,cls){var d=document.createElement('span');d.className='it '+(cls||'');d.innerHTML=h;lane.appendChild(d);return d;}
+    function done(lane,d,anim){anim.onfinish=function(){d.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};}
+    function run(lane,d,frames,ms){var a=d.animate(frames,{duration:ms,easing:'linear',fill:'forwards'});done(lane,d,a);return a;}
+    function animal(band){
+      var A=ANIMALS[aN%ANIMALS.length],lane=lanes[band];aN++;dir=-dir;var w=W(lane),from=dir>0?-24:w+8,to=dir>0?w+8:-24,flip=dir>0?-1:1; // emoji face left; flip when moving right
+      if(band==='footer')row1.classList.add('swap');
+      var d=el(lane,'<span class="g"><span class="fl" style="transform:scaleX('+flip+')">'+A.e+'</span></span>',A.g==='fly'?'bird':'');
+      var PT=window.PhiTiming,g=d.firstChild,ms=PT.ms('animal-cross');   // crossing PHI^4 = 6.854 s (swept); gaits on the ladder too
+      if(A.g==='fly'){d.style.bottom='3px';run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(0) scaleY(1)'},{transform:'translateY(-3px) scaleY(.8)',offset:.25},{transform:'translateY(0) scaleY(1)',offset:.5},{transform:'translateY(2px) scaleY(.9)',offset:.75},{transform:'translateY(0) scaleY(1)'}],{duration:PT.ms('gait-fly'),iterations:Infinity});}
+      else if(A.g==='collie'){ // low trot, a bound, a look-back pause
+        var m=(from+to)/2;run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+(from+(to-from)*.45)+'px)',offset:.4},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.5},{transform:'translateX('+(from+(to-from)*.55)+'px)',offset:.66},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(1px)'},{transform:'translateY(-1px)'},{transform:'translateY(1px)'}],{duration:PT.ms('gait-trot'),iterations:Infinity});
+        var fl=g.firstChild;setTimeout(function(){if(fl.isConnected)fl.animate([{transform:'scaleX('+flip+')'},{transform:'scaleX('+(-flip)+')',offset:.2},{transform:'scaleX('+(-flip)+')',offset:.8},{transform:'scaleX('+flip+')'}],{duration:900});},Math.round(ms*.52));}
+      else if(A.g==='hop'){run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(0)',easing:'ease-out'},{transform:'translateY(-7px)',offset:.45,easing:'ease-in'},{transform:'translateY(0)',offset:.9},{transform:'translateY(0)'}],{duration:PT.ms('gait-hop'),iterations:Infinity});}
+      else{run(lane,d,[{transform:'translateX('+from+'px)'},{transform:'translateX('+to+'px)'}],ms);
+        g.animate([{transform:'translateY(0)'},{transform:'translateY(-2px)'},{transform:'translateY(0)'}],{duration:PT.ms('gait-trot'),iterations:Infinity});}
+      MLOG.log(A.e+' '+A.n+' crossing '+band);
+    }
+    function space(band){
+      var k=SPACE[sN%SPACE.length],lane=lanes[band],w=W(lane);sN++;
+      if(band==='footer')row1.classList.add('swap');
+      if(k==='sat'){satN++;var x=Math.round(w*(.3+Math.random()*.4));var p=el(lane,'\uD83E\uDE90');p.style.transform='translateX('+x+'px)';
+        var s=el(lane,'\uD83D\uDEF0\uFE0F');s.style.fontSize='10px';var fr=[];for(var i=0;i<=12;i++){var a=i/12*2*Math.PI;fr.push({transform:'translate('+(x+3+Math.cos(a)*16)+'px,'+(-3+Math.sin(a)*4)+'px)'});}
+        var an=s.animate(fr,{duration:window.PhiTiming.ms('space-ring'),iterations:2});an.onfinish=function(){s.remove();p.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){p.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
+        MLOG.log('\uD83D\uDEF0\uFE0F sat orbit '+satN+'/\u221E ('+band+')');}
+      else if(k==='rocket'){var r=el(lane,'\uD83D\uDE80');run(lane,r,[{transform:'translate(-20px,2px) rotate(45deg)'},{transform:'translate('+w/2+'px,-3px) rotate(60deg)'},{transform:'translate('+(w+20)+'px,2px) rotate(80deg)'}],window.PhiTiming.ms('space-cross'));MLOG.log('\uD83D\uDE80 rocket arcing over '+band);}
+      else if(k==='comet'){var c=el(lane,'\u2604\uFE0F<span style="opacity:.6;font-size:9px">\u2728</span>');run(lane,c,[{transform:'translateX('+(w+10)+'px) scaleX(1)',opacity:0},{transform:'translateX('+w*.8+'px)',opacity:1,offset:.1},{transform:'translateX(-40px)',opacity:.9}],window.PhiTiming.ms('space-cross'));MLOG.log('\u2604\uFE0F comet through '+band);}
+      else if(k==='moon'){var x2=Math.round(w*(.3+Math.random()*.4));var e=el(lane,'\uD83C\uDF0D');e.style.transform='translateX('+x2+'px)';var mo=el(lane,'\uD83C\uDF19');mo.style.fontSize='9px';var fr2=[];for(var j=0;j<=12;j++){var b2=j/12*2*Math.PI;fr2.push({transform:'translate('+(x2+3+Math.cos(b2)*15)+'px,'+(-3+Math.sin(b2)*4)+'px)'});}
+        var am=mo.animate(fr2,{duration:window.PhiTiming.ms('space-ring-slow'),iterations:2});am.onfinish=function(){mo.remove();e.animate([{opacity:1},{opacity:0}],{duration:500}).onfinish=function(){e.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};};
+        MLOG.log('\uD83C\uDF19 moon circling earth ('+band+')');}
+      else{var tok=CLI[Math.floor(sN/SPACE.length)%CLI.length],x3=Math.round(w*(.2+Math.random()*.5)),t=el(lane,'','cli');t.style.transform='translateX('+x3+'px)';var i2=0;
+        var ti=setInterval(function(){if(document.hidden)return;i2++;t.textContent=tok.slice(0,i2);if(i2>=tok.length){clearInterval(ti);setTimeout(function(){t.animate([{opacity:1},{opacity:0}],{duration:900}).onfinish=function(){t.remove();if(lane===lanes.footer&&!lane.children.length)row1.classList.remove('swap');};},1400);}},110);
+        MLOG.log('cli: '+tok+' ('+band+')');}
+    }
+    var PTI=window.PhiTiming,nextA=t0+PTI.offMs('animals'),nextS=t0+PTI.offMs('space'),ka=0,ks=0;   // golden-angle first entrances
+    setInterval(function(){
+      if(document.hidden)return; var now=Date.now(),fa=now>=nextA,fs=now>=nextS;
+      if(fa){ka++;nextA=now+PTI.ms('animals');} if(fs){ks++;nextS=now+PTI.ms('space');}   // next one after a (possibly swept) period
+      if(fa&&fs){animal('footer');space('header');return;} // both due in the same tick: split the bands
+      if(fa)animal(ka%2?'header':'footer');
+      if(fs)setTimeout(function(){space(ks%2?'footer':'header');},1000); // header/footer offset ~1 s
+    },250);
+  })();
+
+  // ---- Quiz state (memory only) ----
+  var $=function(id){return document.getElementById(id);};
+  var state,qi,simLastQ=-1;
+  function reset(){state=PAIRS.map(function(p){var th=p.yn==='age'?'teen':'weather';return p.yn?{yn:p.yn,opts:[O(C.yes,'\uD83D\uDC4D','#C6E9D2',th),O(C.no,'\uD83D\uDC4E','#F8C8D5',th)],theme:th,pick:null,notes:[]}:{opts:[p[0],p[1]],theme:p[2],pick:null,notes:[]};});qi=0;}
+  function show(id){['start','quiz','summary'].forEach(function(s){$(s).hidden=(s!==id);});window.scrollTo(0,0);if(window.SIM_LIGHTS)SIM_LIGHTS();}
+  function render(){
+    var s=state[qi];
+    $('stars').innerHTML=state.map(function(x,i){return '<i class="'+(i<qi?'done':i===qi?'now':'')+'"></i>';}).join('');
+    $('count').textContent=fmt('progress',{n:qi+1,total:state.length});
+    document.querySelector('.qlabel').textContent=s.yn==='weather'?C.weatherQ:s.yn==='age'?C.ageQ:C.label;
+    var an=$('agenote');an.hidden=s.yn!=='age';an.textContent=C.ageNote;
+    document.getElementById('quiz').classList.toggle('yn',!!s.yn);
+    [0,1].forEach(function(i){var t=$('t'+i),o=s.opts[i];t.querySelector('.emo').textContent=o.e;t.querySelector('.txt').textContent=o.t;t.style.setProperty('--c',dk(o.c));t.classList.toggle('picked',s.pick===i);t.setAttribute('aria-pressed',String(s.pick===i));});
+    $('saved').textContent='';$('note').value='';
+    $('notes').innerHTML=s.notes.map(function(n){return '<li></li>';}).join('');
+    Array.prototype.forEach.call($('notes').children,function(li,i){li.textContent='\u2709\uFE0F '+s.notes[i];});
+    $('back').disabled=$('back2').disabled=(qi===0);
+    theme(s.theme);
+    if(qi!==simLastQ){simLastQ=qi;simHop();}
+    SIM_LIGHTS();
+  }
+  function next(){if(qi<state.length-1){qi++;render();}else summary();}
+  function summary(){
+    show('summary');theme('cosmos');
+    var ol=$('sumlist');ol.innerHTML='';
+    state.forEach(function(s,i){
+      var li=document.createElement('li'),p=s.pick!=null?s.opts[s.pick]:null,o=s.pick!=null?s.opts[1-s.pick]:null;
+      li.style.setProperty('--c',p?dk(p.c):'#1C2A30');
+      li.innerHTML='<span class="n"></span><span class="e" aria-hidden="true"></span><span class="b"><strong></strong><span class="vs"></span></span>';
+      li.querySelector('.n').textContent=i+1;li.querySelector('.e').textContent=p?p.e:'\u23ED\uFE0F';
+      li.querySelector('strong').textContent=p?p.t:C.skipped;
+      li.querySelector('.vs').textContent=s.yn==='weather'?C.weatherSum:s.yn==='age'?C.ageSum:(p?fmt('over',{x:o.t}):fmt('either',{a:s.opts[0].t,b:s.opts[1].t}));
+      s.notes.forEach(function(n){var d=document.createElement('span');d.className='note';d.textContent='\u2709\uFE0F '+n;li.querySelector('.b').appendChild(d);});
+      ol.appendChild(li);
+    });
+  }
+  $('go').onclick=function(){simLastQ=-1;reset();show('quiz');render();$('t0').focus({preventScroll:true});};
+  $('again').onclick=function(){simLastQ=-1;reset();show('start');theme('teen');};
+  [0,1].forEach(function(i){
+    var t=$('t'+i);
+    t.onpointerdown=function(){t.classList.remove('burst');void t.offsetWidth;t.classList.add('burst');};
+    t.addEventListener('animationend',function(e){if(e.target.classList.contains('sp'))t.classList.remove('burst');});
+    t.onclick=function(){state[qi].pick=i;var s0=state[qi],o=s0.opts[i];MLOG.log('q'+(qi+1)+' answered: '+(s0.yn?(i===0?'yes':'no'):o.t.toLowerCase()));render();setTimeout(next,650);};
+    t.onmouseenter=t.onfocus=function(){theme(state[qi].opts[i].th);};
+    t.onmouseleave=t.onblur=function(){theme(state[qi].theme);};
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.reroll'),function(b){
+    b.onclick=function(){
+      var i=+b.dataset.i,s=state[qi],other=s.opts[1-i].t,me=s.opts[i].t;
+      var c=POOL.filter(function(o){return o.t!==other&&o.t!==me;});
+      s.opts[i]=c[Math.floor(Math.random()*c.length)];
+      if(s.pick!=null)s.pick=null;
+      render();var t=$('t'+i);t.classList.remove('swap');void t.offsetWidth;t.classList.add('swap');
+      theme(s.opts[i].th); // lean toward the new topic
+    };
+  });
+  $('send').onclick=function(){var v=$('note').value.trim();if(!v){$('saved').textContent=C.empty;return;}
+    state[qi].notes.push(v);render();$('saved').textContent=C.saved;};
+  $('back').onclick=$('back2').onclick=function(){if(qi>0){qi--;render();}};
+  $('skip').onclick=function(){MLOG.log('q'+(qi+1)+' skipped');next();};
+  reset();theme('teen');SIM_LIGHTS();readout();
+})();
+</script>
+<script>/* pinned header: compacts once the page scrolls (dashboard sticky-head.js thresholds 72 / 8 px) */
+(function(){var h=document.getElementById('q-head');if(!h)return;var c=false,r=0;
+function f(){r=0;var y=window.scrollY||document.documentElement.scrollTop||0,w=c?y>8:y>72;if(w!==c){c=w;h.classList.toggle('is-scrolled',c);}}
+addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive:true});f();})();</script>
+</body>
+</html>
