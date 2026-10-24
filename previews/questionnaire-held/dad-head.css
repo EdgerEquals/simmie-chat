@@ -52,3 +52,6 @@
   .q-head .tick{height:auto;padding:5px 0}.q-head .tick .tview{border-top-color:#0F5C6E}
   .q-head .dad-mark{width:28px;height:28px}.q-head .dh-title{font-size:1.05rem}
   .q-head .dh-pill{font-size:.8rem;letter-spacing:1.5px;padding:.15rem .55rem .05rem;margin-left:.5rem}.q-head .qh-mast .dh-sub{font-size:.85rem;flex-basis:100%}}
+/* Start button ~17% smaller (Danny 24 Oct 2026 08:48 AWST: "too big"); still the primary action, colours/shadow unchanged.
+   was .big font-size 1.5rem, padding .9rem 2.2rem (from the questionnaire's own CSS) */
+#go.big{font-size:1.25rem;padding:.75rem 1.8rem}
