@@ -104,3 +104,5 @@ html[data-term-phase="live"] .tstat .ts-txt{color:#FF2A4A;text-shadow:0 0 4px rg
 .tstat .ts-tel{opacity:.6}
 /* t656u fix: no colour transition on the footer cursor, so it tracks the shared --cur-col exactly with the pill cursor. */
 .foot .tin .blk,.tin .blk{transition:none!important}
+/* t657u fix: basis 0 so the pill only takes leftover row space (weather/emojis keep their line). */
+@media(max-width:480px){.tick .tstat{flex:1 1 0;min-width:calc(7ch + 22px)}.tick .wx{margin-left:8px}}
