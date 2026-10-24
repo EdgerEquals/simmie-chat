@@ -1,0 +1,24 @@
+/* LIVE (Danny 12:39 AWST 24 Oct "push it all"; was previews/questionnaire-held/): travelling glow on the four footer dots left of / above the Simmie avatar
+   (STEP / DONE / SKY / LINK status lights in the .foot row directly above the simmie tty). Danny 24 Oct 2026 10:42 AWST: a soft light walks dot 1->2->3->4, then back 4->3->2->1, looping
+   (ping-pong, like a signal bouncing). It sits on a ::after halo, so each dot's own colour/animation underneath is untouched.
+   Colour: the page's own palette via --dg-c = var(--dpc-accent) = Dad's command-centre accent from dad-head.css (now #0AF2FF), so it follows the palette job.
+   Timing (/home/box/.config/phi-timing-rules.md): Simmie terminal element, Bonnie slot "offering story" PHI^6 17.94 s x PHI^-1.5
+   = PHI^4.5 = 8.723 s per full there-and-back cycle (6 steps of 1.454 s). The four dots move as one group, so they share one
+   golden-angle start (-8.723 x frac(k x 0.618), k = 61 -> -6.24 s); each dot's keyframe peaks at its own step (dot1 0, dot2 1/6 + 5/6,
+   dot3 2/6 + 4/6, dot4 3/6 of the cycle). Fixed period (not weather-swept: that needs the shared phi-timing.js, left untouched).
+   prefers-reduced-motion: no animation, halo hidden (dots static). */
+.foot{--dg-c:var(--dpc-accent,var(--dad-amber,#0AF2FF));--dg-max:.9;--dg-t:8.723s;--dg-d:-6.24s}
+.foot #ltStep > i,.foot #ltDone > i,.foot #ltSky > i,.foot #ltLink > i{position:relative}
+.foot #ltStep > i::after,.foot #ltDone > i::after,.foot #ltSky > i::after,.foot #ltLink > i::after{content:"";position:absolute;inset:-1px;border-radius:50%;pointer-events:none;opacity:0;
+  background:color-mix(in srgb,var(--dg-c) 75%,transparent);
+  box-shadow:0 0 3px 1px color-mix(in srgb,var(--dg-c) 85%,transparent),0 0 9px 2px color-mix(in srgb,var(--dg-c) 40%,transparent);
+  animation:dg1 var(--dg-t) ease-in-out var(--dg-d) infinite}
+.foot #ltDone > i::after{animation-name:dg2}
+.foot #ltSky > i::after{animation-name:dg3}
+.foot #ltLink > i::after{animation-name:dg4}
+body.paused .foot #ltStep > i::after,body.paused .foot #ltDone > i::after,body.paused .foot #ltSky > i::after,body.paused .foot #ltLink > i::after{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.foot #ltStep > i::after,.foot #ltDone > i::after,.foot #ltSky > i::after,.foot #ltLink > i::after{animation:none;opacity:0}}
+@keyframes dg1{0%{opacity:var(--dg-max)}16.667%{opacity:0}83.333%{opacity:0}100%{opacity:var(--dg-max)}}
+@keyframes dg2{0%{opacity:0}16.667%{opacity:var(--dg-max)}33.333%{opacity:0}66.667%{opacity:0}83.333%{opacity:var(--dg-max)}100%{opacity:0}}
+@keyframes dg3{0%,16.667%{opacity:0}33.333%{opacity:var(--dg-max)}50%{opacity:0}66.667%{opacity:var(--dg-max)}83.333%,100%{opacity:0}}
+@keyframes dg4{0%,33.333%{opacity:0}50%{opacity:var(--dg-max)}66.667%,100%{opacity:0}}

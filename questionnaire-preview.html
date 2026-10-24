@@ -496,6 +496,8 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <script src="previews/shared/bonnie-sound.js?v=4" data-page="quiz" data-default="off" data-slot="#vol-sound" defer></script>
 <script src="previews/shared/bonnie-sound-quiz.js?v=3" defer></script>
 <script src="previews/shared/dad-autodj-quiz.js?v=2" defer></script>
+<link rel="stylesheet" href="css/quiz-dj-pill.css?v=c0c7afb8"><!-- Dad's DJ pill + pop-up (Danny 11:06 AWST 24 Oct) -->
+<link rel="stylesheet" href="css/quiz-dots-glow.css?v=19d4b8ab"><!-- travelling glow on the four footer lights (Danny 10:42 AWST 24 Oct) -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -511,7 +513,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <div class="q-head dad-head" id="q-head">
   <div class="qh-top"><div class="qh-c">
     <svg class="qh-logo" viewBox="413 534 1810 893" width="97" height="38" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Rebella" focusable="false"><use href="img/bonnies-logo.svg?v=1#bonnies-logo"/></svg>
-    <span class="qh-right"><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
+    <span class="qh-right"><button type="button" class="dj-pill" id="dj-pill" aria-expanded="false" aria-controls="qh-djpop" aria-haspopup="dialog"><span class="djp-led" aria-hidden="true"></span><span class="djp-lbl">Dad&rsquo;s DJ</span><span class="djp-car" aria-hidden="true">&#9662;</span></button><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
   </div></div>
   <div class="qh-hud"><div class="qh-c">
     <div class="tick" id="tick" role="region" aria-label="Fun facts from Dad">
@@ -523,9 +525,10 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     </div>
     <div class="lane" id="laneH" aria-hidden="true"></div>
   </div></div>
-  <div class="qh-dj"><div class="qh-c">
+  <div class="qh-djpop" id="qh-djpop" role="dialog" aria-label="Dad's DJ" hidden><div class="qh-c">
   <!-- Dad's auto-DJ (phi rule 10): generated in the browser, plays only after a tap; the sound switch below is the master mute -->
   <section class="dad-dj" id="dad-dj" data-guard="dad-dj" aria-label="Dad's music">
+    <button type="button" class="djp-x" aria-label="Close Dad's DJ">&times;</button>
     <div class="dj-row">
       <button type="button" class="dj-play" id="dj-play" aria-pressed="false"><span class="dj-led" aria-hidden="true"></span><span class="dj-lbl">Dad&rsquo;s DJ</span></button>
       <label class="dj-vol"><span>music vol</span><input type="range" id="dj-vol" min="0" max="100" step="1" value="80"></label>
@@ -589,7 +592,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
       <span class="simmie" data-simmie id="footSimmie"></span>
       <div class="ttyl">
         <div class="tout" id="tout"><div class="lp" id="tprev" aria-hidden="true"></div><div class="lc" id="tcur" aria-live="polite"></div></div>
-        <label class="tin"><span class="pr">bonnie$</span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
+        <label class="tin"><span class="pr">simmie$</span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
       </div>
     </div>
   </div>
@@ -1039,5 +1042,6 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   reset();theme('teen');SIM_LIGHTS();readout();
 })();
 </script>
+<script src="js/quiz-dj-pill.js?v=788205e5" defer></script>
 </body>
 </html>

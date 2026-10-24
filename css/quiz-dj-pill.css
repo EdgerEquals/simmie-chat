@@ -1,0 +1,28 @@
+/* LIVE (Danny 12:39 AWST 24 Oct "push it all"; was previews/questionnaire-held/): Dad's DJ folded into a "Dad's DJ" pill in the header top bar, next to the
+   REBELLA live beacon (Danny 24 Oct 2026 11:06 AWST). Pressing the pill pops the SAME Dad's DJ panel (same element, same ids,
+   same dad-autodj-quiz.js behaviour) down under the pinned header; closing only hides it, so music keeps playing.
+   Dad's command-centre palette tokens only (--dpc-*); the pill reuses the idle look of the DJ play pill. Layout-only otherwise. */
+.q-head .dj-pill{display:inline-flex;align-items:center;gap:.35rem;flex:none;height:24px;padding:0 .6rem 0 .45rem;border-radius:999px;cursor:pointer;
+  border:1px solid var(--dpc-accent,#0AF2FF);background:var(--dpc-panel,#040E19);color:var(--dpc-heading,#9DBCCE);
+  font:700 .74rem/1 "Alegreya Sans",system-ui,sans-serif;letter-spacing:.3px;white-space:nowrap;
+  box-shadow:0 0 2px rgba(10,242,255,.6),0 0 10px rgba(10,242,255,.16)}
+.q-head .dj-pill .djp-led{width:7px;height:7px;border-radius:50%;background:var(--dpc-border,#143A57);box-shadow:inset 0 0 0 1px var(--dpc-muted,#6A8CA4)}
+.q-head .dj-pill.is-playing .djp-led{background:var(--dpc-accent,#0AF2FF);box-shadow:0 0 4px rgba(10,242,255,.7)}
+.q-head .dj-pill[aria-expanded="true"]{background:var(--dpc-panel-2,#071829);border-color:var(--dpc-accent,#0AF2FF);color:var(--dpc-accent,#0AF2FF)}
+.q-head .dj-pill .djp-car{font-size:.6rem;line-height:1;transition:transform .2s}
+.q-head .dj-pill[aria-expanded="true"] .djp-car{transform:rotate(180deg)}
+.q-head .dj-pill:focus-visible{outline:2px solid var(--dpc-accent,#0AF2FF);outline-offset:2px}
+/* the pop-up: drops from the bottom of the pinned header, same width/alignment the DJ row had */
+.q-head .qh-djpop{position:absolute;left:0;right:0;top:100%;z-index:45;pointer-events:none}
+.q-head .qh-djpop[hidden]{display:none}
+.q-head .qh-djpop .qh-c{position:relative;padding-top:.45rem;pointer-events:none}
+.q-head .qh-djpop .dad-dj{pointer-events:auto;position:relative;padding-right:2.2rem;box-shadow:0 10px 28px rgba(0,0,0,.75),0 0 0 1px var(--dpc-border-hi,#1F5478)}
+.q-head .qh-djpop .djp-x{position:absolute;top:.35rem;right:.35rem;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;cursor:pointer;z-index:1;
+  border:1px solid var(--dpc-border,#143A57);background:var(--dpc-panel-2,#071829);color:var(--dpc-heading,#9DBCCE);font:700 1rem/1 system-ui,sans-serif;padding:0}
+.q-head .qh-djpop .djp-x:hover{border-color:var(--dpc-border-hi,#1F5478)}
+.q-head .qh-djpop .djp-x:focus-visible{outline:2px solid var(--dpc-accent,#0AF2FF);outline-offset:1px}
+/* still openable while the header is compacted (scrolled) */
+.q-head.is-scrolled .qh-djpop:not([hidden]){display:block}
+.q-head .qh-djpop .dad-dj{max-height:calc(100vh - 140px);max-height:calc(100dvh - 140px);overflow:auto}
+@media(max-width:480px){.q-head .qh-right{gap:6px}.q-head .dj-pill{padding:0 .5rem 0 .4rem;font-size:.72rem}}
+@media(prefers-reduced-motion:reduce){.q-head .dj-pill .djp-car{transition:none}}
