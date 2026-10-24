@@ -44,16 +44,24 @@ html[data-term-status="live"] .foot .tin .blk{background:var(--mx-r);box-shadow:
 body.paused .tstat .ts-dot,body.paused .tstat .ts-s i{animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){.tstat .ts-dot,.tstat .ts-s i{animation:none!important}.tstat .ts-w b,.foot .tin .blk{transition:none!important}}
 
-/* ---- t648u (Danny 13:30 AWST 24 Oct): grouped pulses (status x3 green, live x3 red, PHI^2 / pump each) + quiet "away" when not live ---- */
-.tstat .ts-l{text-shadow:0 0 3px rgba(255,0,51,.35)}
-html[data-term-status="live"] .tstat .ts-l{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
-.tstat .ts-s i{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
-html[data-term-status="status"] .tstat .ts-s i,html[data-term-status="live"] .tstat .ts-l{animation-delay:0s}
-.tstat .ts-q{opacity:0;color:#5E7A66}
-html[data-term-status="quiet"] .tstat .ts-s,html[data-term-status="quiet"] .tstat .ts-l{opacity:0}
-html[data-term-status="quiet"] .tstat .ts-q{opacity:.85}
-html[data-term-status="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px #1E2A33}
-html[data-term-status="quiet"] .tstat .ts-dot{animation:none;background:#4F6168;box-shadow:none;transform:scale(.8);opacity:.6}
+/* ---- t650u (Danny 13:32 AWST 24 Oct): pill inside reads like the footer simmie$ line - monospace text + block cursor.
+   Sequence (js/quiz-term-status.js, html[data-term-phase]): cursor blinks x2 (PHI^0.5 each) -> "status" green, pulses x3 (PHI^2 each),
+   cursor steady after it -> clear, cursor x2 -> "live" red, pulses x3 -> clear ... All / RatioPump rate. Fixed 7ch box, no shift.
+   Quiet (offline / Rebella link down): muted grey-green "away", dim static cursor, grey dot, no glow, nothing moves. ---- */
+.tstat .ts-w{width:7ch;display:inline-flex;align-items:center;height:1em;overflow:hidden}
+.tstat .ts-w > b{display:none!important}
+.tstat .ts-txt{white-space:pre;color:var(--mx-g)}
+.tstat .ts-cur{display:inline-block;width:.6em;height:.95em;margin-left:1px;background:var(--mx-g);box-shadow:0 0 4px rgba(0,255,65,.6)}
+html[data-term-phase="cursor"] .tstat .ts-cur{animation:tsBlink var(--ts-blink,1.272s) steps(1,end) infinite}
+html[data-term-phase="status"] .tstat .ts-txt.ts-go{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
+html[data-term-phase="live"] .tstat .ts-txt{color:var(--mx-r);text-shadow:0 0 3px rgba(255,0,51,.35)}
+html[data-term-phase="live"] .tstat .ts-txt.ts-go{animation:tsPulse var(--ts-pulse,2.618s) ease-in-out infinite}
+html[data-term-phase="live"] .tstat .ts-cur{background:var(--mx-r);box-shadow:0 0 4px rgba(255,0,51,.6)}
+@keyframes tsBlink{0%{opacity:1}50%{opacity:0}}
+html[data-term-phase="quiet"] .tstat .ts-txt{color:#5E7A66;opacity:.85;text-shadow:none}
+html[data-term-phase="quiet"] .tstat .ts-cur{background:#3E4F47;box-shadow:none;opacity:.6}
+html[data-term-phase="quiet"] .tick .tstat{box-shadow:inset 0 0 0 1px #1E2A33}
+html[data-term-phase="quiet"] .tstat .ts-dot{animation:none;background:#4F6168;box-shadow:none;transform:scale(.8);opacity:.6}
 html[data-term-status="quiet"] .foot .tin .blk{background:#4F6168;box-shadow:none}
-body.paused .tstat .ts-l{animation-play-state:paused}
-@media(prefers-reduced-motion:reduce){.tstat .ts-l{animation:none!important}}
+body.paused .tstat .ts-txt,body.paused .tstat .ts-cur{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.tstat .ts-txt,.tstat .ts-cur{animation:none!important}}

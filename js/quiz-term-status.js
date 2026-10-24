@@ -1,35 +1,47 @@
-/* Questionnaire terminal status pill (Danny t637u/t639u; grouped pulses + quiet state t647u/t648u 13:30 AWST 24 Oct 2026). Display only.
-   Shared state on <html data-term-status="status|live|quiet"> + 'termstatus:change' event (header pill + footer simmie$ light).
-   Pattern: "status" (green) pulses 3x, cross-fade, "live" (red) pulses 3x, repeat. Pulse period PHI^2 = 2.618 base s; group = 3 pulses
-   = 7.854 base s; all advanced at RatioPump.rate() (dial 0.75). Cross-fade PHI^0.25 / rate (--ts-xf).
-   Quiet: when NOT actually live (navigator.onLine false, or the page's Rebella link check window.SIM_BEACON.state==='down'),
-   the pill stops cycling and shows a muted, still "away". Resumes when both come back. Reduced motion: static "status". */
+/* Questionnaire terminal status pill (Danny t637u/t639u; t647u/t648u/t650u 13:32 AWST 24 Oct 2026). Display only: sends nothing.
+   Pill renders a terminal line: text + block cursor, like the footer simmie$ line.
+   Sequence (phi rules, base seconds, advanced at RatioPump.rate(), dial 0.75):
+     cursor  : no word, cursor blinks 2x at PHI^0.5 = 1.272 s  -> 2.544 s
+     status  : "status" green, pulses 3x at PHI^2 = 2.618 s, steady cursor after it -> 7.854 s
+     cursor  : 2.544 s
+     live    : "live" red, pulses 3x -> 7.854 s ... full cycle 20.80 base s.
+   html[data-term-phase]=cursor|status|live|quiet (pill); html[data-term-status]=status|live|quiet (footer simmie$ light, holds the
+   last word through cursor phases) + 'termstatus:change'.
+   Quiet: not actually live = navigator.onLine false OR the page's Rebella link check window.SIM_BEACON.state==='down' -> muted
+   static "away", no cycling. Resumes on recovery. Reduced motion: static "status" + steady cursor. */
 (function(){
   'use strict';
-  var PHI=1.6180339887, P=Math.pow(PHI,2), N={status:3, live:3}, XF=Math.pow(PHI,0.25);
+  var PHI=1.6180339887, B=Math.pow(PHI,0.5), P=Math.pow(PHI,2);
+  var SEQ=[['cursor',2*B],['status',3*P],['cursor',2*B],['live',3*P]];
   var root=document.documentElement, RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
   function rate(){ try{ var r=window.RatioPump&&window.RatioPump.rate(); return r>0?r:1; }catch(e){ return 1; } }
-  var w=document.querySelector('#tstat .ts-w'); if(w&&!w.querySelector('.ts-q')){ var q=document.createElement('b'); q.className='ts-q'; q.textContent='away'; w.appendChild(q); }
-  var phase='status', left=N.status*P, shown=null, last=Date.now();
+  var w=document.querySelector('#tstat .ts-w'), txt, cur;
+  if(w){ txt=document.createElement('span'); txt.className='ts-txt'; cur=document.createElement('i'); cur.className='ts-cur'; w.appendChild(txt); w.appendChild(cur); }
+  var idx=1, left=SEQ[1][1], phase=null, word='status', last=Date.now();
   function isLive(){ if(navigator.onLine===false) return false; var b=window.SIM_BEACON; return !(b&&b.state==='down'); }
-  function setXf(){ root.style.setProperty('--ts-xf',(XF/rate()).toFixed(3)+'s'); root.style.setProperty('--ts-pulse',(P/rate()).toFixed(3)+'s'); }
-  function show(s){ if(s===shown) return; shown=s; root.setAttribute('data-term-status',s);
-    try{ document.dispatchEvent(new CustomEvent('termstatus:change',{detail:{state:s}})); }catch(e){} }
+  function setVars(){ var r=rate(); root.style.setProperty('--ts-pulse',(P/r).toFixed(3)+'s'); root.style.setProperty('--ts-blink',(B/r).toFixed(3)+'s'); root.style.setProperty('--ts-xf',(Math.pow(PHI,0.25)/r).toFixed(3)+'s'); }
+  function show(ph){
+    if(ph===phase) return; phase=ph; root.setAttribute('data-term-phase',ph);
+    if(txt){ txt.classList.remove('ts-go'); txt.textContent= ph==='status'?'status': ph==='live'?'live': ph==='quiet'?'away':''; void txt.offsetWidth; if(ph==='status'||ph==='live') txt.classList.add('ts-go'); }
+    var st= ph==='cursor'?word:ph; if(ph==='status'||ph==='live') word=ph;
+    if(root.getAttribute('data-term-status')!==st){ root.setAttribute('data-term-status',st);
+      try{ document.dispatchEvent(new CustomEvent('termstatus:change',{detail:{state:st,phase:ph}})); }catch(e){} }
+  }
   function tick(){
     var now=Date.now(), dt=(now-last)/1000; last=now;
     if(!isLive()){ show('quiet'); return; }
-    if(RM.matches){ phase='status'; left=N.status*P; show('status'); return; }
-    if(shown==='quiet'){ phase='status'; left=N.status*P; setXf(); show('status'); return; }
+    if(RM.matches){ show('status'); return; }
+    if(phase==='quiet'){ idx=0; left=SEQ[0][1]; setVars(); show('cursor'); return; }
     if(document.hidden||(document.body&&document.body.classList.contains('paused'))) return;
     left-=dt*rate();
-    if(left<=0){ setXf(); phase=phase==='status'?'live':'status'; left=N[phase]*P; }
-    show(phase);
+    if(left<=0){ setVars(); idx=(idx+1)%SEQ.length; left=SEQ[idx][1]; }
+    show(SEQ[idx][0]);
   }
-  setXf(); show(isLive()?'status':'quiet');
-  document.addEventListener('ratiopump:change',setXf);
+  setVars(); show(isLive()?'status':'quiet');
+  document.addEventListener('ratiopump:change',setVars);
   document.addEventListener('visibilitychange',function(){ last=Date.now(); });
   window.addEventListener('online',tick); window.addEventListener('offline',tick);
-  setInterval(tick,200);
-  window.TermStatus={ state:function(){ return shown; }, live:isLive,
-    info:function(){ var r=rate(); return {state:shown, rate:r, pulseBase:P, pulses:N, groupEffective:{status:N.status*P/r, live:N.live*P/r}, crossfadeEffective:XF/r, leftBase:left}; } };
+  setInterval(tick,100);
+  window.TermStatus={ phase:function(){ return phase; }, state:function(){ return root.getAttribute('data-term-status'); }, live:isLive,
+    info:function(){ var r=rate(); return {phase:phase, rate:r, seqBase:SEQ, cycleBase:2*(2*B+3*P), cycleEffective:2*(2*B+3*P)/r}; } };
 })();
