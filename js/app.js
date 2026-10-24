@@ -189,7 +189,8 @@
   // ---------- Dad's Yes / No questions ----------
   // Her tap is sent like any other message of hers (same encrypted relay -> webhook path), with reply_to + answer.
   const senderName = (from) => (from === 'dad' ? 'Dad' : 'Simmie');
-  const ASK = 'Ask more';
+  const ASK = 'Ask more';              // answer value sent to the relay (protocol unchanged)
+  const ASK_LABEL = 'Request a change'; // visible label of the third button (opens the text box)
   function answerFor(q) {
     const prefix = '[Answer to ' + senderName(q.from) + ': "' + q.text + '"] ';
     for (const m of msgs.values()) {
@@ -259,7 +260,8 @@
       if (m.reply_to) {
         const qm = msgs.get(m.reply_to), q = document.createElement('span'); q.className = 'quote';
         q.textContent = 'Answer to ' + (qm ? senderName(qm.from) : (m.text.match(/^\[Answer to (\w+)/) || [, 'Dad'])[1]); b.appendChild(q);
-        b.appendChild(document.createTextNode(m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text)));
+        const shown = m.answer === ASK ? ASK_LABEL : m.answer;   // display only; the stored answer stays "Ask more"
+        b.appendChild(document.createTextNode(m.comment ? shown + ': ' + m.comment : (shown || m.text)));
       } else b.appendChild(document.createTextNode(m.text));
       if (m.from !== 'daughter' && m.kind === 'question') b.appendChild(questionControls(m));
       const meta = document.createElement('span'); meta.className = 'meta';
@@ -291,7 +293,7 @@
     for (const opt of opts) {
       const btn = document.createElement('button'); btn.type = 'button';
       btn.className = 'choice' + (opt === ASK ? ' ask' : '') + (picked === opt ? ' picked' : '') + (askOpen === m.id && opt === ASK ? ' open' : '');
-      btn.textContent = (picked === opt ? '✓ ' : '') + opt; btn.disabled = ans !== null;
+      btn.textContent = (picked === opt ? '✓ ' : '') + (opt === ASK ? ASK_LABEL : opt); btn.disabled = ans !== null;
       btn.onclick = () => {
         if (opt === ASK) { askOpen = askOpen === m.id ? '' : m.id; render(); if (askOpen) { const t = document.querySelector('.ask-box textarea'); if (t) t.focus(); } return; }
         row.querySelectorAll('button').forEach((x) => { x.disabled = true; }); askOpen = ''; answerQuestion(m, opt);

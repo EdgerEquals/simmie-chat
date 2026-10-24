@@ -260,7 +260,7 @@ class Chat:
 
 def fmt(m):
     t = time.strftime('%a %d %b %H:%M', time.localtime(int(m.get('ts', 0)) / 1000))
-    q = ' [question, buttons: %s / Ask more]' % ' / '.join(m.get('options') or ['Yes', 'No']) if m.get('kind') == 'question' else ''
+    q = ' [question, buttons: %s / Request a change]' % ' / '.join(m.get('options') or ['Yes', 'No']) if m.get('kind') == 'question' else ''
     return f"[{t}] {m.get('from')}{q}: {m.get('text')}"
 
 
@@ -381,7 +381,7 @@ def main():
     a = sub.add_parser('append'); a.add_argument('--from', dest='frm', choices=['simmie', 'daughter', 'dad'], required=True)
     a.add_argument('--text', required=True); a.add_argument('--id'); a.add_argument('--ts', type=int); a.add_argument('--no-ping', action='store_true')
     q = sub.add_parser('ask'); q.add_argument('--from', dest='frm', choices=['dad', 'simmie'], required=True)
-    q.add_argument('--options', nargs=2, metavar=('FIRST', 'SECOND'), default=['Yes', 'No'], help='labels of the two choice buttons (default: Yes No); Ask more is always the third')
+    q.add_argument('--options', nargs=2, metavar=('FIRST', 'SECOND'), default=['Yes', 'No'], help='labels of the two choice buttons (default: Yes No); Request a change (sent as "Ask more") is always the third')
     q.add_argument('--text', required=True); q.add_argument('--id'); q.add_argument('--ts', type=int); q.add_argument('--no-ping', action='store_true')
     p = sub.add_parser('pending'); p.add_argument('--ingest', action='store_true')
     sub.add_parser('relay'); sub.add_parser('relay-ensure'); sub.add_parser('relay-status'); sub.add_parser('relay-restart')
