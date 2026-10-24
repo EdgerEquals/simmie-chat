@@ -96,7 +96,7 @@
   function restyle(it){
     var cs = getComputedStyle(it.btn), fixed = cs.position === "fixed", z = parseInt(cs.zIndex, 10); if(isNaN(z)) z = 2;
     var small = it.btn.offsetHeight > 0 && it.btn.offsetHeight < 30;   // chat key (17px tall) vs the 43px dashboard circle
-    if(small !== it.small){ it.small = small; it.p.style.setProperty("--adp-s", small ? "13.8px" : "17.25px"); }
+    if(small !== it.small){ it.small = small; it.p.style.setProperty("--adp-s", small ? "14.49px" : "18.1125px"); }
     it.vis = cs.visibility !== "hidden" && (fixed || it.btn.offsetParent !== null);
     if(fixed !== it.fixed){ it.fixed = fixed; it.wrap.classList.toggle("is-fixed", fixed); }
     if(z - 1 !== it.zBack){ it.zBack = z - 1; it.zFront = z + 1; it.near = null; }
