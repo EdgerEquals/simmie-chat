@@ -62,3 +62,126 @@
 .q-head .qh-logo{height:46px;width:93px;max-width:none;transform:translateY(-3px) rotate(-5.7deg);transform-origin:50% 50%}
 @media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{height:36px;width:73px;transform:translateY(-2px) rotate(-5.7deg)}}
 @media(max-width:480px){.q-head .qh-logo{height:38px;width:77px;transform:translateY(-2px) rotate(-5.7deg)}}
+/* ==== DAD'S PALETTE: COMMAND CENTRE (PREVIEW ONLY; Danny 24 Oct 2026 10:34-10:38 AWST). Colour values only, no layout/content.
+   Sampled (k-means + highlight pick) from Danny's two command-centre photos: dark room, wall of glowing blue screens, one person.
+   Pure black room, dim cool blues for panels/borders/text, ONE bright accent = the radar sweep (#09B1C0 sampled, the most saturated
+   highlight in both photos) pushed to full brightness #0AF2FF. The accent is the only thing that glows: tight glow + faint wide
+   bloom, breathing very slowly (bloom alpha +-20%) on PHI^5 = 11.090 s (Bonnie-ladder slow-breathe slot, new element k=60 ->
+   golden-angle start -0.910 s; swept by phi-timing like every other loop; static under prefers-reduced-motion). Surfaces next to
+   the accent catch a barely-there reflection (accent at 4.5% alpha). Full spec: /home/box/.config/dad-palette-command-centre.md
+   Contrast on #000 / panel #040E19 / panel-2 #071829: heading #9DBCCE 10.5/9.7/9.0 | text #85A6BB 8.2/7.6/7.0 |
+   muted #6A8CA4 5.9/5.5/5.0 | accent #0AF2FF 15.2/14.0/12.9 | black on accent 15.2 */
+:root{--dpc-bg:#000000;--dpc-panel:#040E19;--dpc-panel-2:#071829;--dpc-border:#143A57;--dpc-border-hi:#1F5478;
+  --dpc-heading:#9DBCCE;--dpc-text:#85A6BB;--dpc-muted:#6A8CA4;--dpc-accent:#0AF2FF;--dpc-on-accent:#000000;
+  --dpc-glow:0 0 2px rgba(10,242,255,.9),0 0 7px rgba(10,242,255,.55);
+  --dpc-bloom:0 0 18px rgba(10,242,255,.28),0 0 44px rgba(10,242,255,.14);
+  --dpc-bloom-lo:0 0 18px rgba(10,242,255,.224),0 0 44px rgba(10,242,255,.112);
+  --dpc-bloom-hi:0 0 18px rgba(10,242,255,.336),0 0 44px rgba(10,242,255,.168);
+  --dpc-text-glow:0 0 1px rgba(10,242,255,.85),0 0 6px rgba(10,242,255,.45),0 0 16px rgba(10,242,255,.18);
+  --dpc-reflect:rgba(10,242,255,.045);--dpc-reflect-edge:rgba(10,242,255,.10);
+  --dpc-pulse:11.090s;--dpc-pulse-d:-0.910s;
+  /* old Dad tokens re-pointed so every rule that reads them follows */
+  --dad-ocean:#071829;--dad-ocean-deep:#040E19;--dad-amber:#0AF2FF;--dad-sand:#85A6BB;--dad-sky:#071829;--dad-charcoal:#000000;
+  --cc-amber:#0AF2FF;--cc-sand:#85A6BB;--cc-sky:#9DBCCE;--cc-muted:#6A8CA4;--cc-hair-am:rgba(10,242,255,.35);
+  --cc-emerald-glow:#6A8CA4;--cc-emerald:#1F5478;--cc-emerald-fill:#143A57;--cc-emerald-dim:#1F5478;--cc-emerald-deep:#071829;
+  --cc-hair-em:#143A57;--cc-hair-em-soft:#0C2338;--cc-panel:#040E19;--cc-ink:#000000;
+  --cc-grid:repeating-linear-gradient(0deg,#050F1A 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,#050F1A 0 1px,transparent 1px 28px);
+  --bg:#000000;--bg-top:#000000;--surface:#040E19;--surface-2:#071829;--line:#143A57;--teal-hi:#1F5478;--ink:#85A6BB;--heading:#9DBCCE;--accent:#0AF2FF;--deep:#04717A;
+  --tsw-line:#6A8CA4;--tsw-area:#143A57;--tsw-now:#9DBCCE}
+@keyframes dpcBreathe{0%,100%{box-shadow:var(--dpc-glow),var(--dpc-bloom-lo)}50%{box-shadow:var(--dpc-glow),var(--dpc-bloom-hi)}}
+@keyframes dpcBreatheT{0%,100%{text-shadow:0 0 1px rgba(10,242,255,.85),0 0 6px rgba(10,242,255,.36),0 0 16px rgba(10,242,255,.144)}50%{text-shadow:0 0 1px rgba(10,242,255,.85),0 0 6px rgba(10,242,255,.54),0 0 16px rgba(10,242,255,.216)}}
+/* room: pure black; the space backdrop dimmed so the accent is the only light */
+body{background:#000;color:#85A6BB}
+body::before{background:var(--cc-grid),#000}
+.bgloop,.bgloop-still{opacity:.12}
+/* header */
+.q-head{color:#85A6BB;background:#000;border-bottom:1px solid #143A57;box-shadow:0 1px 0 #040E19,0 6px 18px rgba(0,0,0,.6)}
+.q-head .qh-top{background:#000;border-top:1px solid #0C2338;border-bottom:1px solid #143A57}
+.q-head .qh-logo{color:#9DBCCE}
+.q-head .beacon{background:#040E19;color:#85A6BB}
+.q-head .beacon:focus-visible{outline-color:#0AF2FF}
+.q-head .qh-hud{background:#040E19;border-bottom:1px solid #143A57}
+.q-head .tick{color:#85A6BB}
+.q-head .tick .tag{background:#071829;color:#9DBCCE;box-shadow:inset 0 0 0 1px #143A57}
+.q-head .tick .wx{border-color:#143A57;color:#85A6BB}.q-head .tick .wx b{color:#9DBCCE}
+.q-head .tk{color:#9DBCCE}.q-head .tc{color:#85A6BB}.q-head .ts{color:#85A6BB}.q-head .tp{color:#6A8CA4}
+.q-head .lane .cli,.lane .cli{color:#6A8CA4}
+.q-head .tick .tview{border-top-color:#143A57}
+.tick{background:#040E19;border-color:#143A57}.tk{color:#9DBCCE}.tout .ts{color:#6A8CA4}
+.beacon{background:#040E19}.beacon.live{--bc:#0AF2FF}.beacon.live i{box-shadow:0 0 2px rgba(10,242,255,.9),0 0 7px rgba(10,242,255,.55)}
+/* Dad's DJ: dim panel; the play pill is the accent (glows, and its light reflects faintly across the panel from the left) */
+.dad-head .dad-dj,.q-head .dad-dj{background:radial-gradient(ellipse 45% 160% at 0% 50%,var(--dpc-reflect),transparent 70%),#040E19;
+  border-color:#143A57;border-top-color:#1A4A6A;color:#85A6BB}
+.dad-dj .dj-play{border-color:#0AF2FF;color:#9DBCCE;box-shadow:0 0 2px rgba(10,242,255,.6),0 0 10px rgba(10,242,255,.16)}
+.dad-dj .dj-play[aria-pressed="true"]{background:#0AF2FF;color:#000;box-shadow:var(--dpc-glow),var(--dpc-bloom);animation:dpcBreathe var(--dpc-pulse) ease-in-out var(--dpc-pulse-d) infinite}
+.dad-dj .dj-play:focus-visible,.dad-dj summary:focus-visible,.dad-dj input:focus-visible{outline-color:#0AF2FF}
+.dad-dj .dj-led{background:#143A57;box-shadow:inset 0 0 0 1px #6A8CA4}
+.dad-dj .dj-play[aria-pressed="true"] .dj-led{background:#04717A;box-shadow:inset 0 0 0 1px #000}
+.dad-dj .dj-led.on{background:#0AF2FF;box-shadow:0 0 4px rgba(10,242,255,.7)}.dad-dj .dj-led.on2{background:#9DBCCE;box-shadow:0 0 0 2px #040E19}
+.dad-dj .dj-vol{color:#85A6BB}.dad-dj .dj-vol input{accent-color:#0AF2FF}
+.dad-dj .dj-read{color:#85A6BB}.dad-dj .dj-pumps{color:#6A8CA4}
+.dad-dj summary{color:#9DBCCE}
+.dad-dj .dj-grp legend{color:#6A8CA4}
+.dad-dj .dj-grp span{border-color:#143A57;color:#85A6BB}
+.dad-dj .dj-grp input:checked + span{background:#0AF2FF;border-color:#0AF2FF;color:#000;box-shadow:var(--dpc-glow)}
+.dad-dj .dj-grp input:focus-visible + span{outline-color:#0AF2FF}
+@media(prefers-reduced-motion:reduce){.dad-dj .dj-led.on,.dad-dj .dj-led.on2{background:#143A57;box-shadow:none}}
+/* panels: dim, near-black blue; the start / question panels catch the button's light at their bottom edge */
+.panel{background:#040E19;border-color:#143A57;box-shadow:0 0 0 1px #000,0 10px 28px rgba(0,0,0,.6)}
+#start.panel,#quiz.panel,#summary.panel{border-top:1px solid #1A4A6A;--scrim:rgba(4,14,25,.7);
+  background:radial-gradient(ellipse 55% 38% at 50% 100%,var(--dpc-reflect),transparent 72%),#040E19}
+.panel .hud-lab{color:#6A8CA4}
+#start h1,.sum h2,h1,.qlabel{color:#9DBCCE}
+#start .lead,.askbox label{color:#85A6BB}
+#start .from,.from{color:#0AF2FF;text-shadow:var(--dpc-text-glow)}
+.count{color:#6A8CA4}
+/* buttons: dim secondaries; Start + Send are the accent */
+.btn,.reroll,.btnrow .btn.skip{background:#071829;color:#85A6BB;box-shadow:inset 0 0 0 1px #143A57}
+.btnrow .bk{background:#071829;color:#85A6BB;box-shadow:inset 0 0 0 1px #143A57}
+.big,#go.big{background:#0AF2FF;color:#000;border:1px solid #7FF8FF;box-shadow:var(--dpc-glow),var(--dpc-bloom);
+  --scrim:rgba(10,242,255,.75);animation:dpcBreathe var(--dpc-pulse) ease-in-out var(--dpc-pulse-d) infinite}
+.big:active{box-shadow:var(--dpc-glow)}
+.big::before{opacity:.08}
+.btnrow .btn.send{background:#0AF2FF;color:#000;--scrim:rgba(10,242,255,.75);box-shadow:var(--dpc-glow),var(--dpc-bloom);
+  animation:dpcBreathe var(--dpc-pulse) ease-in-out var(--dpc-pulse-d) infinite}
+.btnrow .btn.send::before{opacity:.08}
+.btn:focus-visible,.tile:focus-visible,textarea:focus-visible,.beacon:focus-visible{outline-color:#0AF2FF}
+/* tiles: topic colours stay; dim hairlines; picked = accent ring with glow */
+.tile{border-color:#143A57}
+.tile:hover{border-color:#1F5478}
+.tile.picked{border-color:#0AF2FF;box-shadow:0 0 0 3px #040E19,0 0 0 5px #0AF2FF,0 0 14px 5px rgba(10,242,255,.28)}
+.yn .tile{color:#9DBCCE}
+.yn #t0{background:#071829!important;border:1px solid #1F5478}
+.yn #t1{background:#040E19!important;border:1px solid #143A57}
+.yn .tile.picked{box-shadow:0 0 0 3px #040E19,0 0 0 5px #0AF2FF,0 0 14px 5px rgba(10,242,255,.28)}
+.btnrow .btn,.btnrow .btn.skip,.yn #t0,.yn #t1{--scrim:rgba(4,14,25,.6)}
+.stars i{background:#0C2338}.stars i.done{background:#1F5478}.stars i.now{background:#0AF2FF;filter:drop-shadow(0 0 3px rgba(10,242,255,.7))}
+.saved{color:#6A8CA4}
+textarea{background:#000;border-color:#143A57;color:#85A6BB}
+textarea::placeholder{color:#6A8CA4}
+textarea:focus-visible{border-color:#0AF2FF;outline-color:#0AF2FF!important}
+.notes li,.sum li{border-color:#143A57}
+.sum .n{background:#071829;box-shadow:inset 0 0 0 1px #1F5478;color:#9DBCCE}
+.agenote{background:#040E19;color:#85A6BB;border-left-color:#1F5478}
+.tile .sp{background:#0AF2FF}.tile .sp:nth-child(2),.tile .sp:nth-child(3){background:#9DBCCE}
+/* footer: black bar, dim blue hairlines and text; status lights dimmed and no longer glow (only the accent glows) */
+.foot{background:rgba(0,0,0,.97);border-top:1px solid #143A57;color:#85A6BB}
+.foot a{color:#9DBCCE}
+.foot .strip{color:#6A8CA4}.foot .lt b{color:#85A6BB}.foot .ro{color:#6A8CA4}
+.foot .lt i{box-shadow:none}
+.foot .lt:not(.warn):not(.bad):not(.idle) i{background:#2B6A92;box-shadow:none}
+.foot .lt.idle{--lc:#2A3E4E}
+.foot .tty{background:#020812;border-color:#143A57}
+.ttybar{background:#040E19;color:#6A8CA4}
+.ttybar i{background:#143A57}.ttybar i:nth-child(2){background:#1F5478}.ttybar i:nth-child(3){background:#0AF2FF;box-shadow:0 0 4px rgba(10,242,255,.6)}
+.ttyl,.tin input{color:#85A6BB}
+.tin .blk{background:#0AF2FF;box-shadow:0 0 4px rgba(10,242,255,.6)}
+@media(prefers-reduced-motion:reduce){.big,#go.big,.btnrow .btn.send,.dad-dj .dj-play[aria-pressed="true"]{animation:none}}
+/* keep the accent count low: the status beacon, terminal cursor and tty dots stay dim blue (status, not the light source);
+   the faint code drift inside the panels is toned down to match the darker panel */
+.beacon.live,.q-head .beacon.live{--bc:#2B6A92}.beacon.live i,.q-head .beacon.live i{box-shadow:none}
+.ttybar i:nth-child(3){background:#2B6A92;box-shadow:none}
+.tin .blk{background:#85A6BB;box-shadow:none}
+#start.panel::before,#quiz.panel::before,#summary.panel::before{opacity:.4}
+/* text on Bonnie's coloured topic tiles: text-strong #B4CEDC (>= 4.6:1 on the lightest tile colour #0F5C6E, 7-8:1 on the rest) */
+.tile{color:#B4CEDC}
