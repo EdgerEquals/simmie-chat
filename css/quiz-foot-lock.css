@@ -28,3 +28,9 @@ html{overscroll-behavior-y:none}
 @supports (-webkit-touch-callout:none){
   .foot .tin input{font-size:16px;height:16px;line-height:16px;transform:scale(.75);transform-origin:0 50%;width:133.34%;flex:0 0 133.34%;margin-right:-33.34%}
 }
+/* Questionnaire host for the cycling foot line (#footLine, js/foot-line.js; Danny t691u/t693u 25 Oct): the readout takes the place of
+   "Preview only, nothing is sent" and gets the room it needs; the credit stays beside it on wide screens and moves into the pop-up on
+   phones (one 18px line, no sideways scroll). Critters (#fcr) and tide stay where they were. */
+.foot .note #footLine{flex:0 1 auto;min-width:0}
+.foot .note{min-width:0}
+@media (max-width:760px){.foot .note #footLine ~ .dot,.foot .note [data-copy="credit"]{display:none}}

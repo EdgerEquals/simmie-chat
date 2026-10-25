@@ -44,7 +44,10 @@
     ['#fcr','Footer critters',function(){var a=moonAge();return '<p class="qp-big">'+esc(txt(document.querySelector('#fcr .ct>span')))+'</p>'+kv([['moon',MOON[Math.floor(a/29.530588853*8+0.5)%8]],['moon age',a.toFixed(1)+' days']])+'<p class="qp-note">The Moon&rsquo;s phase sets the critters&rsquo; order.</p>';}],
     ['#fts','Tide & swell',function(){var h=$('fts'),s=h&&h.querySelector('svg'),c=s?s.cloneNode(true):null;if(c){c.setAttribute('class','qp-tide');}
       return (c?c.outerHTML:'')+'<p>'+esc((h&&h.getAttribute('aria-label'))||'Tide data not loaded.')+'</p>';}],
-    ['.foot .note > span[data-copy]','About this page',function(){return '<p>'+esc(txt(document.querySelector('[data-copy="footer"]')))+'.</p><p>'+esc(txt(document.querySelector('[data-copy="credit"]')))+'.</p>';}],
+    ['#footLine','Today',function(){var F=window.FootLine;if(!F||!F.today)return '<p>Loading&hellip;</p>';var c=F.current();
+      return F.today().map(function(it){var on=c&&c.type===it.type;return '<p'+(on?' class="qp-big" style="font-size:1em"':'')+'>'+esc(it.emoji)+' <b>'+esc(it.label)+'</b><br>'+esc(it.type==='quote'?it.full+' \u2014 '+it.by:it.full)+(it.src?'<br><span class="qp-note">'+esc(it.src)+'</span>':'')+'</p>';}).join('')+
+        '<p class="qp-note">'+esc(txt(document.querySelector('[data-copy="credit"]')))+'. Changes at midnight Perth time.</p>';}],
+    ['.foot .note > span[data-copy]','About this page',function(){return '<p>'+esc(txt(document.querySelector('[data-copy="credit"]')))+'.</p><p class="qp-note">Nothing on this page is sent anywhere.</p>';}],
     ['.foot .ttybar','simmie &mdash; tty',function(){return tty();}],
     ['.foot .tout','simmie &mdash; tty',function(){return tty();}],
     ['#footSimmie','Simmie',function(){return tty();}]

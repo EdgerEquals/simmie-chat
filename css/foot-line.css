@@ -1,0 +1,12 @@
+/* foot-line.css: the cycling one-line readout (js/foot-line.js). Inherits the host line's font, size and colour. */
+.fl{display:inline-flex;align-items:center;gap:.35em;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;cursor:pointer;vertical-align:middle}
+.fl:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:3px}
+.fl-e{flex:0 0 auto}
+.fl-w{display:block;flex:0 1 auto;min-width:0;overflow:hidden}
+.fl-t{display:inline-block;white-space:nowrap;will-change:transform}
+.fl.fl-long .fl-w{-webkit-mask:linear-gradient(90deg,#000 0,#000 calc(100% - 1.4em),transparent);mask:linear-gradient(90deg,#000 0,#000 calc(100% - 1.4em),transparent)}
+.fl-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){
+  .fl-t{display:block;overflow:hidden;text-overflow:ellipsis;transform:none!important}
+  .fl.fl-long .fl-w{-webkit-mask:none;mask:none}
+}
