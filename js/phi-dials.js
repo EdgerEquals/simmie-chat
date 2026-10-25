@@ -1,6 +1,6 @@
 /* PHI-DIALS: golden-ratio dials + ONE closed feedback loop (Kids Club core standard, /home/box/.config/kids-club/shared.md
    "Core standard: golden-ratio dials, one closed feedback loop", Danny 20:02 AWST 25 Oct 2026; built on his go t816u 20:20).
-   The SAME file is rebella js/phi-dials.js and simmie-chat js/phi-dials.js. Loaded at idle by js/ratio-pump.js after js/phi-adapt.js.
+   The SAME file is rebella js/phi-dials.js and simmie-chat js/phi-dials.js. Loaded at idle by js/ratio-pump.js after js/phi-adapt.js and js/season-pumps.js.
 
    ONE DIAL SHAPE. A dial is a rung on the phi ladder: rung k has the value PHI^-k (1, .618, .382, .236, .146, .090, .056, .034),
    and the rung after the last one is closed (0). A dial moves one rung at a time, never to an invented value, and only between its
@@ -23,28 +23,33 @@
                    RatioPump.setUser), so the steps are phi powers too. The visit's own interaction rate vs her long-term rate
                    (a PHI^-2 moving average kept in the record, a ratio only): >= PHI x -> one rung quicker, <= PHI^-1 x -> one rung
                    gentler. Pages here have no tier list, so only animation speed follows it. Reduced motion: factor 1.
-   Dial 3  season  season pump: palette warmth only, slowly. Day length at the one coarse city point (Perth -32.0, shared layer's
-                   location standard) from the NOAA solar equations (cited external data, rule 11:
-                   https://gml.noaa.gov/grad/solcalc/solareqns.PDF), as a ratio of this year's shortest..longest day, so southern
-                   seasons come out right with no feed. Warmth = rung value x that ratio, as a sepia tint on the page's own background
-                   layer only (data-warm on js/ratio-pump.js; Rebella gets a backdrop layer behind its content), PHI^5 s transition.
-                   The loop has no usage signal for warmth, so this dial rests at its rung until Danny moves it.
+   Dial 3  season  season pump: follows the Season pumps standard in the shared layer (js/season-pumps.js; Danny 21:47 AWST 25 Oct).
+                   Sky clocks worked out on the device from the date, the time and the one coarse city point (-32.0, 115.9): sun's
+                   height and day length (NOAA), M2/S2 tide clocks and their spring-neap beat, synodic and anomalistic months, the year
+                   (Meeus). Asserted, not verified. One shared formula, ratios only, phi the sole scaling factor. Two outputs, both on
+                   the page's own background layer only (data-warm on js/ratio-pump.js; Rebella gets a backdrop layer behind its
+                   content): warmth (sepia, the year's timescale) and rest calm (softer colour once the sun is down, smoothly through
+                   dusk and dawn, the day's timescale). This dial's live rung is each output's peak, then the WCAG safe-side floor
+                   steps the tint down by phi if the page's own text/background contrast would drop. PHI^5 s colour transition,
+                   clocks re-read every PHI^8 s while visible (reduced motion: on load and on return only). The loop has no usage
+                   signal for colour, so this dial rests at its rung until Danny moves it.
    API (read-only for the page; nudge/rollback are for Simmie's checks): window.PhiDials.{RUNGS, SPEC, pos(id), value(id), live(id),
    level(), season(), log(), proposals(), nudge(id, +1|-1), rollback(), gate}. */
 (function () {
   "use strict";
   var root = window, doc = document;
   if (root.PhiDials || !root.PhiAdapt) return;
-  var PA = root.PhiAdapt, PHI = 1.6180339887, IP = 1 / PHI, CLOSED = 8;
+  var PA = root.PhiAdapt, PHI = 1.6180339887, IP = 1 / PHI, CLOSED = 8;   // phi: the golden ratio; anchor: Danny's ladder, 8 rungs then closed (t816u)
   var RUNGS = []; for (var k = 0; k < CLOSED; k++) RUNGS.push(+Math.pow(IP, k).toFixed(4)); RUNGS.push(0);
   function val(r) { return r >= CLOSED ? 0 : Math.pow(IP, r); }
   // Danny's floor and ceiling per dial, as rungs (ceiling = the highest value allowed = the smaller rung index). Only Danny changes these.
   var SPEC = {
-    filter: { def: 2, ceil: 1, floor: 4 },        // 0.382 ; up to 0.618, down to 0.146
-    pace:   { def: 2, ceil: 1, floor: 3 },        // factor 1 ; up to 1.236 (quicker), down to 0.854 (gentler)
-    season: { def: 4, ceil: 2, floor: CLOSED }    // 0.146 ; up to 0.382, down to closed
+    filter: { def: 2, ceil: 1, floor: 4 },        // anchor: Danny's rungs. 0.382 ; up to 0.618, down to 0.146
+    pace:   { def: 2, ceil: 1, floor: 3 },        // anchor: Danny's rungs. factor 1 ; up to 1.236 (quicker), down to 0.854 (gentler)
+    season: { def: 4, ceil: 2, floor: CLOSED }    // anchor: Danny's rungs. 0.146 ; up to 0.382, down to closed
   };
-  var LOGMAX = 89, PROPMAX = 13;                    // Fibonacci sizes for the private ring buffers
+  var MS = 1e3;                                    // unit: milliseconds per second (SI)
+  var LOGMAX = 89, PROPMAX = 13;                    // phi: Fibonacci sizes for the private ring buffers
   var RM = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
   var SCRIPT = doc.querySelector("script[src*='ratio-pump.js']");
   var X = PA.ext("dials") || {};
@@ -89,46 +94,42 @@
     (function step() {
       var dlt = target - shown[id];
       if (Math.abs(dlt) < 1e-3 || RM.matches) shown[id] = target; else shown[id] += dlt * IP;   // each PHI^-1 s step closes 61.8% of the gap
-      apply(id); if (shown[id] !== target) gT[id] = setTimeout(step, Math.round(1000 * IP));
+      apply(id); if (shown[id] !== target) gT[id] = setTimeout(step, Math.round(MS * IP));
     })();
   }
 
-  // ---------- Dial 3: day length at the city point (NOAA solar equations), palette warmth only ----------
-  var LAT = -32.0;   // the shared layer's one coarse city point (Perth, 0.1 degree); latitude is all day length needs
-  function dayLength(date) {
-    var y = date.getUTCFullYear(), leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-    var doy = Math.floor((Date.UTC(y, date.getUTCMonth(), date.getUTCDate()) - Date.UTC(y, 0, 1)) / 864e5) + 1;
-    var g = 2 * Math.PI / (leap ? 366 : 365) * (doy - 1 + 0.5);                                 // fractional year (NOAA), at midday
-    var decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g)
-             - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);                         // solar declination, radians (NOAA)
-    var lat = LAT * Math.PI / 180, z = 90.833 * Math.PI / 180;                                 // NOAA sunrise zenith (refraction + disc)
-    var c = Math.cos(z) / (Math.cos(lat) * Math.cos(decl)) - Math.tan(lat) * Math.tan(decl);
-    return 2 * Math.acos(Math.max(-1, Math.min(1, c))) * 180 / Math.PI / 15;                     // hours
+  // ---------- Dial 3: season pump (js/season-pumps.js, the Season pumps standard), background layers only ----------
+  var SP = root.SeasonPumps || null, seasonV = { warm: 0, calm: 0, k: 0 }, warmEl = null, layerEl = null;
+  function rgb(s) { s = String(s || ""); if (/rgba?\(/.test(s) && !/,\s*0\)$/.test(s)) { var m = s.match(/[\d.]+/g); return [+m[0], +m[1], +m[2]]; } return null; }
+  function pageColours() {               // the page's own background and text colour, measured on the screen, for the WCAG floor
+    var bg = null, els = [layerEl, doc.body, doc.documentElement];
+    for (var i = 0; i < els.length && !bg; i++) if (els[i] && els[i].nodeType) bg = rgb(getComputedStyle(els[i]).backgroundColor);
+    return { bg: bg || SP.WHITE, fg: doc.body ? rgb(getComputedStyle(doc.body).color) : null };
   }
-  var seasonR = null;
   function season() {
-    if (seasonR != null) return seasonR;
-    var now = new Date(), y = now.getUTCFullYear(), lo = 99, hi = 0;
-    for (var t = Date.UTC(y, 0, 1); t < Date.UTC(y + 1, 0, 1); t += 864e5) { var h = dayLength(new Date(t)); if (h < lo) lo = h; if (h > hi) hi = h; }
-    var d = dayLength(now); seasonR = hi > lo ? (d - lo) / (hi - lo) : 0;
-    return seasonR;
+    if (!SP) return { warm: 0, calm: 0, k: 0 };
+    var now = new Date(), base = shown.season || 0, pc = pageColours();
+    return SP.wcagFloor(pc.bg, pc.fg, SP.output("warmth", base, now), SP.output("calm", base, now), CLOSED);
   }
-  var warmEl = null;
   function paintSeason() {
-    var w = +(shown.season * season()).toFixed(4), first = !warmEl;
+    var v = season(), first = !warmEl; seasonV = v;
     if (first) {
-      var sel = SCRIPT && SCRIPT.getAttribute("data-warm"), st = doc.createElement("style");
-      var tr = "transition:filter " + Math.pow(PHI, 5).toFixed(2) + "s linear,-webkit-backdrop-filter " + Math.pow(PHI, 5).toFixed(2) + "s linear,backdrop-filter " + Math.pow(PHI, 5).toFixed(2) + "s linear";
-      if (sel) { st.textContent = sel + "{filter:sepia(var(--phi-season-warm,0));" + tr + "}"; warmEl = doc.querySelector(sel) || true; }
+      var sel = SCRIPT && SCRIPT.getAttribute("data-warm"), st = doc.createElement("style"), f = "sepia(var(--phi-season-warm,0)) saturate(var(--phi-season-sat,1))";
+      var tr = "transition:filter " + Math.pow(PHI, 5) + "s linear,-webkit-backdrop-filter " + Math.pow(PHI, 5) + "s linear,backdrop-filter " + Math.pow(PHI, 5) + "s linear";
+      if (sel) { st.textContent = sel + "{filter:" + f + ";" + tr + "}"; layerEl = doc.querySelector(sel); warmEl = layerEl || true; }
       else {     // no background layer of its own (Rebella): a backdrop layer behind the content
-        st.textContent = ".phi-season{position:fixed;inset:0;z-index:-1;pointer-events:none;-webkit-backdrop-filter:sepia(var(--phi-season-warm,0));backdrop-filter:sepia(var(--phi-season-warm,0));" + tr + "}";
-        warmEl = doc.createElement("div"); warmEl.className = "phi-season"; warmEl.setAttribute("aria-hidden", "true"); doc.body.insertBefore(warmEl, doc.body.firstChild);
+        st.textContent = ".phi-season{position:fixed;inset:0;z-index:-1;pointer-events:none;-webkit-backdrop-filter:" + f + ";backdrop-filter:" + f + ";" + tr + "}";
+        warmEl = layerEl = doc.createElement("div"); warmEl.className = "phi-season"; warmEl.setAttribute("aria-hidden", "true"); doc.body.insertBefore(warmEl, doc.body.firstChild);
       }
       st.setAttribute("data-phi-dials", ""); doc.head.appendChild(st);
     }
-    var set = function () { doc.documentElement.style.setProperty("--phi-season-warm", String(w)); };
-    if (first) setTimeout(set, Math.round(1000 * IP)); else set();   // first paint at 0, then the slow transition: no snap
+    var set = function () { var s = doc.documentElement.style;
+      s.setProperty("--phi-season-warm", String(v.warm)); s.setProperty("--phi-season-sat", String(1 - v.calm)); };
+    if (first) setTimeout(set, Math.round(MS * IP)); else set();   // first paint at 0, then the slow transition: no snap
   }
+  // the sky clocks move on their own: re-read every PHI^8 s while visible (reduced motion: only when she comes back to the page)
+  setInterval(function () { if (!doc.hidden && !RM.matches && warmEl) paintSeason(); }, Math.round(MS * Math.pow(PHI, 8)));
+  doc.addEventListener("visibilitychange", function () { if (!doc.hidden && warmEl) paintSeason(); });
 
   // ---------- the loop: this visit's own usage -> dials + level reading ----------
   var visStart = doc.hidden ? 0 : Date.now(), visMs = 0, start = PA.snapshot(), checked = false, ended = false;
@@ -138,7 +139,7 @@
     ids.forEach(function (id) { n += ses[id].o + ses[id].t; });
     // Dial 2: pace (once per visit)
     if (!checked) {
-      var V = visible() / 1000;
+      var V = visible() / MS;
       if (n >= Math.pow(PHI, 3) && V >= Math.pow(PHI, 6)) {
         checked = true; var rate = n / V;
         if (X.pace == null) X.pace = rate;
@@ -171,7 +172,7 @@
   function onHide() { if (doc.hidden) { if (visStart) { visMs += Date.now() - visStart; visStart = 0; } if (!ended) { ended = true; evaluate(true); } } else visStart = Date.now(); }
   doc.addEventListener("visibilitychange", onHide);
   root.addEventListener("pagehide", function () { if (!ended) { ended = true; if (visStart) { visMs += Date.now() - visStart; visStart = 0; } evaluate(true); } });
-  var mid = setInterval(function () { if (checked || ended) return clearInterval(mid); if (!doc.hidden) evaluate(false); }, Math.round(1000 * Math.pow(PHI, 8)));
+  var mid = setInterval(function () { if (checked || ended) return clearInterval(mid); if (!doc.hidden) evaluate(false); }, Math.round(MS * Math.pow(PHI, 8)));
 
   // passes the information filter share into phi-adapt (live event -> profile)
   PA.onPass(function (id) { return val(cur("filter:" + id)); });
@@ -179,7 +180,9 @@
 
   root.PhiDials = { RUNGS: RUNGS, SPEC: JSON.parse(JSON.stringify(SPEC)), gate: "off",
     pos: function (id) { return cur(id); }, value: function (id) { return val(cur(id)); }, live: function (id) { return shown[id]; },
-    level: function () { return JSON.parse(JSON.stringify(X.lvl)); }, season: function () { return { ratio: +season().toFixed(4), hours: +dayLength(new Date()).toFixed(3), warmth: shown.season * season() }; },
+    level: function () { return JSON.parse(JSON.stringify(X.lvl)); }, season: function () { var c = SP ? SP.clocks() : null; return c ? { ratio: c.dayRatio, hours: c.dayHours,
+      sunHeight: c.sunHeight, rest: c.rest, warmth: seasonV.warm, calm: seasonV.calm, floorSteps: seasonV.k,
+      pumps: c.pumps, note: c.asserted } : { ratio: 0, hours: 0, warmth: 0, calm: 0, note: "season-pumps.js not loaded" }; },
     log: function () { return X.log.slice(); }, proposals: function () { return X.prop.slice(); },
     nudge: function (id, dir) { return move(id, dir, "manual check"); }, rollback: rollback };
 })();

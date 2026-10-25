@@ -137,11 +137,13 @@
     else if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", go); else go();
   }
   // Kids Club golden-ratio dials (Danny's go t816u 25 Oct 2026): at idle, load the shared usage record (js/phi-adapt.js) and the dials
-  // (js/phi-dials.js) from this script's own folder. Two same-origin static files, nothing else; data-dials="off" on this tag skips them.
+  // (js/phi-dials.js) from this script's own folder, with js/season-pumps.js (sky clocks for Dial 3) before the dials. Three same-origin
+  // static files, nothing else; data-dials="off" on this tag skips them all.
   if (doc && SCRIPT && SCRIPT.getAttribute("data-dials") !== "off" && SCRIPT.src) {
     var base = SCRIPT.src.replace(/[^\/]*$/, ""), ric2 = root.requestIdleCallback || function (f) { return setTimeout(f, 618); };
     var add = function (src, then) { var s = doc.createElement("script"); s.src = base + src; s.async = true; if (then) s.onload = then; doc.head.appendChild(s); };
-    var dials = function () { ric2(function () { if (root.PhiAdapt) add("phi-dials.js?v=1"); else add("phi-adapt.js?v=2", function () { add("phi-dials.js?v=1"); }); }, { timeout: 4236 }); };
+    var rest = function () { add("season-pumps.js?v=1", function () { add("phi-dials.js?v=2"); }); };   // Season pumps standard: sky clocks for Dial 3, then the dials
+    var dials = function () { ric2(function () { if (root.PhiAdapt) rest(); else add("phi-adapt.js?v=2", rest); }, { timeout: 4236 }); };
     if (doc.readyState === "complete") dials(); else root.addEventListener("load", dials);
   }
   if (typeof module !== "undefined") module.exports = api;
