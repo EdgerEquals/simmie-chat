@@ -2,6 +2,7 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
+<script>try{if(localStorage.getItem("dadQuizTheme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script><!-- light theme before first paint (Danny t0u 25 Oct; switch = footer tty satellite, js/quiz-theme.js) -->
 <script id="phi-timing">
 /* PHI TIMING (shared module; same file on every Bonnie site/preview).
    Standing rules: /home/box/.config/phi-timing-rules.md (set by Danny, 2026-10-23). Summary, follow it in future builds:
@@ -489,6 +490,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="css/quiz-popups.css?v=1"><!-- pop-up panels for every tappable item in the page chrome (Danny t660u 13:43 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-tty-detail.css?v=1"><!-- Simmie tty detail back: bright dots, amber timestamps, dashed teal top rule, amber AWST · AGE (Danny 25 Oct 12:26 AWST) -->
 <link rel="stylesheet" href="css/dad-mark-zoom.css?v=4"><link rel="stylesheet" href="css/dad-mark-waves.css?v=1"><!-- radiating, reflecting waves around Dad's mark (Danny t719u) --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<link rel="stylesheet" href="css/quiz-light.css?v=1"><!-- light theme + footer theme switch (Danny t0u 25 Oct); every light rule is scoped to html[data-theme="light"] -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp" data-src-webm="media/space-loop.webm" data-src-mp4="media/space-loop.mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -576,7 +578,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     <span class="ro" id="ro" aria-hidden="true"></span>
   </div></div>
   <div class="tty" id="tty">
-    <div class="ttybar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span class="tt" aria-hidden="true"></span><span class="sat" aria-hidden="true">&#x1F6F0;&#xFE0F;</span></div><!-- t709u: dots -> live bar graphs + rolling readout, title text removed (js/quiz-tty2.js) -->
+    <div class="ttybar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span class="tt" aria-hidden="true"></span></div><button type="button" class="thm" id="thm" aria-pressed="false" aria-label="Light theme" title="Switch to light theme"><span class="sat" aria-hidden="true">&#x1F6F0;&#xFE0F;</span><i class="thm-o" aria-hidden="true"></i></button><!-- theme switch: the satellite moved out of the bar into its own button (Danny t0u) --><!-- t709u: dots -> live bar graphs + rolling readout, title text removed (js/quiz-tty2.js) -->
     <div class="ttybody">
       <span class="simmie" data-simmie id="footSimmie"></span>
       <div class="ttyl">
@@ -1057,5 +1059,6 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
 <script src="js/dad-mark-zoom.js?v=8" defer></script><script>(function(){var i=document.querySelector(".q-head .dad-mark[data-zoom-src]");if(i&&window.LoadTiers)LoadTiers.prefetch(i.getAttribute("data-zoom-src"));if(i.getAttribute("data-zoom-stage"))LoadTiers.prefetch(i.getAttribute("data-zoom-stage"));LoadTiers.script("js/eq-physics.js?v=2",3);})();</script><!-- tier 3: detailed zoom mark prefetched at idle --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 <link rel="stylesheet" href="css/quiz-tty2.css?v=3"><!-- tty redesign 2 (Danny t709u 25 Oct 13:11 AWST): live bar graphs, deeper granular palette, rising lines, rain; foot line 2x + bounce -->
 <script src="js/quiz-tty2.js?v=3" defer></script>
+<script src="js/quiz-theme.js?v=1" defer></script><!-- light/dark switch, tier 1 (Danny t0u 25 Oct) -->
 </body>
 </html>
