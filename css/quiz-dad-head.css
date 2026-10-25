@@ -207,3 +207,10 @@ textarea:focus-visible{border-color:#0AF2FF;outline-color:#0AF2FF!important}
 .q-head .qh-logo{height:52px;width:105px;transform:translateY(14px) rotate(-5.5deg)}
 @media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{height:42px;width:85px;transform:translateY(12px) rotate(-5.5deg)}}
 @media(max-width:480px){.q-head .qh-logo{height:42px;width:85px;transform:translateY(12px) rotate(-5.5deg)}}
+/* Rebella logo fills the top bar evenly (Danny t696u/t698u 12:30 AWST 25 Oct, Dad's palette = questionnaire only): moved up so the middle of
+   the sweep sits inside the bar, and enlarged until the gap from the bar's top line to the top of the writing equals the gap from the bottom
+   of the sweep to the bar's bottom line (2px each, measured from the rendered ink). Only the tip of the R's leg dips just past the line.
+   Desktop x1.034 (52 -> ~53.8px drawn), phones x1.103 (42 -> ~46.3px); left edge unchanged; -5.5deg kept; layout box and bar height unchanged. */
+.q-head .qh-logo{transform:translate(1.6px,-1.8px) rotate(-5.5deg) scale(1.0337)}
+@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{transform:translate(0,-1.3px) rotate(-5.5deg)}}
+@media(max-width:480px){.q-head .qh-logo{transform:translate(4px,-1.5px) rotate(-5.5deg) scale(1.1034)}}
