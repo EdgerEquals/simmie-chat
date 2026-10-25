@@ -31,7 +31,7 @@
              "nucleus":{"m":4,"q":1.2,"r":2.1},"electron":{"m":1,"q":-1,"r":0.85},"perBar":{"nuclei":[-6.4,6.4],"electrons":[-11.6,11.6]},
              "kick":16,"kq":40,"soft":1.2,"B":1.6,"gamma0":0.25,"gamma1":5,"kHome":30,"Rp":19,"e":0.92},
     "bars":{"w":25.6,"h":6.4,"y":[-4.4,4.4]},
-    "waves":{"on":false,"R0":30,"ratio":2.0,"speed":34,"alpha":0.012,"Rc":0.45,"diffuse":2.6,"reflections":2,"a0":0.9,"peakA":0.55}
+    "waves":{"on":true,"R0":30,"ratio":2.0,"speed":34,"alpha":0.012,"Rc":0.45,"diffuse":2.6,"reflections":2,"a0":0.9,"peakA":0.55}
   };
   /*PARAMS-END*/
   function rng(seed){var a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}

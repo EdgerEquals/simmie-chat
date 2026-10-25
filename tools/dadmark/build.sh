@@ -5,3 +5,4 @@ node tools/gen-eq-keyframes.js > /tmp/eqk.json
 python3 tools/dadmark/gen-head.py "dash/img/dad-mark-v2-head-$1.svg" emerald /tmp/eqk.json
 python3 tools/dadmark/gen4.py "dash/img/dad-mark-v2-$1.svg" /tmp/eqk.json
 python3 tools/dadmark/gen4.py "dash/img/dad-mark-v2-stage-$1.svg" nobars /tmp/eqk.json
+python3 tools/dadmark/gen-waves-css.py /tmp/eqk.json css/dad-mark-waves.css
