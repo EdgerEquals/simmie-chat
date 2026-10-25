@@ -214,3 +214,9 @@ textarea:focus-visible{border-color:#0AF2FF;outline-color:#0AF2FF!important}
 .q-head .qh-logo{transform:translate(1.6px,-1.8px) rotate(-5.5deg) scale(1.0337)}
 @media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{transform:translate(0,-1.3px) rotate(-5.5deg)}}
 @media(max-width:480px){.q-head .qh-logo{transform:translate(4px,-1.5px) rotate(-5.5deg) scale(1.1034)}}
+/* Bigger again + the R's swish dips below the bar (Danny t700u 12:43 AWST 25 Oct, questionnaire only): ~1.13x the 6be2e1e size; ink top keeps
+   its 2px gap under the bar's top line, letter bodies stay in the bar, and the lowest point of the sweep now sits between the bar's bottom
+   border and the status row below it. Left ink edge, -5.5deg, colour and layout box unchanged (transform only, header height unchanged). */
+.q-head .qh-logo{transform:translate(7.76px,.87px) rotate(-5.5deg) scale(1.155)}
+@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{transform:translate(5.88px,1.24px) rotate(-5.5deg) scale(1.152)}}
+@media(max-width:480px){.q-head .qh-logo{transform:translate(9.7px,.86px) rotate(-5.5deg) scale(1.2495)}}
