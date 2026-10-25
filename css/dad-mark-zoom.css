@@ -35,7 +35,7 @@
   filter:drop-shadow(0 0 1px #F8CFDB) drop-shadow(0 0 6px rgba(229,138,166,.85)) drop-shadow(0 0 16px rgba(229,138,166,.45))}
 /* Clearer letter loops in the enlarged view (Danny t710u 13:14 AWST 25 Oct): the 6px/16px drop-shadows were filling the black insides
    of the e, b, a and other loops. The glow is now an SVG filter (#rbz-glow, added by js/dad-mark-zoom.js): a tight 1-2px pale rim plus the
-   wide pink halo, with the halo cut out of a soft filled-in letter shape (blurred + thresholded alpha), so it only shines outward and the loops stay black.
+   wide pink halo, and (t720u) a black copy of the small letter holes drawn between the glow and the logo, so the holes stay black and full size.
    Size, position, tilt and colour unchanged. */
 .dmz--rebella svg{filter:none}
 @media (prefers-reduced-motion:reduce){.q-head .rb-zoom .qh-logo{transition:none}}

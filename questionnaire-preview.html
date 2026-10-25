@@ -488,7 +488,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="css/quiz-front-orbit.css?v=c55ddc97"><!-- front orbit emojis over the greeting + scroll fade of both orbit layers (Danny 13:22-13:24 AWST 24 Oct, t641u-t644u) -->
 <link rel="stylesheet" href="css/quiz-popups.css?v=1"><!-- pop-up panels for every tappable item in the page chrome (Danny t660u 13:43 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-tty-detail.css?v=1"><!-- Simmie tty detail back: bright dots, amber timestamps, dashed teal top rule, amber AWST · AGE (Danny 25 Oct 12:26 AWST) -->
-<link rel="stylesheet" href="css/dad-mark-zoom.css?v=3"><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<link rel="stylesheet" href="css/dad-mark-zoom.css?v=4"><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp" data-src-webm="media/space-loop.webm" data-src-mp4="media/space-loop.mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -503,7 +503,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
      Replaces Dad's-palette header 53b7cda (restore from that commit: header.dad-head, dad-head-quiz.css). -->
 <div class="q-head dad-head" id="q-head">
   <div class="qh-top"><div class="qh-c">
-    <button type="button" class="rb-zoom" data-zoom="rebella" data-zoom-title="Rebella logo" aria-label="Enlarge Rebella logo" aria-haspopup="dialog"><svg class="qh-logo" viewBox="413 534 1810 893" width="97" height="38" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Rebella" focusable="false"><use href="img/bonnies-logo-2026-10-24b.svg?v=20261024b#bonnies-logo"/></svg></button>
+    <button type="button" class="rb-zoom" data-zoom="rebella" data-zoom-title="Rebella logo" aria-label="Enlarge Rebella logo" aria-haspopup="dialog"><svg class="qh-logo" viewBox="413 534 1810 893" width="97" height="38" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Rebella" focusable="false"><use href="img/bonnies-logo-2026-10-24b.svg?v=20261025holes#bonnies-logo"/></svg></button>
     <span class="qh-right"><button type="button" class="dj-pill" id="dj-pill" aria-expanded="false" aria-controls="qh-djpop" aria-haspopup="dialog"><span class="djp-led" aria-hidden="true"></span><span class="djp-lbl">Dad&rsquo;s DJ</span><span class="djp-car" aria-hidden="true">&#9662;</span></button><button type="button" class="beacon chk" id="beacon" aria-live="polite" title="Rebella status"><i aria-hidden="true"></i><span class="bn">REBELLA &middot; </span><span class="bs">CHECKING</span></button></span>
   </div></div>
   <div class="qh-hud"><div class="qh-c">
@@ -1054,7 +1054,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
 <script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth", rate:2, bounce:true}); });</script>
 <script src="js/quiz-popups.js?v=6" defer></script>
 <script>LoadTiers.script("js/matrix-rain.js?v=1",2)</script><!-- matrix rain background, tier 2 idle (Danny t713u 25 Oct) -->
-<script src="js/dad-mark-zoom.js?v=4" defer></script><script>(function(){var i=document.querySelector(".q-head .dad-mark[data-zoom-src]");if(i&&window.LoadTiers)LoadTiers.prefetch(i.getAttribute("data-zoom-src"));})();</script><!-- tier 3: detailed zoom mark prefetched at idle --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<script src="js/dad-mark-zoom.js?v=5" defer></script><script>(function(){var i=document.querySelector(".q-head .dad-mark[data-zoom-src]");if(i&&window.LoadTiers)LoadTiers.prefetch(i.getAttribute("data-zoom-src"));})();</script><!-- tier 3: detailed zoom mark prefetched at idle --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 <link rel="stylesheet" href="css/quiz-tty2.css?v=2"><!-- tty redesign 2 (Danny t709u 25 Oct 13:11 AWST): live bar graphs, deeper granular palette, rising lines, rain; foot line 2x + bounce -->
 <script src="js/quiz-tty2.js?v=2" defer></script>
 </body>

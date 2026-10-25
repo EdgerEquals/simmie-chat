@@ -16,16 +16,19 @@
   document.body.appendChild(ov);
   var fig=ov.querySelector('.dmz-fig'),x=ov.querySelector('.dmz-x'),cur=null,t=null;
   function srcEl(b){return b.querySelector('img,svg');}
-  // Rebella neon (Danny t710u): rim + halo, both cut out of a soft 'filled-in' letter shape (blurred alpha, thresholded, eroded back to the letter edge) so the loops stay black. Units = logo viewBox (1810 wide).
+  // Rebella neon (Danny t710u): rim + halo behind, small letter holes painted black on top of the glow, then the logo. Units = logo viewBox (1810 wide).
   var NS='http://www.w3.org/2000/svg';
   function glow(svg){var u=svg.querySelector('use');if(!u)return;var d=document.createElementNS(NS,'defs');
+    // Layers (Danny t720u): [glow only: halo + pale rim] -> [black copy of the small letter holes, #bonnies-logo-holes] -> [the logo itself].
+    // So the e/b/a holes stay black and full size with the same outer neon; the R bowl and heart keep their glow.
     d.innerHTML='<filter id="rbz-glow" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">'+
-      '<feGaussianBlur in="SourceAlpha" stdDeviation="9" result="sb"/><feComponentTransfer in="sb" result="fill"><feFuncA type="linear" slope="5" intercept="-.6"/></feComponentTransfer><feMorphology in="fill" operator="erode" radius="8" result="closed"/>'+
       '<feGaussianBlur in="SourceAlpha" stdDeviation="20" result="b"/><feFlood flood-color="#E58AA6" flood-opacity=".9"/><feComposite in2="b" operator="in" result="halo"/>'+
-      
       '<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="r"/><feFlood flood-color="#F8CFDB" flood-opacity=".8"/><feComposite in2="r" operator="in" result="rim"/>'+
-      '<feMerge result="g"><feMergeNode in="halo"/><feMergeNode in="rim"/></feMerge><feComposite in="g" in2="closed" operator="out" result="gOut"/><feMerge><feMergeNode in="gOut"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
-    svg.insertBefore(d,svg.firstChild);u.setAttribute('filter','url(#rbz-glow)');}
+      '<feMerge><feMergeNode in="halo"/><feMergeNode in="rim"/></feMerge></filter>';
+    svg.insertBefore(d,svg.firstChild);
+    var href=u.getAttribute('href')||u.getAttributeNS('http://www.w3.org/1999/xlink','href')||'';
+    var g=u.cloneNode(false);g.setAttribute('filter','url(#rbz-glow)');svg.insertBefore(g,u);
+    var h=u.cloneNode(false);h.setAttribute('href',href.replace(/#bonnies-logo$/,'#bonnies-logo-holes'));svg.insertBefore(h,u);}
   function build(b){var name=b.getAttribute('data-zoom'),s=srcEl(b),c;
     if(s.tagName.toLowerCase()==='img'){c=document.createElement('img');c.decoding='async';c.src=s.getAttribute('data-zoom-src')||s.src;c.alt=s.getAttribute('data-zoom-alt')||'';}
     else{c=s.cloneNode(true);c.removeAttribute('class');c.removeAttribute('width');c.removeAttribute('height');c.removeAttribute('style');c.setAttribute('preserveAspectRatio','xMidYMid meet');}
