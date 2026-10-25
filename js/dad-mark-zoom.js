@@ -46,7 +46,7 @@
   // it is this module's own context (the auto-DJ is never touched), suspended again PHI^0 s after close.
   // Open/close sounds (Danny t740u 25 Oct: the old G3 chords were "too baby and too scary" -> fairies): a breathy airy whoosh, high-passed
   // noise whose soft band rises 2.8 -> 8.5 kHz on open (with two faint glass sparkles) and falls 7 -> 2.6 kHz on close. No chords, no low end.
-  var AC=null,acT=null,LIFE='js/rebella-zoom-life.js?v=4',lifeLoading=false,NB=null;
+  var AC=null,acT=null,LIFE='js/rebella-zoom-life.js?v=5',lifeLoading=false,NB=null;
   function audio(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;if(!AC)AC=new C();clearTimeout(acT);if(AC.state!=='running')AC.resume();return AC;}catch(e){return null;}}
   function chord(up){if(!AC)return;try{var t=AC.currentTime+0.02,d=up?0.618:0.382;
     if(!NB){var n=Math.floor(AC.sampleRate*0.8);NB=AC.createBuffer(1,n,AC.sampleRate);var c=NB.getChannelData(0);for(var i=0;i<n;i++)c[i]=Math.random()*2-1;}

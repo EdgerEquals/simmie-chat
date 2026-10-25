@@ -5,8 +5,9 @@
    2 STARS    very faint static stars on a small canvas behind the logo, plus 6 highlight stars that twinkle in and out just above the top and
               just below the bottom edge of the lettering (positions read from the letter silhouette). Star k (1..6) repeats every
               PHI^(1.5+k/2) s = 2.62 / 3.33 / 4.24 / 5.39 / 6.85 / 8.72 s, each twinkle PHI^1 s, first at period*frac(k*0.618) (golden angle).
-   3 SOUND    (t746u) a continuous music bed from js/logo-sound.js (the shared logo sound engine, trap <-> ethereal-organic ladder, loaded
-              lazily on the first open; the bird's star-drop and each shimmer fire its 'star-drop' / 'shimmer' hooks = +0.236 nudge). On top:
+   3 SOUND    (t746u, MIDI rebuild 15:11 AWST) a continuous music bed from js/logo-sound.js v=2 (shared logo engine: a MIDI sequencer on the
+              phi grid + ladder, rendered by self-hosted Tone.js like Rebella's Music Playground; root, loudness and pumps come from the
+              page via PhiPumps subscriptions; loaded lazily on the first open; the bird's star-drop and each shimmer fire its 'star-drop' / 'shimmer' hooks = +0.236 nudge). On top:
               Fairy palette (Danny t740u 14:2x AWST 25 Oct: the music-box tones were "too baby and too scary"): Web Audio synthesis only, no
               files, no tones below ~1.3 kHz, no drone. Each shimmer = a breathy high-passed air swish (3 -> 8 kHz) with one or two faint glassy
               sparkles; star k = one tiny glass sparkle (bright E-major-pentatonic partials in the E6-E7 octave, 4 ms attack, ~0.3 s decay,
@@ -19,6 +20,14 @@
               6.85 beats/s = PHI^4, gentle PHI^1 s bob, soft wing-flutter sound and a little chirp), hovers over the top of a letter (1.236 s) and leaves
               the star it carries in its beak (dust burst, glass chime, happy chirp, logo glow brightens), then flies off out of frame
               (2.544 s). Reduced motion: no flight, just the soft sparkle in place with the chime.
+   5b VIEWS   (Danny 15:24) the bluebird (and the wagtail) have side-on, 30 deg and 60 deg turned views, mirrored left/right: body
+              foreshortened, far wing partly hidden, breast and eye more visible, far eye peeking in at 60. Chosen by each bird's own VIEW
+              PUMP (see ViewPump below: PHI^3 + PHI^4 modes, PHI^6 depth pump, child of the logo node, biased by turn rate; one step at a
+              time, held >= PHI^0.5 s, 0.236 s morph, hysteresis 0.146, frozen during the star-drop hover; reduced motion: side-on).
+              Bluebird reference data (js/bird-ref-data.js, documented exception): ~79.5% perch-then-drop approach arcs, low flight, fast
+              irregular wingbeats (Pennycuick estimate x PHI^-1, +-14.6% per beat), each value x its own pump.
+   9 WAGTAIL  (Danny 15:25) an original Willie wagtail perches on a letter, wags, preens, hops, hawks insects and leaves; behaviour from
+              real field data, pumped (see section 9 below).
    6 COMPANIONS tiny butterflies and small songbirds (no birds of prey) drift through the dawn sky behind the tile (see section 6 below).
    7 DAWN SKY  a calm background loop behind the tile: horizon glow, aurora veils, rising bokeh motes (see section 7 below).
    The small header logo gets only a faint glow drift (css/rebella-glow-lite.css, tier 3), never creatures.
@@ -77,9 +86,10 @@
   function toFig(ux,uy){var a=st.art,W=a.offsetWidth,H=a.offsetHeight,s=Math.min(W/VB[2],H/VB[3]),x=(ux-VB[0])*s+(W-VB[2]*s)/2-W/2,y=(uy-VB[1])*s+(H-VB[3]*s)/2-H/2,r=-5.5*Math.PI/180;
     return [a.offsetLeft+W/2+x*Math.cos(r)-y*Math.sin(r),a.offsetTop+H/2+x*Math.sin(r)+y*Math.cos(r),s];}
   function snd(name){try{st&&st.snd&&st.snd.event(name);}catch(e){}}
-  var SND='js/logo-sound.js?v=1',sndLoading=null;
+  var SND='js/logo-sound.js?v=2',sndLoading=null;
   function music(){if(!st||!st.ac||!st.out)return;var me=st;
-    function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{root:41.2034,events:{'star-drop':0.236,'shimmer':0.236},gain:0.5});}catch(e){}}
+    function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{logo:'rebella-logo',events:{'star-drop':0.236,'shimmer':0.236},
+      subscribe:['pump:page','daytime','tide','moon','ratio-pump','clock','component:theme','phi-adapt:rebella-logo']});/* rule 10: the logo listens to the page */}catch(e){}}
     if(window.LogoSound)return go();if(!sndLoading)sndLoading=new Promise(function(res){var sc=document.createElement('script');sc.src=SND;sc.async=true;sc.onload=sc.onerror=res;document.head.appendChild(sc);});sndLoading.then(go);}
   function shimmer(){if(!st.sheen)return;snd('shimmer');var dur=P(1);anim(st.sheen,[{transform:'translateX(0px)'},{transform:'translateX('+(VB[2]+900)+'px)'}],{duration:dur,easing:'cubic-bezier(.45,.05,.35,1)'});
     swish(dur/1000);later(shimmer,P(4));}
@@ -96,25 +106,31 @@
   function eio(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
   function star4(x,c,r){x.beginPath();x.moveTo(0,-r);x.quadraticCurveTo(0,0,r,0);x.quadraticCurveTo(0,0,0,r);x.quadraticCurveTo(0,0,-r,0);x.quadraticCurveTo(0,0,0,-r);x.fillStyle=c;x.fill();}
   // bird in local units (~28 wide, beak to +x). face: +1 right / -1 left. flap: wing phase (rad). wing<0 = folded (glide). a: alpha. pal: 0 bluebird, 1 small songbird
-  function drawBird(x,face,px,py,tilt,flap,sz,carry,a,pal,aura){x.save();x.translate(px,py);x.rotate(tilt);x.scale(sz*face,sz);x.globalAlpha=a==null?1:a;
+  // yaw (Danny 15:24): 0 = side-on (the original view), 30 / 60 = turned toward the viewer: body foreshortened (x 0.55 + 0.45 cos yaw), far wing
+  // smaller, paler and tucked behind the body, near wing a little lower and forward, pale breast and eye more visible, far eye peeks in at 60.
+  function drawBird(x,face,px,py,tilt,flap,sz,carry,a,pal,aura,yaw){var ba=a==null?1:a,yw=(yaw||0)*Math.PI/180,cy=Math.cos(yw),sy=Math.sin(yw);
+    x.save();x.translate(px,py);x.rotate(tilt);x.scale(sz*face,sz);x.globalAlpha=ba;
     var back=pal?'#85A6BB':'#1F5478',deep=pal?'#1F5478':'#143A57',belly=pal?'#DCEAF2':'#C9DEEA',head=pal?'#9DBCCE':'#1F5478';
     if(aura){x.globalCompositeOperation='lighter';var g=x.createRadialGradient(0,0,0,0,0,26);g.addColorStop(0,'rgba(10,242,255,.30)');g.addColorStop(.4,'rgba(10,242,255,.10)');g.addColorStop(1,'rgba(10,242,255,0)');
       x.fillStyle=g;x.beginPath();x.arc(0,0,26,0,6.2832);x.fill();x.globalCompositeOperation='source-over';}
     var w=flap==null?0:Math.sin(flap);                                           // wing: +1 up, -1 down
-    // far wing (behind the body)
-    x.save();x.translate(-1,-2.2);x.scale(1,flap==null?0.35:-0.9*w);x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(-4,-9,-11,-8.5);x.quadraticCurveTo(-6,-3,0,0);x.fillStyle=deep;x.fill();x.restore();
+    x.scale(0.55+0.45*cy,1);                                                       // turned views: foreshortened
+    // far wing (behind the body; partly hidden when turned)
+    x.save();x.globalAlpha=ba*(1-0.55*sy);x.translate(-1+2*sy,-2.2);x.scale(1-0.45*sy,(flap==null?0.35:-0.9*w)*(1-0.3*sy));x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(-4,-9,-11,-8.5);x.quadraticCurveTo(-6,-3,0,0);x.fillStyle=deep;x.fill();x.restore();x.globalAlpha=ba;
     // tail
     x.beginPath();x.moveTo(-6,-0.6);x.lineTo(-14.5,-3.4);x.quadraticCurveTo(-13,-0.6,-14.5,2.2);x.lineTo(-6,1.6);x.closePath();x.fillStyle=deep;x.fill();
     // body: blue back to pale belly
     var b=x.createLinearGradient(0,-5.5,0,5.5);b.addColorStop(0,back);b.addColorStop(.55,pal?'#9DBCCE':'#85A6BB');b.addColorStop(1,belly);
     x.beginPath();x.ellipse(0,0.4,8.2,5.4,-0.08,0,6.2832);x.fillStyle=b;x.fill();
+    if(sy>0.01){x.globalAlpha=ba*(0.25+0.75*sy);x.beginPath();x.ellipse(3.4+0.6*sy,1.8,2.4+3*sy,2.4+1.3*sy,0.2,0,6.2832);x.fillStyle=belly;x.fill();x.globalAlpha=ba;}   // breast toward the viewer
     // head + eye + beak
     x.beginPath();x.arc(6.6,-3.2,4.1,0,6.2832);x.fillStyle=head;x.fill();
     x.beginPath();x.arc(7.4,-1.6,2.2,0,6.2832);x.fillStyle=pal?'#DCEAF2':'#9DBCCE';x.fill();             // soft cheek
-    x.beginPath();x.arc(8,-3.9,1.05,0,6.2832);x.fillStyle='#F4FBFF';x.fill();x.beginPath();x.arc(8.3,-3.9,0.6,0,6.2832);x.fillStyle='#071A28';x.fill();
+    var er=1+0.3*sy,ex=8+0.6*sy;x.beginPath();x.arc(ex,-3.9,1.05*er,0,6.2832);x.fillStyle='#F4FBFF';x.fill();x.beginPath();x.arc(ex+0.3,-3.9,0.6*er,0,6.2832);x.fillStyle='#071A28';x.fill();
+    if(sy>0.6){x.globalAlpha=ba*Math.min(1,(sy-0.6)*2.5);x.beginPath();x.arc(9.9,-3.6,0.62,0,6.2832);x.fillStyle='#F4FBFF';x.fill();x.beginPath();x.arc(10,-3.6,0.38,0,6.2832);x.fillStyle='#071A28';x.fill();x.globalAlpha=ba;}   // far eye
     x.beginPath();x.moveTo(10.3,-3.5);x.lineTo(13.4,-2.6);x.lineTo(10.3,-1.8);x.closePath();x.fillStyle='#E7DDBF';x.fill();
     // near wing (in front), cyan glint on its edge
-    x.save();x.translate(-0.5,-1.6);x.scale(1,flap==null?0.4:w);x.beginPath();x.moveTo(1.5,0);x.quadraticCurveTo(-3,-10,-12,-9.5);x.quadraticCurveTo(-6.5,-2.6,1.5,0);
+    x.save();x.translate(-0.5+1.2*sy,-1.6+0.8*sy);x.scale(1,flap==null?0.4:w);x.beginPath();x.moveTo(1.5,0);x.quadraticCurveTo(-3,-10,-12,-9.5);x.quadraticCurveTo(-6.5,-2.6,1.5,0);
     x.fillStyle=back;x.fill();x.lineWidth=0.6;x.strokeStyle='rgba(10,242,255,.7)';x.stroke();x.restore();
     if(!pal){x.globalCompositeOperation='lighter';x.beginPath();x.arc(5.6,-5.4,0.9,0,6.2832);x.fillStyle='rgba(10,242,255,.55)';x.fill();x.globalCompositeOperation='source-over';}   // crown glint
     if(carry){x.save();x.translate(14.6,-2.4);x.rotate((flap||0)*0.08);x.globalCompositeOperation='lighter';star4(x,'rgba(10,242,255,.5)',4.4);star4(x,'#E9FDFF',2.7);x.restore();}
@@ -124,6 +140,36 @@
       os.frequency.setValueAtTime(f,t+dt);os.frequency.exponentialRampToValueAtTime(f*(i?1.27:1.5),t+dt+0.06);
       g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(0.008,t+dt+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dt+0.085);
       os.connect(g);g.connect(d);os.start(t+dt);os.stop(t+dt+0.12);});}
+  // ---- PUMPS for the birds (Danny 15:24 / 15:25): every bird pump is a child of the shared Rebella logo node (PhiPumps.logo), itself a
+  // child of the page root, so scaling the page or the logo scales the birds too. Without PhiPumps: a local stub node with the same maths.
+  function pnow(){return (window.performance?performance.now():Date.now())/1000;}
+  function pumpParent(){try{if(window.PhiPumps&&PhiPumps.logo)return PhiPumps.logo('rebella-logo');}catch(e){}return null;}
+  var pseed=40;
+  function pnode(name,n,k0,depth,parent){pseed++;if(window.PhiPumps&&PhiPumps.node)return PhiPumps.node(name,n,k0,depth,parent===undefined?pumpParent():parent,pseed);
+    var P=[],ph=[],sd=pseed;for(var j=0;j<n;j++){P.push(Math.pow(PHI,k0+j/2));ph.push(2*Math.PI*(((j+1+sd)*G)%1));}
+    return {out:function(t){if(t==null)t=pnow();var s=0;for(var j=0;j<n;j++)s+=Math.sin(2*Math.PI*t/P[j]+ph[j]);return (parent?parent.out(t):1)*(1+depth*s/n);}};}
+  // ---- VIEW PUMP (Danny 15:24): which of the side-on (0), 30 deg and 60 deg turned views a bird shows. Its own branch (child of the logo
+  // node, separate from the flight motion): v = 0.5 + 0.5 x D x [sin(2 pi t/PHI^3 + a) + sin(2 pi t/PHI^4 + b)]/2, depth pump
+  // D = 0.618 + 0.382 x (0.5 + 0.5 sin(2 pi t/PHI^6 + c)), times the logo node's output. Target = 0.382 v + 0.618 x turn, where turn is the
+  // bird's smoothed turn rate (|d heading/dt| / 2.618 rad/s, 0..1, low-passed over 0.382 s): turning eases it toward 60 deg, straight
+  // flight back toward side-on. Thresholds 1/3 and 2/3 with hysteresis 0.146 (+-0.073); it steps ONE view at a time (0 <-> 30 <-> 60),
+  // holds each view at least PHI^0.5 = 1.27 s, morphs over 0.236 s, never changes while frozen (star-drop hover). Reduced motion: side-on.
+  function ViewPump(){var par=pumpParent(),sd=(pseed+=3),a=2*Math.PI*((sd*G)%1),b=2*Math.PI*(((sd+1)*G)%1),c=2*Math.PI*(((sd+2)*G)%1);
+    var k=0,from=0,since=-9,mt=-9,turn=0,lh=null,lt=null;
+    function v(t){var D=0.618+0.382*(0.5+0.5*Math.sin(2*Math.PI*t/Math.pow(PHI,6)+c));
+      return clamp01((0.5+0.5*D*(Math.sin(2*Math.PI*t/Math.pow(PHI,3)+a)+Math.sin(2*Math.PI*t/Math.pow(PHI,4)+b))/2)*(par?par.out(t):1));}
+    return {update:function(t,dx,dy,frozen){
+        if(Math.abs(dx)+Math.abs(dy)>0.3){var h=Math.atan2(dy,Math.abs(dx));if(lh!=null&&lt!=null&&t>lt){var dh=Math.abs(h-lh),r=clamp01(dh/(t-lt)/2.618);turn+=(r-turn)*Math.min(1,(t-lt)/0.382);}lh=h;lt=t;}
+        else{turn*=0.95;lt=t;}
+        if(!RM.matches&&!frozen&&t-since>=1.272){var x=0.382*v(t)+0.618*turn,up=[1/3+0.073,2/3+0.073],dn=[1/3-0.073,2/3-0.073];
+          if(k<2&&x>up[k]){from=k;k++;since=t;mt=t;}else if(k>0&&x<dn[k-1]){from=k;k--;since=t;mt=t;}}
+        if(RM.matches)k=0;
+        var f=clamp01((t-mt)/0.236);f=f*f*(3-2*f);return (from+(k-from)*f)*30;},
+      view:function(){return k*30;}};}
+  function clamp01(x){return x<0?0:x>1?1:x;}
+  function REF(){return window.BirdRef||{wagtail:{budget:{perch:0.54,preen:0.15,hop:0.12,sally:0.104,fly:0.086},wagHz:3,wagSwingDeg:35,dawnHour:6,duskHour:18.5,middayHour:12.5,wagDawnDuskBoost:0.382,flashMiddayBoost:0.382,sally:{twistsPerSally:2},wingbeatHz:8.54},
+    bluebird:{perchDrop:0.795,irregularWingbeat:0.146,wingbeatHz:9.72}};}
+  function loadRef(){if(window.BirdRef||document.getElementById('rbz-birdref'))return;var s=document.createElement('script');s.id='rbz-birdref';s.src='js/bird-ref-data.js?v=1';s.async=true;document.head.appendChild(s);}
   function bird(){if(!st||st.bird)return;var me=st;st.bird={cv:null,raf:0};later(function(){if(me===st)fly(me);},382);}   // PHI^-2: after the zoom has finished scaling up
   function fly(me){var ov=st.fig.parentNode;if(!ov)return;
     var cv=document.createElement('canvas');cv.className='rbz-bird';cv.setAttribute('aria-hidden','true');ov.appendChild(cv);
@@ -134,7 +180,14 @@
     else T=[fr.left-orr.left+fr.width*0.6,fr.top-orr.top+fr.height*0.32];
     // 1.6x the fairy's size (Danny t744u "a bit bigger")
     var side=Math.random()<0.5?-1:1,sz=1.618*Math.max(1,Math.min(1.8,fr.width/480)),fw=fr.width,fh=fr.height,H0=[T[0]-side*2*sz,T[1]-11*sz];
-    var IN=[[side<0?-60:W+60,Math.max(24,fr.top-orr.top-fh*0.2)],[T[0]+side*fw*0.18,T[1]+fh*0.55],[T[0]-side*fw*0.3,T[1]-fh*0.45],H0];
+    // reference data (js/bird-ref-data.js, Pinkowski 1977 etc.), each value x its own pump (children of a 'bluebird' node under the logo node):
+    // ~79.5% of the time it comes in as a perch-then-drop arc (high, then dropping onto the letter), otherwise a low level approach.
+    var R=REF().bluebird,bbN=pnode('bluebird',5,2,0.146),dropN=pnode('bb-drop',2,1,0.146,bbN),beatN=pnode('bb-beat',2,1,0.146,bbN),vp=ViewPump(),yaw=0,yawDx=0,yawDy=0;
+    var drop=Math.random()<clamp01(R.perchDrop*dropN.out());
+    var IN=[[side<0?-60:W+60,Math.max(24,fr.top-orr.top-fh*0.2)],[T[0]+side*fw*0.18,T[1]+fh*0.55],drop?[T[0]-side*fw*0.1,T[1]-fh*0.75]:[T[0]-side*fw*0.3,T[1]-fh*0.12],H0];
+    // wingbeats: Pennycuick estimate (ESTIMATED, ~9.7 Hz) x PHI^-1 (Danny's slowed flight) x pump, each beat +-irregularWingbeat (fast but irregular)
+    var bph=0,bfr=R.wingbeatHz/PHI,lastNow=performance.now();
+    function beatPh(now){var d=(now-lastNow)/1000;lastNow=now;var o=Math.floor(bph);bph+=d*bfr;if(Math.floor(bph)!==o)bfr=R.wingbeatHz/PHI*beatN.out()*(1+(Math.random()*2-1)*R.irregularWingbeat);var f=bph%1;return f<0.72?f*6.2832/0.72:null;}
     var OUT=[H0,[T[0]+side*fw*0.1,T[1]-fh*0.38],[T[0]-side*fw*0.6,T[1]-fh*0.55],[side<0?W+80:-80,Math.max(-50,fr.top-orr.top-fh*0.45)]];
     // Danny t744u: 50% slower = every flight phase twice as long (fairy 1.272 / 0.618 / 1.272 s -> 2.544 / 1.236 / 2.544 s), dust PHI^1
     var D0=0,DIN=2544,DT=1236,DOUT=2544,DUST=1618,t0=performance.now(),parts=[],burst=false,gift=null,lx=IN[0][0],ly=IN[0][1],face=-side,rm=RM.matches,ac=st.ac;
@@ -152,11 +205,11 @@
       air(DOUT/1000,{delay:(D0+DIN+DT)/1000,f0:3000,f1:8000,gain:0.016,peak:0.3,flutter:6.85,pan:[pp(T[0]),-side*0.95]});chirp((DIN+DT)/1000+0.2,pp(T[0]),true);}
     function frame(now){if(me!==st)return;var e=now-t0,dt=1/60,fx=null,fy=null,tilt=0,carry=true,ph=null,k=0;
       if(!rm&&e>=D0){k=e-D0;
-        if(k<DIN){var q=eio(k/DIN),p=bez(IN,q);fx=p[0];fy=p[1];var fl=k/1000*6.85;ph=(fl%1<0.72)?fl*6.2832/0.72:null;}            // wingbeats with short glides
+        if(k<DIN){var q=eio(k/DIN),p=bez(IN,q);fx=p[0];fy=p[1];ph=beatPh(now);}            // wingbeats with short glides
         else if(k<DIN+DT){var h=(k-DIN)/DT;fx=H0[0]+Math.sin(h*Math.PI*2)*2*sz;fy=H0[1]+Math.sin(h*Math.PI)*7*sz;ph=k/1000*6.2832*9;if(h>0.5)carry=false;if(h>=0.5&&!burst)give();}
-        else if(k<DIN+DT+DOUT){var o=(k-DIN-DT)/DOUT,p2=bez(OUT,o*o*(1.6-0.6*o));fx=p2[0];fy=p2[1];carry=false;var fl2=k/1000*6.85;ph=(fl2%1<0.72)?fl2*6.2832/0.72:null;}
+        else if(k<DIN+DT+DOUT){var o=(k-DIN-DT)/DOUT,p2=bez(OUT,o*o*(1.6-0.6*o));fx=p2[0];fy=p2[1];carry=false;ph=beatPh(now);}
         if(fx!==null){fy+=Math.sin(k/1000*6.2832/1.618)*2.2*sz;                                                          // gentle bob, PHI^1 s
-          var vx=fx-lx;if(Math.abs(vx)>0.25)face=vx>0?1:-1;tilt=Math.max(-0.35,Math.min(0.35,(fy-ly)*0.05));if(Math.random()<0.6)spawn(fx-vx*0.5,fy+3*sz,1,10,1,0);lx=fx;ly=fy;}}
+          var vx=fx-lx;yaw=vp.update(now/1000,vx,fy-ly,k>=DIN&&k<DIN+DT);if(Math.abs(vx)>0.25)face=vx>0?1:-1;tilt=Math.max(-0.35,Math.min(0.35,(fy-ly)*0.05));if(Math.random()<0.6)spawn(fx-vx*0.5,fy+3*sz,1,10,1,0);lx=fx;ly=fy;}}
       x.clearRect(0,0,W,H);x.globalCompositeOperation='lighter';
       for(var i=parts.length-1;i>=0;i--){var P0=parts[i];P0.l+=dt;if(P0.l>=P0.m){parts.splice(i,1);continue;}
         if(!rm){P0.vx*=0.965;P0.vy=P0.vy*0.965+30*dt;P0.x+=P0.vx*dt;P0.y+=P0.vy*dt;}
@@ -167,7 +220,7 @@
           var rr=4+gt*36*sz/1.6,g2=x.createRadialGradient(gx,gy,0,gx,gy,rr);g2.addColorStop(0,'rgba(235,252,255,'+(0.8*(1-gt)).toFixed(3)+')');g2.addColorStop(0.4,'rgba(10,242,255,'+(0.35*(1-gt)).toFixed(3)+')');g2.addColorStop(1,'rgba(10,242,255,0)');
           x.fillStyle=g2;x.beginPath();x.arc(gx,gy,rr,0,6.2832);x.fill();x.save();x.translate(gx,gy);x.rotate(gt*2);star4(x,'rgba(233,253,255,'+(1-gt).toFixed(3)+')',3+5*(1-gt)*sz/1.6);x.restore();}else gift=null;}
       x.globalCompositeOperation='source-over';
-      if(fx!==null)drawBird(x,face,fx,fy,tilt,ph,sz,carry,1,0,true);
+      if(fx!==null)drawBird(x,face,fx,fy,tilt,ph,sz,carry,1,0,true,yaw);
       if(e>(rm?D0:D0+DIN+DT+DOUT)+200&&!parts.length&&!gift){endBird(me);return;}
       if(e>D0+DIN+DT+DOUT+DUST+1600){endBird(me);return;}
       me.bird.raf=requestAnimationFrame(frame);}
@@ -184,6 +237,94 @@
     x.beginPath();x.ellipse(0,0.6,0.7,3.4,0,0,6.2832);x.fillStyle='#143A57';x.fill();
     x.strokeStyle='rgba(157,188,206,.8)';x.lineWidth=0.35;x.beginPath();x.moveTo(-0.3,-2.6);x.quadraticCurveTo(-1.4,-4.6,-2.2,-4.9);x.moveTo(0.3,-2.6);x.quadraticCurveTo(1.4,-4.6,2.2,-4.9);x.stroke();
     x.restore();x.globalAlpha=1;}
+  // ---- 9 WILLIE WAGTAIL (Danny 15:25: Rhipidura leucophrys, 'jidi jidi'; original drawing, same canvas style). Glossy black upperparts and
+  // head (#0B0F14 with a faint #1F5478 / #0AF2FF sheen), white belly, small white eyebrow, long fan tail. Local units, feet at the origin.
+  // wag -1..1 = tail swung side to side in the HORIZONTAL plane (seen side-on: the tail foreshortens and turns slightly); fan 0..1 spread;
+  // preen 0..1 head down to the breast; flash 0..1 wing flicked open; flap = wing phase in flight (null = folded); yaw as the bluebird.
+  function drawWag(x,face,px,py,tilt,flap,sz,a,yaw,wag,fan,preen,flash){var ba=a==null?1:a,yw=(yaw||0)*Math.PI/180,cy=Math.cos(yw),sy=Math.sin(yw);
+    x.save();x.translate(px,py);x.rotate(tilt);x.scale(sz*face,sz);x.globalAlpha=ba;x.scale(0.55+0.45*cy,1);
+    var blk='#0B0F14',wht='#F4F8FA',w=flap==null?0:Math.sin(flap),perched=flap==null;
+    x.globalCompositeOperation='lighter';var au=x.createRadialGradient(0,-7,0,0,-7,20);au.addColorStop(0,'rgba(157,188,206,.16)');au.addColorStop(1,'rgba(157,188,206,0)');x.fillStyle=au;x.beginPath();x.arc(0,-7,20,0,6.2832);x.fill();x.globalCompositeOperation='source-over';   // faint rim light so black reads on black
+    if(perched){x.strokeStyle='#2A3540';x.lineWidth=0.7;x.beginPath();x.moveTo(-0.6,-2.6);x.lineTo(-1,0);x.moveTo(1.2,-2.6);x.lineTo(1,0);x.stroke();}
+    // far wing
+    x.save();x.globalAlpha=ba*(1-0.55*sy);x.translate(-1+2*sy,-7.5);x.scale(1-0.45*sy,perched?0.3+0.7*flash:(-0.9*w)*(1-0.3*sy));x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(-4,-8,-10,-7.5);x.quadraticCurveTo(-5.5,-2.5,0,0);x.fillStyle='#141B22';x.fill();x.restore();x.globalAlpha=ba;
+    // long fan tail from the rump, cocked up a little; horizontal wag = foreshortening + a slight turn
+    var sw=wag*0.61,L=(13.5+2*fan)*Math.abs(Math.cos(sw))*(1-0.25*sy)+2,spread=0.18+0.34*fan;
+    x.save();x.translate(-5.5,-6.8);x.rotate(Math.PI+0.32+sw*0.25);x.beginPath();x.moveTo(0,-1.1);x.lineTo(L*Math.cos(-spread),L*Math.sin(-spread));
+    x.quadraticCurveTo(L*1.06,0,L*Math.cos(spread),L*Math.sin(spread));x.lineTo(0,1.1);x.closePath();x.fillStyle=blk;x.fill();
+    if(fan>0.3){x.strokeStyle='rgba(244,248,250,'+(0.5*(fan-0.3)).toFixed(3)+')';x.lineWidth=0.5;x.beginPath();x.moveTo(L*0.6*Math.cos(spread),L*0.6*Math.sin(spread));x.lineTo(L*Math.cos(spread),L*Math.sin(spread));x.stroke();}
+    x.restore();
+    // body: black back, white belly
+    x.beginPath();x.ellipse(0,-6.2,6.8,4.4,-0.12,0,6.2832);x.fillStyle=blk;x.fill();
+    x.save();x.beginPath();x.ellipse(0,-6.2,6.8,4.4,-0.12,0,6.2832);x.clip();x.beginPath();x.ellipse(1.4+0.6*sy,-3.4,6.4,3.6+1.2*sy,-0.12,0,6.2832);x.fillStyle=wht;x.fill();x.restore();
+    x.globalCompositeOperation='lighter';x.beginPath();x.ellipse(-0.5,-9.4,4.6,0.9,-0.15,0,6.2832);x.fillStyle='rgba(31,84,120,.55)';x.fill();x.globalCompositeOperation='source-over';   // glossy sheen
+    // head (preen: down toward the breast)
+    x.save();x.translate(4.8,-9.6+3.2*preen);x.rotate(0.9*preen);
+    x.beginPath();x.arc(0,0,3.5,0,6.2832);x.fillStyle=blk;x.fill();
+    var er=1+0.3*sy,ex=1.4+0.5*sy;
+    x.strokeStyle=wht;x.lineWidth=0.75;x.beginPath();x.arc(ex,-0.2,1.7,-2.6,-0.9);x.stroke();                                           // white eyebrow
+    x.beginPath();x.arc(ex,0.2,0.8*er,0,6.2832);x.fillStyle='#000';x.fill();x.beginPath();x.arc(ex+0.3,-0.1,0.25,0,6.2832);x.fillStyle='rgba(10,242,255,.8)';x.fill();
+    if(sy>0.6){x.globalAlpha=ba*Math.min(1,(sy-0.6)*2.5);x.strokeStyle=wht;x.lineWidth=0.5;x.beginPath();x.arc(3,-0.3,1,-2.4,-1.1);x.stroke();x.globalAlpha=ba;}
+    x.beginPath();x.moveTo(3.2,-0.6);x.lineTo(5.6,0.1);x.lineTo(3.2,0.7);x.closePath();x.fillStyle='#1A1F24';x.fill();x.restore();
+    // near wing (folded, flicked open in a wing-flash, or beating in flight); cyan glint on the edge
+    x.save();x.translate(-0.5+1.2*sy,-7+0.8*sy);x.scale(1,perched?0.35+0.65*flash:w);x.beginPath();x.moveTo(1.5,0);x.quadraticCurveTo(-3,-9,-11,-8.5);x.quadraticCurveTo(-6,-2.4,1.5,0);
+    x.fillStyle='#10161C';x.fill();x.lineWidth=0.5;x.strokeStyle='rgba(10,242,255,.45)';x.stroke();x.restore();
+    x.restore();x.globalAlpha=1;}
+  // Behaviour (all from js/bird-ref-data.js, each value x its own pump under a 'wagtail' node, child of the logo node; depth <= 0.146):
+  // arrives PHI^1 s after the bluebird with a short jerky flight, lands on top of a letter about 0.236 of the way along the word (away from the
+  // bluebird's 0.618), then a state machine picks each next state with the Stevens (2002) time-budget weights: PERCH 54% (still, tail wagging
+  // hard right after alighting then easing off), PREEN 15% (head down to the breast), HOP 12% (a hop or two along the letter, wagging on
+  // landing), HAWK SALLY 10.4% (a short jerky loop up off the letter with sudden twists to snap an insect, then back) and FLY 8.6% (leaves).
+  // State lengths: PHI^1..PHI^2 s (perch), PHI^1.5 s (preen), PHI^0.5 s per hop, PHI^0.5..PHI^1 s (sally). It always leaves by PHI^5 s.
+  // Tail: side-to-side wag at wagHz (ESTIMATED 3 Hz) x pump x (1 + 0.382 x dawn/dusk bump), with fanning bursts; wing-flashes on a
+  // pumped rate that peaks around midday (Webb-Pullman & Elgar 1998). Wingbeat in flight: Pennycuick estimate 8.5 Hz x PHI^-1 x pump.
+  // Views: its own ViewPump (turning in sallies eases it toward 60 deg). Reduced motion: a still wagtail perched on the letter, no motion.
+  function bump(h,c,wd){var d=Math.abs(h-c);d=Math.min(d,24-d);return d>wd?0:0.5+0.5*Math.cos(Math.PI*d/wd);}
+  function wagtail(){if(!st||st.wag)return;var me=st;st.wag={cv:null,raf:0};later(function(){if(me===st)wagGo(me);},382+1618);}
+  function wagGo(me){var ov=st.fig.parentNode;if(!ov)return;var R=REF().wagtail,rm=RM.matches;
+    var cv=document.createElement('canvas');cv.className='rbz-bird rbz-wag';cv.setAttribute('aria-hidden','true');ov.appendChild(cv);st.wag.cv=cv;
+    var W=ov.clientWidth||innerWidth,H=ov.clientHeight||innerHeight,dpr=Math.min(2,window.devicePixelRatio||1);cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+    var x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+    var fr=st.fig.getBoundingClientRect(),orr=ov.getBoundingClientRect(),T;
+    if(st.cols&&st.cols.length){var col=st.cols[Math.floor(st.cols.length*0.236)],u=toFig(col[0],col[1]);T=[fr.left-orr.left+st.fig.clientLeft+u[0],fr.top-orr.top+st.fig.clientTop+u[1]+1];}
+    else T=[fr.left-orr.left+fr.width*0.3,fr.top-orr.top+fr.height*0.3];
+    var sz=1.15*Math.max(1,Math.min(1.8,fr.width/480)),face=Math.random()<0.5?1:-1,hr=new Date().getHours()+new Date().getMinutes()/60;
+    var wN=pnode('wagtail',5,2,0.146),pw={};Object.keys(R.budget).forEach(function(k){pw[k]=pnode('wag-'+k,2,1,0.146,wN);});
+    var rateN=pnode('wag-rate',2,1,0.146,wN),flashN=pnode('wag-flash',2,1,0.146,wN),beatN=pnode('wag-beat',2,1,0.146,wN),vp=ViewPump();
+    var dd=Math.max(bump(hr,R.dawnHour,3),bump(hr,R.duskHour,3)),mid=bump(hr,R.middayHour,4);
+    var wagHz=R.wagHz*(1+R.wagDawnDuskBoost*dd),flashPerS=0.12*(1+R.flashMiddayBoost*mid);                  // flash base rate ESTIMATED
+    if(rm){x.clearRect(0,0,W,H);drawWag(x,face,T[0],T[1],0,null,sz,1,0,0,0.2,0,0);return;}
+    var side=Math.random()<0.5?-1:1,start=[side<0?-50:W+50,Math.max(20,T[1]-H*0.25)],t0=performance.now(),pos=start.slice(),perch=T.slice();
+    var state='in',sT=0,sDur=2618,path=null,wagAmp=0,fan=0,preen=0,flash=0,flashT=-1,bph=0,last=t0,lx=pos[0],ly=pos[1],yaw=0;
+    function pick(){var tot=0,k,w={};for(k in R.budget){w[k]=R.budget[k]*pw[k].out();tot+=w[k];}var r=Math.random()*tot;for(k in w){r-=w[k];if(r<=0)return k;}return 'perch';}
+    function jerky(a,b,dur,twists){var pts=[a];for(var i=1;i<=twists+1;i++){var f=i/(twists+2);pts.push([a[0]+(b[0]-a[0])*f+(Math.random()-0.5)*60*sz,a[1]+(b[1]-a[1])*f-(Math.random()*40+10)*sz]);}pts.push(b);return {pts:pts,dur:dur};}
+    function along(p,f){f=clamp01(f);var n=p.pts.length-1,i=Math.min(n-1,Math.floor(f*n)),g=f*n-i;g=g*g*(3-2*g);return [p.pts[i][0]+(p.pts[i+1][0]-p.pts[i][0])*g,p.pts[i][1]+(p.pts[i+1][1]-p.pts[i][1])*g];}   // jerky: eased per segment
+    function go(s,now){state=s;sT=now;
+      if(s==='perch'){sDur=1000*Math.pow(PHI,1+Math.random());wagAmp=1;}
+      else if(s==='preen')sDur=1000*Math.pow(PHI,1.5);
+      else if(s==='hop'){sDur=1272;var nx=Math.max(-1,Math.min(1,(Math.random()-0.5)*2));perch=[T[0]+nx*14*sz,T[1]];path={pts:[pos.slice(),[(pos[0]+perch[0])/2,pos[1]-7*sz],perch.slice()],dur:sDur};}
+      else if(s==='sally'){sDur=1000*Math.pow(PHI,0.5+Math.random()*0.5);var top=[perch[0]+(Math.random()-0.5)*80*sz,perch[1]-(40+Math.random()*40)*sz];
+        path={pts:[perch.slice(),[top[0]-20*sz,top[1]+15*sz],top,[top[0]+25*sz,top[1]+5*sz],perch.slice()],dur:sDur};}
+      else if(s==='fly'){sDur=1618;var end=[side<0?W+60:-60,Math.max(-40,T[1]-H*0.3)];path=jerky(pos.slice(),end,sDur,R.sally.twistsPerSally||2);}}
+    path=jerky(start,T,2618,2);
+    function frame(now){if(me!==st)return;var dt=Math.min(0.05,(now-last)/1000),e=now-t0,k=now-sT,f=Math.min(1,k/sDur),flap=null,tilt=0;last=now;
+      if(state==='in'||state==='hop'||state==='sally'||state==='fly'){pos=along(path,state==='in'?Math.min(1,e/2618):f);
+        if(state!=='hop'){bph+=dt*R.wingbeatHz/PHI*beatN.out();var q=bph%1;flap=q<0.75?q*6.2832/0.75:null;}
+        if(state==='in'&&e>=2618){pos=T.slice();go('perch',now);}
+        else if(state!=='in'&&f>=1){if(state==='fly'){endWag(me);return;}pos=perch.slice();go(state==='hop'?'perch':'perch',now);wagAmp=1;}}
+      else if(f>=1){go(e>1000*Math.pow(PHI,5)?'fly':pick(),now);}
+      // tail: wag hardest just after alighting, easing off; fanning bursts; preen; wing-flash
+      wagAmp+=((state==='perch'?0.35:state==='preen'?0:0.2)-wagAmp)*dt*0.618;
+      var wag=Math.sin(e/1000*2*Math.PI*wagHz*rateN.out())*wagAmp;fan+=(((Math.sin(e/1000*2*Math.PI/PHI/PHI)>0.6||state==='sally')?1:0.15)-fan)*dt*3;
+      preen+=((state==='preen'?(0.6+0.4*Math.sin(k/1000*2*Math.PI/1.618)):0)-preen)*dt*4;
+      if(state==='perch'&&flashT<0&&Math.random()<flashPerS*flashN.out()*dt)flashT=now;
+      if(flashT>=0){var ft=(now-flashT)/382;flash=ft<1?Math.sin(Math.PI*ft):0;if(ft>=1)flashT=-1;}else flash=0;
+      var dx=pos[0]-lx,dy=pos[1]-ly;if(Math.abs(dx)>0.3)face=dx>0?1:-1;yaw=vp.update(now/1000,dx,dy,false);lx=pos[0];ly=pos[1];
+      if(flap!==null)tilt=Math.max(-0.4,Math.min(0.4,dy*0.06));
+      x.clearRect(0,0,W,H);drawWag(x,face,pos[0],pos[1],tilt,flap,sz,1,yaw,wag,fan,preen,flash);
+      me.wag.raf=requestAnimationFrame(frame);}
+    me.wag.raf=requestAnimationFrame(frame);}
+  function endWag(s){if(!s||!s.wag)return;try{cancelAnimationFrame(s.wag.raf);}catch(e){}if(s.wag.cv&&s.wag.cv.parentNode)s.wag.cv.parentNode.removeChild(s.wag.cv);s.wag.raf=0;}
   function companions(){if(!st||RM.matches)return;var me=st,ov=st.fig.parentNode;if(!ov)return;
     var cv=document.createElement('canvas');cv.className='rbz-sky';cv.setAttribute('aria-hidden','true');ov.insertBefore(cv,st.fig);
     var dpr=Math.min(2,window.devicePixelRatio||1),W=0,H=0,x=cv.getContext('2d'),list=[],n=0,raf=0,lastT=0;
@@ -232,7 +373,7 @@
       anim(a2,[{opacity:.9,transform:'translate3d(8%,0,0)'},{opacity:.35,transform:'translate3d(-8%,-3%,0)'}],{duration:P(6),delay:-P(6)*((2*G)%1),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});}
     requestAnimationFrame(function(){d.classList.add('on');});}
   function start(fig,ac){stop();var svg=fig.querySelector('.dmz-art svg'),use=svg&&svg.querySelector('use:last-of-type');if(!svg||!use)return;style();
-    st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,snd:null,bird:null,sky:null,layers:[]};
+    st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,snd:null,bird:null,wag:null,sky:null,layers:[]};
     dawn();companions();
     if(st.ac){try{st.out=st.ac.createGain();st.out.gain.value=0.8;st.out.connect(st.ac.destination);}catch(e){st.out=null;}}
     music();
@@ -244,14 +385,14 @@
     if(motion){var B=P(5);if(glowUse)anim(glowUse,[{opacity:.72},{opacity:1},{opacity:.72}],{duration:B,iterations:Infinity,easing:'ease-in-out'});
       anim(wall,[{opacity:.3},{opacity:.95},{opacity:.3}],{duration:B,delay:P(-1),iterations:Infinity,easing:'ease-in-out',fill:'backwards'});}
     var href=(use.getAttribute('href')||'').split('#')[0],fst=st;
-    later(function(){if(st===fst&&!st.bird)bird();},300);   // bluebird: once per open (waits up to 0.3 s for the letter tops, then flies anyway)
+    loadRef();later(function(){if(st===fst&&!st.bird)bird();if(st===fst)wagtail();},300);   // bluebird: once per open (waits up to 0.3 s for the letter tops, then flies anyway)
     pathD(href).then(function(d){if(!st||st.fig!==fig||!d)return;
       var defs=document.createElementNS(NS,'defs');
       defs.innerHTML='<clipPath id="rbz-clip"><path clip-rule="evenodd" d="'+d+'"/></clipPath>'+
         '<linearGradient id="rbz-sheen-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#FFF4F8" stop-opacity=".62"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>';
       svg.appendChild(defs);
       try{st.cols=edges(d);}catch(e){st.cols=null;}
-      if(!st.bird)bird();
+      if(!st.bird)bird();if(!st.wag)wagtail();
       if(motion){var g=document.createElementNS(NS,'g');g.setAttribute('clip-path','url(#rbz-clip)');g.setAttribute('aria-hidden','true');
         var r=document.createElementNS(NS,'rect');r.setAttribute('x',VB[0]-560);r.setAttribute('y',VB[1]-200);r.setAttribute('width',300);r.setAttribute('height',VB[3]+400);
         r.setAttribute('fill','url(#rbz-sheen-g)');r.setAttribute('transform','translate(0 0)');g.appendChild(r);
@@ -260,7 +401,7 @@
         for(var k=1;k<=6;k++){var s=document.createElement('span');s.className='rbz-star';fx.appendChild(s);st.stars.push(s);
           (function(k){later(function(){twinkle(k);},P(1.5+k/2)*((k*G)%1));})(k);}}
     }).catch(function(){});}
-  function stop(){if(!st)return;var s=st;st=null;endBird(s);if(s.snd){try{s.snd.stop();}catch(e){}}if(s.sky){s.sky.stop();var sc=s.sky.cv;}
+  function stop(){if(!st)return;var s=st;st=null;endBird(s);endWag(s);if(s.snd){try{s.snd.stop();}catch(e){}}if(s.sky){s.sky.stop();var sc=s.sky.cv;}
     s.layers.forEach(function(l){l.classList.remove('on');});setTimeout(function(){s.layers.forEach(function(l){if(l.parentNode)l.parentNode.removeChild(l);});if(sc&&sc.parentNode)sc.parentNode.removeChild(sc);},400);
     s.timers.forEach(clearTimeout);s.anims.forEach(function(a){try{a.cancel();}catch(e){}});
     if(s.out){try{var t=s.ac.currentTime;s.out.gain.cancelScheduledValues(t);s.out.gain.setValueAtTime(s.out.gain.value,t);s.out.gain.linearRampToValueAtTime(0,t+0.08);
