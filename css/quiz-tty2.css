@@ -56,7 +56,9 @@ body.paused .foot::before{animation-play-state:paused}
   box-shadow:0 0 3px rgba(0,255,65,.25)}
 .foot .ttybar .tg-qz .tgb i{background:linear-gradient(0deg,var(--k9) 0%,var(--b2) 18%,var(--b3) 34%,var(--b5) 50%,var(--b7) 66%,var(--b9) 82%,#D8EEF6 100%)}
 .foot .ttybar .tg-qz .tgb i.on{animation:t2step 1.272s ease-in-out infinite;box-shadow:0 0 4px rgba(10,242,255,.7)}
-@keyframes t2step{0%,100%{filter:brightness(1)}50%{filter:brightness(1.8)}}
+/* the pulse is opacity only (compositor): the bar sits at a fixed brightness(1.8) and fades 0.556 to 1 over the dark floor, which reads the same as brightness 1 to 1.8 */
+.foot .ttybar .tg-qz .tgb i.on{filter:brightness(1.8)}
+@keyframes t2step{0%,100%{opacity:.556}50%{opacity:1}}
 .foot .ttybar .tg-net .tgb i{background:linear-gradient(0deg,#03303F 0%,#05506A 16%,var(--c1) 32%,#079AB6 48%,var(--c2) 62%,#08D6EA 78%,var(--c3) 92%,#B8FBFF 100%);box-shadow:0 0 3px rgba(10,242,255,.25)}
 .foot .ttybar .tg-net.slow .tgb i:last-child,.foot .ttybar .tg-net.off .tgb i{background:linear-gradient(0deg,var(--r1) 0%,#7A0018 25%,var(--r2) 50%,#E0002C 75%,var(--r3) 100%);box-shadow:0 0 4px rgba(255,0,51,.45)}
 /* idle shimmer so the graphs never look dead: a tiny phi-staggered bob on top of the real value */
@@ -110,5 +112,6 @@ body.paused .foot .tty::after,body.paused .foot .ttybar .tg .tgb i,body.paused .
 @media (max-width:400px){.tgs{gap:5px}.foot .ttybar .tg{gap:1px}.foot .ttybar .tg .tgl{font-size:6.5px}.foot .ttybar{gap:5px}}
 @media (prefers-reduced-motion:reduce){
   .foot .tty::after,.foot .ttybar .tg .tgb i,.foot .ttybar .tg-qz .tgb i.on,.foot .ttybar .sat,.foot .train span,.foot .note .fl-e{animation:none!important}
+  .foot .ttybar .tg-qz .tgb i.on{filter:none}
   .foot .ttybar .tg .tgb i{transition:none}.foot .note .fl-k{display:none}
 }

@@ -32,6 +32,10 @@
   // one dial PER SITE (Danny: separate dials for Dad's palette, Bonnie's Dashboard, Rebella and the chat), set on this script tag:
   //   data-site="dashboard|chat|dad|rebella"  data-freq="0.75"  (default 0.75 = 25% slower). Tune one site without touching the others.
   var SITE = (SCRIPT && SCRIPT.getAttribute("data-site")) || "site";
+  // data-lite="1" (questionnaire, Danny 25 Oct 'smoother first load'): same rates, less work. No 1 s re-scan of every animation
+  // (doc.getAnimations() forces a full style recalc each time); the rate is re-applied only when it changes (refresh), new animations
+  // get it from animationstart, batched once per frame; animationiteration is ignored (playbackRate persists); first scan when idle.
+  var LITE = !!(SCRIPT && SCRIPT.getAttribute("data-lite") === "1");
   var SITE_FREQ = parseFloat(SCRIPT && SCRIPT.getAttribute("data-freq")); if (!(SITE_FREQ >= 0.25 && SITE_FREQ <= 2)) SITE_FREQ = 0.75;
   var pumpOn = true;
   try { var q = new URLSearchParams(location.search), f = parseFloat(q.get("freq"));
@@ -84,6 +88,8 @@
     var v = doc.querySelectorAll("video[loop]"); for (var i = 0; i < v.length; i++) { if (v[i].muted || v[i].hasAttribute("muted")) { var r = rate * extra(v[i]); if (Math.abs(v[i].playbackRate - r) > 1e-3) { try { v[i].defaultPlaybackRate = r; v[i].playbackRate = r; } catch (e) {} } } }
   }
   function onAnim(ev) { var el = ev.target; if (!el || !el.getAnimations) return; el.getAnimations().forEach(function (a) { if (a.animationName === ev.animationName) setRate(a, want(a)); }); }
+  var pend = [], pendRaf = 0;
+  function onAnimLite(ev) { if (ev.type !== "animationstart") return; pend.push(ev); if (!pendRaf) pendRaf = requestAnimationFrame(function () { var q = pend; pend = []; pendRaf = 0; q.forEach(onAnim); }); }
   var subs = [];
   function refresh() { var before = rate; compute(); applyAll(); var inf = api.info();
     if (doc) try { doc.dispatchEvent(new CustomEvent("ratiopump:change", { detail: inf })); } catch (e) {}
@@ -116,13 +122,15 @@
   compute();
   wrapPT(root.PhiTiming);
   if (doc) {
-    doc.addEventListener("animationstart", onAnim, true);
-    doc.addEventListener("animationiteration", onAnim, true);
+    doc.addEventListener("animationstart", LITE ? onAnimLite : onAnim, true);
+    if (!LITE) doc.addEventListener("animationiteration", onAnim, true);
     doc.addEventListener("rebella:weather", function (e) { var k = e && e.detail && e.detail.key; if (k !== wxKey) { wxKey = k || null; refresh(); } });
     doc.addEventListener("visibilitychange", function () { if (!doc.hidden) refresh(); });
     if (RM.addEventListener) RM.addEventListener("change", refresh);
-    var go = function () { applyAll(); setInterval(function () { if (!doc.hidden) applyAll(); }, 1000); setInterval(refresh, 60000); };
-    if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", go); else go();
+    var go = function () { applyAll(); if (!LITE) setInterval(function () { if (!doc.hidden) applyAll(); }, 1000); setInterval(refresh, 60000); };
+    if (LITE) { var ric = root.requestIdleCallback || function (f) { return setTimeout(f, 300); }; var goIdle = function () { ric(go, { timeout: 1500 }); };
+      if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", goIdle); else goIdle(); }
+    else if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", go); else go();
   }
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : this);

@@ -21,7 +21,8 @@
   bar.insertBefore(wrap,bar.firstChild);
   var roll=document.createElement('span');roll.className='troll';roll.setAttribute('aria-hidden','true');roll.innerHTML='<span class="trw"><b></b><b></b></span>';
   var tt=bar.querySelector('.tt');if(tt)tt.replaceWith(roll);else bar.insertBefore(roll,bar.querySelector('.sat'));
-  function set(g,vals,lab){var b=g.querySelectorAll('.tgb i');for(var i=0;i<b.length;i++){var v=Math.max(0.12,Math.min(1,vals[i]||0));b[i].style.setProperty('--v',v.toFixed(3));}g.setAttribute('aria-label',lab);g.title=lab;}
+  // writes only what changed (no style invalidation when a value is the same; Danny 25 Oct 'smoother')
+  function set(g,vals,lab){var b=g._b||(g._b=g.querySelectorAll('.tgb i'));for(var i=0;i<b.length;i++){var v=Math.max(0.12,Math.min(1,vals[i]||0)).toFixed(3);if(b[i]._v!==v){b[i]._v=v;b[i].style.setProperty('--v',v);}}if(g._lab!==lab){g._lab=lab;g.setAttribute('aria-label',lab);g.title=lab;}}
 
   // ---- LOG: count new mission-log lines (the previous line changes each time a new one starts) ----
   var prev=$('tprev'),cur=$('tcur'),slots=[0,0,0,0,0,0,0],lastPrev=prev?prev.innerHTML:'';
