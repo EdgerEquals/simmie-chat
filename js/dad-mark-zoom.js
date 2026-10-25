@@ -24,10 +24,11 @@
   function glow(svg){var u=svg.querySelector('use');if(!u)return;var d=document.createElementNS(NS,'defs');
     // Layers (Danny t720u): [glow only: halo + pale rim] -> [black copy of the small letter holes, #bonnies-logo-holes] -> [the logo itself].
     // So the e/b/a holes stay black and full size with the same outer neon; the R bowl and heart keep their glow.
-    d.innerHTML='<filter id="rbz-glow" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">'+
+    d.innerHTML='<filter id="rbz-glow" x="-22%" y="-40%" width="144%" height="180%" color-interpolation-filters="sRGB">'+
+      '<feGaussianBlur in="SourceAlpha" stdDeviation="46" result="b2"/><feFlood flood-color="#E58AA6" flood-opacity=".6"/><feComposite in2="b2" operator="in" result="halo2"/>'+
       '<feGaussianBlur in="SourceAlpha" stdDeviation="20" result="b"/><feFlood flood-color="#E58AA6" flood-opacity=".9"/><feComposite in2="b" operator="in" result="halo"/>'+
       '<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="r"/><feFlood flood-color="#F8CFDB" flood-opacity=".8"/><feComposite in2="r" operator="in" result="rim"/>'+
-      '<feMerge><feMergeNode in="halo"/><feMergeNode in="rim"/></feMerge></filter>';
+      '<feMerge><feMergeNode in="halo2"/><feMergeNode in="halo"/><feMergeNode in="rim"/></feMerge></filter>';
     svg.insertBefore(d,svg.firstChild);
     var href=u.getAttribute('href')||u.getAttributeNS('http://www.w3.org/1999/xlink','href')||'';
     var g=u.cloneNode(false);g.setAttribute('filter','url(#rbz-glow)');svg.insertBefore(g,u);
@@ -40,15 +41,33 @@
     fig.className='dmz-fig dmz--'+name;fig.innerHTML='';var w=document.createElement('div');w.className='dmz-art';w.appendChild(c);fig.appendChild(w);
     if(phys){phys.stop();phys=null;}if(live){try{phys=EqPhysics.attach(ov,c);}catch(e){phys=null;}}
     ov.setAttribute('aria-label',(b.getAttribute('data-zoom-title')||'Logo')+', enlarged');}
+  // Rebella zoom life + sound (Danny t724u 14:04 AWST 25 Oct): js/rebella-zoom-life.js is injected the first time the Rebella zoom opens
+  // (shimmer, stars, breathing glow, wall echo, sweep/star sounds). The AudioContext is made HERE, inside the tap (iOS needs the gesture);
+  // it is this module's own context (the auto-DJ is never touched), suspended again PHI^0 s after close. Open/close chords use the same
+  // harmonic set as the life sounds (G3 196 Hz x 4,6,8,12): open rises, close falls; notes PHI^-5 = 0.09 s apart.
+  var AC=null,acT=null,LIFE='js/rebella-zoom-life.js?v=1',lifeLoading=false;
+  function audio(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;if(!AC)AC=new C();clearTimeout(acT);if(AC.state!=='running')AC.resume();return AC;}catch(e){return null;}}
+  function chord(up){if(!AC)return;try{var t=AC.currentTime+0.02,H=up?[4,6,8,12]:[12,8,6,4];
+    H.forEach(function(h,i){var o=AC.createOscillator(),g=AC.createGain(),w=t+i*0.09,pk=(up?0.045:0.035)/(1+i*0.35);o.type='sine';o.frequency.value=196*h;
+      g.gain.setValueAtTime(0,w);g.gain.linearRampToValueAtTime(pk,w+0.015);g.gain.exponentialRampToValueAtTime(0.0001,w+(up?1:0.618));
+      o.connect(g);g.connect(AC.destination);o.start(w);o.stop(w+1.05);});}catch(e){}}
+  function life(){if(!cur||cur.getAttribute('data-zoom')!=='rebella')return;
+    if(window.RebellaZoomLife){try{RebellaZoomLife.start(fig,AC);}catch(e){}return;}
+    if(lifeLoading)return;lifeLoading=true;var sc=document.createElement('script');sc.src=LIFE;sc.async=true;
+    sc.onload=function(){lifeLoading=false;life();};sc.onerror=function(){lifeLoading=false;};document.head.appendChild(sc);}
   function fromBtn(){var a=srcEl(cur).getBoundingClientRect();fig.style.transition='none';fig.style.transform='none';
     var b=fig.getBoundingClientRect();if(!b.width||!a.width)return 'none';
     return 'translate('+(a.left-b.left)+'px,'+(a.top-b.top)+'px) scale('+(a.width/b.width)+','+(a.height/b.height)+')';}
   function open(b){if(cur)return;clearTimeout(t);try{window.QuizPopups&&QuizPopups.close();}catch(e){}
+    var rb=b.getAttribute('data-zoom')==='rebella';if(rb){audio();chord(true);}
     cur=b;build(b);ov.hidden=false;b.setAttribute('aria-expanded','true');ov.classList.remove('is-open');
     if(!rm.matches){var f=fromBtn();fig.style.transform=f;void fig.offsetWidth;fig.style.transition='';}
     requestAnimationFrame(function(){ov.classList.add('is-open');fig.style.transform='none';});
+    if(rb)life();
     x.focus({preventScroll:true});}
-  function close(){if(!cur)return;var b=cur;b.setAttribute('aria-expanded','false');ov.classList.remove('is-open');
+  function close(){if(!cur)return;var b=cur;
+    if(b.getAttribute('data-zoom')==='rebella'){try{window.RebellaZoomLife&&RebellaZoomLife.stop();}catch(e){}chord(false);clearTimeout(acT);acT=setTimeout(function(){try{if(AC&&!cur&&AC.state==='running')AC.suspend();}catch(e){}},1000);}
+b.setAttribute('aria-expanded','false');ov.classList.remove('is-open');
     if(rm.matches){ov.hidden=true;endPhys();}else{var f=fromBtn();fig.style.transform='none';void fig.offsetWidth;fig.style.transition='';fig.style.transform=f;
       t=setTimeout(function(){ov.hidden=true;fig.style.transform='';endPhys();},D);}
     cur=null;b.focus({preventScroll:true});}
