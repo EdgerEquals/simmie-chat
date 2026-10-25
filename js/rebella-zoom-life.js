@@ -5,7 +5,7 @@
    2 STARS    very faint static stars on a small canvas behind the logo, plus 6 highlight stars that twinkle in and out just above the top and
               just below the bottom edge of the lettering (positions read from the letter silhouette). Star k (1..6) repeats every
               PHI^(1.5+k/2) s = 2.62 / 3.33 / 4.24 / 5.39 / 6.85 / 8.72 s, each twinkle PHI^1 s, first at period*frac(k*0.618) (golden angle).
-   3 SOUND    (t746u, MIDI rebuild 15:11 AWST) a continuous music bed from js/logo-sound.js v=2 (shared logo engine: a MIDI sequencer on the
+   3 SOUND    (t746u, MIDI rebuild 15:11 AWST) a continuous music bed from js/logo-sound.js v=3 (shared logo engine: a MIDI sequencer on the
               phi grid + ladder, rendered by self-hosted Tone.js like Rebella's Music Playground; root, loudness and pumps come from the
               page via PhiPumps subscriptions; loaded lazily on the first open; the bird's star-drop and each shimmer fire its 'star-drop' / 'shimmer' hooks = +0.236 nudge). On top:
               Fairy palette (Danny t740u 14:2x AWST 25 Oct: the music-box tones were "too baby and too scary"): Web Audio synthesis only, no
@@ -86,7 +86,7 @@
   function toFig(ux,uy){var a=st.art,W=a.offsetWidth,H=a.offsetHeight,s=Math.min(W/VB[2],H/VB[3]),x=(ux-VB[0])*s+(W-VB[2]*s)/2-W/2,y=(uy-VB[1])*s+(H-VB[3]*s)/2-H/2,r=-5.5*Math.PI/180;
     return [a.offsetLeft+W/2+x*Math.cos(r)-y*Math.sin(r),a.offsetTop+H/2+x*Math.sin(r)+y*Math.cos(r),s];}
   function snd(name){try{st&&st.snd&&st.snd.event(name);}catch(e){}}
-  var SND='js/logo-sound.js?v=2',sndLoading=null;
+  var SND='js/logo-sound.js?v=3',sndLoading=null;
   function music(){if(!st||!st.ac||!st.out)return;var me=st;
     function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{logo:'rebella-logo',events:{'star-drop':0.236,'shimmer':0.236},
       subscribe:['pump:page','daytime','tide','moon','ratio-pump','clock','component:theme','phi-adapt:rebella-logo']});/* rule 10: the logo listens to the page */}catch(e){}}

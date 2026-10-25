@@ -1,6 +1,6 @@
 /* LOGO SOUND ENGINE v2: MIDI end to end (Danny voice 15:11 AWST 25 Oct 2026; t746u blend, free-wheel rule 6, rule 10 'logo = microcosm
-   of the site'; spec /home/box/.config/logo-sound-motion-spec.md). Reusable and logo-agnostic. Only the questionnaire's Rebella zoom uses it
-   (js/rebella-zoom-life.js); do not add it to other pages or logos until Danny says so.
+   of the site'; spec /home/box/.config/logo-sound-motion-spec.md). Reusable and logo-agnostic. Used by the questionnaire's two header logos only:
+   the Rebella zoom (js/rebella-zoom-life.js) and Dad's mark (js/logo-sound-dad.js voice, 15:28 AWST); not on other pages.
 
    ARCHITECTURE  [Sequencer] -> MIDI events -> [ToneRenderer]
      Sequencer: pure JS (no DOM, no audio; runs in node for the offline .mid export). On the phi grid and the ladder it emits real MIDI
@@ -78,7 +78,10 @@
      Without PhiPumps a local stub gives a local page node and the locally computable feeds (daytime, clock, moon); others read neutral.
      component:theme light adds +0.056 to the cutoff detail (a touch brighter in the light theme).
    COST: one look-ahead scheduler (~100 ms tick, 0.3 s ahead), Tone voices reused (no per-note node churn), two reverbs, no catch-up burst.
-   API: LogoSound.create(ac, dest, {base, subscribe, events, logo, record}) -> engine {event(name), nudge(x), state(), stop(), log()}
+   VOICES (v3, Danny voice 15:28-15:30 AWST): create(..., {voice:'dad'}) uses a registered voice's own Sequencer/Renderer pair
+     (js/logo-sound-dad.js = Dad's mark); the default voice is the Rebella one above. SOLO: only one logo engine sounds at a time (a new
+     create() stops the previous engine). LIVE: LogoSound.live[logo id] = {m, D, midi, loud, day} snapshot for live mini-mapped open/close sounds.
+   API: LogoSound.create(ac, dest, {voice, subscribe, events, logo, feeds, record}) -> engine {event(name), nudge(x), state(), stop(fade), log()}
         LogoSound.Sequencer(opts) (offline/export), LogoSound.feedTide() (lazy tide fetch), LogoSound.wave(t). */
 (function(G0){
   'use strict';
@@ -95,7 +98,8 @@
   function v7(x){return Math.max(0,Math.min(127,Math.round(x*127)));}
   // ---- local stub registry (when the page has no PhiPumps) ----
   function stubNode(name,n,k0,depth,parent,seed){var P=[],ph=[];for(var j=0;j<n;j++){P.push(Math.pow(PHI,k0+j/2));ph.push(2*Math.PI*(((j+1+(seed||0))*G)%1));}
-    return {name:name,n:n,out:function(t){var s=0;for(var j=0;j<n;j++)s+=Math.sin(2*Math.PI*t/P[j]+ph[j]);return (parent?parent.out(t):1)*(1+depth*s/n);}};}
+    function modes(t){var s=0;for(var j=0;j<n;j++)s+=Math.sin(2*Math.PI*t/P[j]+ph[j]);return s/n;}
+    return {name:name,n:n,depth:depth,parent:parent||null,modes:modes,out:function(t){return (parent?parent.out(t):1)*(1+depth*modes(t));}};}
   function stub(clock){var page=stubNode('page',13,4,0.146,null,0),f={
       'pump:page':function(){return page.out(clock.mono());},
       daytime:function(){var d=new Date(clock.wall()*1000);return -Math.cos(2*Math.PI*(d.getHours()+d.getMinutes()/60)/24);},
@@ -233,7 +237,7 @@
     }catch(err){}}
     return {midi:midi,ready:Promise.all([revS.ready,revL.ready]).catch(function(){}),
       fadeIn:function(t){tgt(master.gain,0.12,t,0.618);},
-      stop:function(t){tgt(master.gain,0,t,0.06);setTimeout(function(){nodes.forEach(function(n){try{n.dispose();}catch(e){}});},600);}};}
+      stop:function(t,fade){tgt(master.gain,0,t,fade||0.06);setTimeout(function(){nodes.forEach(function(n){try{n.dispose();}catch(e){}});},600);}};}
 
   // ================= lazy loading + tide fetch =================
   var toneP=null;
@@ -248,19 +252,28 @@
     return tideP;}
 
   // ================= engine =================
-  function create(ac,dest,o){o=o||{};var alive=true,seq=null,R=null,timer=0,next=0,log=o.record?[]:null,pend=[];
+  // VOICES (v3, Dad's mark 15:28-15:30 AWST): a logo may bring its own Sequencer + Renderer pair (LogoSound.voices[name], e.g. js/logo-sound-dad.js);
+  // the scheduler, lazy Tone load, tide feed and solo rule stay here. SOLO: only one logo sounds at a time; creating an engine stops the one before.
+  // LIVE: each running engine publishes a small state snapshot in LogoSound.live[logo id] (used by the live mini-mapped open/close sounds).
+  var voices={},live={},current=null;
+  function create(ac,dest,o){o=o||{};var alive=true,seq=null,R=null,timer=0,next=0,log=o.record?[]:null,pend=[],V=o.voice?voices[o.voice]:null;
     var api={event:function(n){if(seq)seq.event(n);else pend.push(['e',n]);},nudge:function(a){if(seq)seq.nudge(a);else pend.push(['n',a]);},
       state:function(){return seq?seq.state():null;},log:function(){return log?log.slice():null;},
-      stop:function(){if(!alive)return;alive=false;clearTimeout(timer);if(R&&seq){seq.allOff(ac.currentTime).forEach(R.midi);R.stop(ac.currentTime);}}};
+      stop:function(fade){if(!alive)return;alive=false;if(current===api)current=null;clearTimeout(timer);if(R&&seq){seq.allOff(ac.currentTime).forEach(R.midi);R.stop(ac.currentTime,fade);}}};
+    if(current&&current!==api){try{current.stop();}catch(e){}}current=api;
     Promise.all([loadTone(),feedTide()]).then(function(r){var T=r[0];if(!alive)return;
       try{if(!T.getContext||T.getContext().rawContext!==ac)T.setContext(ac);}catch(e){}
-      R=ToneRenderer(T,dest);seq=Sequencer({subscribe:o.subscribe,events:o.events,logo:o.logo,forceM:o.forceM});
+      var so={subscribe:o.subscribe,events:o.events,logo:o.logo,forceM:o.forceM,forceD:o.forceD,feeds:o.feeds,forceHour:o.forceHour};
+      R=V?V.Renderer(T,dest):ToneRenderer(T,dest);seq=V?V.Sequencer(so):Sequencer(so);
       pend.forEach(function(p){p[0]==='e'?seq.event(p[1]):seq.nudge(p[1]);});pend=[];
       R.ready.then(function(){if(!alive)return;next=ac.currentTime+0.1;R.fadeIn(ac.currentTime);tick();});
     }).catch(function(){});
     function tick(){if(!alive)return;if(next<ac.currentTime)next=ac.currentTime+0.05;
       while(next<ac.currentTime+0.3){var evs=seq.step(next);for(var i=0;i<evs.length;i++){R.midi(evs[i]);if(log){log.push(evs[i]);if(log.length>4000)log.splice(0,1000);}}next+=STEP;}
+      if(o.logo){try{var q=seq.state();live[o.logo]={at:Date.now(),m:q.m,D:q.D,midi:q.root&&q.root.midi,loud:q.loud,day:q.day};}catch(e){}}
       timer=setTimeout(tick,100);}
     return api;}
-  W.LogoSound={create:create,Sequencer:Sequencer,wave:wave,feedTide:feedTide,dayCurve:dayCurve,THRESHOLDS:E.slice(),CH:CH,CC:CC,STEP:STEP};
+  W.LogoSound={create:create,Sequencer:Sequencer,wave:wave,feedTide:feedTide,dayCurve:dayCurve,THRESHOLDS:E.slice(),CH:CH,CC:CC,STEP:STEP,
+    voices:voices,live:live,current:function(){return current;},
+    util:{PHI:PHI,G:G,STEP:STEP,E:E,HYS:HYS,ZETA:ZETA,lerp:lerp,clamp:clamp,sstep:sstep,wave:wave,v7:v7,hz:hz,dayCurve:dayCurve,stub:stub,stubNode:stubNode}};
 })(this);
