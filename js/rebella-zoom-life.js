@@ -5,7 +5,9 @@
    2 STARS    very faint static stars on a small canvas behind the logo, plus 6 highlight stars that twinkle in and out just above the top and
               just below the bottom edge of the lettering (positions read from the letter silhouette). Star k (1..6) repeats every
               PHI^(1.5+k/2) s = 2.62 / 3.33 / 4.24 / 5.39 / 6.85 / 8.72 s, each twinkle PHI^1 s, first at period*frac(k*0.618) (golden angle).
-   3 SOUND    Fairy palette (Danny t740u 14:2x AWST 25 Oct: the music-box tones were "too baby and too scary"): Web Audio synthesis only, no
+   3 SOUND    (t746u) a continuous music bed from js/logo-sound.js (the shared logo sound engine, trap <-> ethereal-organic ladder, loaded
+              lazily on the first open; the bird's star-drop and each shimmer fire its 'star-drop' / 'shimmer' hooks = +0.236 nudge). On top:
+              Fairy palette (Danny t740u 14:2x AWST 25 Oct: the music-box tones were "too baby and too scary"): Web Audio synthesis only, no
               files, no tones below ~1.3 kHz, no drone. Each shimmer = a breathy high-passed air swish (3 -> 8 kHz) with one or two faint glassy
               sparkles; star k = one tiny glass sparkle (bright E-major-pentatonic partials in the E6-E7 octave, 4 ms attack, ~0.3 s decay,
               +-12 cent random scatter). The AudioContext is created inside the tap (js/dad-mark-zoom.js, iOS-safe); it is its own context,
@@ -74,7 +76,12 @@
   // logo units -> px inside the figure (svg box = .dmz-art, xMidYMid meet, rotated -5.5deg about its centre)
   function toFig(ux,uy){var a=st.art,W=a.offsetWidth,H=a.offsetHeight,s=Math.min(W/VB[2],H/VB[3]),x=(ux-VB[0])*s+(W-VB[2]*s)/2-W/2,y=(uy-VB[1])*s+(H-VB[3]*s)/2-H/2,r=-5.5*Math.PI/180;
     return [a.offsetLeft+W/2+x*Math.cos(r)-y*Math.sin(r),a.offsetTop+H/2+x*Math.sin(r)+y*Math.cos(r),s];}
-  function shimmer(){if(!st.sheen)return;var dur=P(1);anim(st.sheen,[{transform:'translateX(0px)'},{transform:'translateX('+(VB[2]+900)+'px)'}],{duration:dur,easing:'cubic-bezier(.45,.05,.35,1)'});
+  function snd(name){try{st&&st.snd&&st.snd.event(name);}catch(e){}}
+  var SND='js/logo-sound.js?v=1',sndLoading=null;
+  function music(){if(!st||!st.ac||!st.out)return;var me=st;
+    function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{root:41.2034,events:{'star-drop':0.236,'shimmer':0.236},gain:0.5});}catch(e){}}
+    if(window.LogoSound)return go();if(!sndLoading)sndLoading=new Promise(function(res){var sc=document.createElement('script');sc.src=SND;sc.async=true;sc.onload=sc.onerror=res;document.head.appendChild(sc);});sndLoading.then(go);}
+  function shimmer(){if(!st.sheen)return;snd('shimmer');var dur=P(1);anim(st.sheen,[{transform:'translateX(0px)'},{transform:'translateX('+(VB[2]+900)+'px)'}],{duration:dur,easing:'cubic-bezier(.45,.05,.35,1)'});
     swish(dur/1000);later(shimmer,P(4));}
   function twinkle(k){var el=st.stars[k-1],c=st.cols;if(!el||!c||!c.length)return;
     var col=c[Math.floor(c.length*(0.04+0.88*Math.random()))],top=(k%2===1),u=toFig(col[0],top?col[1]-26:col[2]+26),sz=Math.max(8,Math.round(st.fig.clientWidth*0.022*(0.75+0.5*Math.random())));
@@ -135,7 +142,7 @@
     st.bird.cv=cv;
     function spawn(px,py,n,sp,life,up){for(var i=0;i<n;i++){var a=Math.random()*6.2832,v=sp*(0.35+0.65*Math.random());
       parts.push({x:px,y:py,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(up||0),l:0,m:life*(0.6+0.8*Math.random()),r:(0.7+Math.random()*1.4)*sz/1.3,c:Math.random()<0.55?'10,242,255':(Math.random()<0.5?'157,188,206':'235,250,255'),s:Math.random()<0.3});}}
-    function give(){if(me!==st)return;burst=true;gift={x:lx+face*14*sz,y:ly-2*sz,t:performance.now()};
+    function give(){if(me!==st)return;burst=true;snd('star-drop');gift={x:lx+face*14*sz,y:ly-2*sz,t:performance.now()};
       spawn(T[0],T[1],rm?16:40,rm?14:110,rm?1.4:1.2,rm?0:18);
       [0,1,2,3].forEach(function(i){sparkle(note(1+i+(i>2?1:0)),0.014-0.002*i,i*0.056,pp(T[0]));});
       chirp(0.3,pp(T[0]),true);
@@ -225,9 +232,10 @@
       anim(a2,[{opacity:.9,transform:'translate3d(8%,0,0)'},{opacity:.35,transform:'translate3d(-8%,-3%,0)'}],{duration:P(6),delay:-P(6)*((2*G)%1),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});}
     requestAnimationFrame(function(){d.classList.add('on');});}
   function start(fig,ac){stop();var svg=fig.querySelector('.dmz-art svg'),use=svg&&svg.querySelector('use:last-of-type');if(!svg||!use)return;style();
-    st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,bird:null,sky:null,layers:[]};
+    st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,snd:null,bird:null,sky:null,layers:[]};
     dawn();companions();
     if(st.ac){try{st.out=st.ac.createGain();st.out.gain.value=0.8;st.out.connect(st.ac.destination);}catch(e){st.out=null;}}
+    music();
     var bg=document.createElement('canvas');bg.className='rbz-bg';bg.setAttribute('aria-hidden','true');fig.insertBefore(bg,fig.firstChild);
     var wall=document.createElement('div');wall.className='rbz-wall';wall.setAttribute('aria-hidden','true');fig.insertBefore(wall,st.art);
     var fx=document.createElement('div');fx.className='rbz-fx';fx.setAttribute('aria-hidden','true');fig.appendChild(fx);
@@ -252,7 +260,7 @@
         for(var k=1;k<=6;k++){var s=document.createElement('span');s.className='rbz-star';fx.appendChild(s);st.stars.push(s);
           (function(k){later(function(){twinkle(k);},P(1.5+k/2)*((k*G)%1));})(k);}}
     }).catch(function(){});}
-  function stop(){if(!st)return;var s=st;st=null;endBird(s);if(s.sky){s.sky.stop();var sc=s.sky.cv;}
+  function stop(){if(!st)return;var s=st;st=null;endBird(s);if(s.snd){try{s.snd.stop();}catch(e){}}if(s.sky){s.sky.stop();var sc=s.sky.cv;}
     s.layers.forEach(function(l){l.classList.remove('on');});setTimeout(function(){s.layers.forEach(function(l){if(l.parentNode)l.parentNode.removeChild(l);});if(sc&&sc.parentNode)sc.parentNode.removeChild(sc);},400);
     s.timers.forEach(clearTimeout);s.anims.forEach(function(a){try{a.cancel();}catch(e){}});
     if(s.out){try{var t=s.ac.currentTime;s.out.gain.cancelScheduledValues(t);s.out.gain.setValueAtTime(s.out.gain.value,t);s.out.gain.linearRampToValueAtTime(0,t+0.08);
