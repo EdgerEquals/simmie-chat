@@ -41,3 +41,5 @@ questionnaire-preview.html :: script:js/dad-autodj-quiz.js
 questionnaire-preview.html :: script:js/quiz-front-orbit.js
 questionnaire-preview.html :: script:js/quiz-space-sweep.js
 questionnaire-preview.html :: script:js/quiz-term-status.js
+# approved by Danny 15:28 AWST 25 Oct (voice): the questionnaire page moved to its own repo EdgerEquals/dad-page (https://edgerequals.github.io/dad-page/); questionnaire-preview.html becomes a redirect that keeps the query string and hash (rollback tag pre-quizmove-2026-10-25). Shared files stay.
+questionnaire-preview.html
