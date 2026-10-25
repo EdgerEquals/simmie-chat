@@ -35,7 +35,7 @@
       var li=s.map(function(x){var t=x.querySelector('.ts'),c=x.querySelector('.tc');return '<li>'+esc(t?txt(t).replace(/^"|"$/g,''):txt(x))+(c?' <span class="src">'+esc(txt(c).replace(/^\/\/\s*/,''))+'</span>':'')+'</li>';}).join('');
       return '<p class="qp-note">Picked for age '+esc(window.SIM_AGE?window.SIM_AGE():13)+'.</p><ul class="qp-list">'+(li||'<li>Loading&hellip;</li>')+'</ul>';}],
     ['.qh-mast .dh-sub','Questions for Bonnie',function(){return '<p>'+esc(txt(document.querySelector('.dh-sub')))+'</p>';}],
-    ['.qh-mast .dh-brand','Questions for Bonnie',function(){var q=$('quiz'),c=$('count');return '<p>From Dad. '+esc(txt(document.querySelector('.dh-sub')))+'</p>'+kv([['progress',q&&!q.hidden?txt(c):($('summary')&&!$('summary').hidden?'finished':'not started')],['answered',txt($('vDone'))||'0']]);}],
+    ['.qh-mast .dh-words','Questions for Bonnie',function(){var q=$('quiz'),c=$('count');return '<p>From Dad. '+esc(txt(document.querySelector('.dh-sub')))+'</p>'+kv([['progress',q&&!q.hidden?txt(c):($('summary')&&!$('summary').hidden?'finished':'not started')],['answered',txt($('vDone'))||'0']]);}],
     ['#ltStep','STEP',function(){return kv([['question',txt($('vStep'))],['state',$('quiz')&&!$('quiz').hidden?'in progress':'waiting']])+'<p class="qp-note">Which question you&rsquo;re on.</p>';}],
     ['#ltDone','DONE',function(){return kv([['answered',txt($('vDone'))]])+'<p class="qp-note">Questions answered so far (kept on this page only).</p>';}],
     ['#ltSky','SKY',function(){var w=window.SIM_WX||{};return kv([['weather feed',w.status==='ok'?'OK':w.status==='fail'?'not available':'loading'],['sky',COND[w.cond]||'n/a']]);}],
@@ -55,7 +55,7 @@
   function tty(){return '<div class="qp-term">'+esc(txt($('tprev')))+'\n'+esc(txt($('tcur')))+'</div><p class="qp-note">Type in the simmie$ box to chat. Preview only, nothing is sent.</p>';}
   var SEL=T.map(function(t){return t[0];}).join(',');
   function match(el){if(!el||!el.closest)return null;for(var i=0;i<T.length;i++){var m=el.closest(T[i][0]);if(m)return {el:m,t:T[i]};}return null;}
-  function excluded(el){return !el||!el.closest||!!el.closest('.qp-pop,#dj-pill,#qh-djpop,.tin,input,textarea,select,main');}
+  function excluded(el){return !el||!el.closest||!!el.closest('.qp-pop,.dad-zoom,.dmz,#dj-pill,#qh-djpop,.tin,input,textarea,select,main');}
 
   function decorate(){[].forEach.call(document.querySelectorAll(SEL),function(el){if(el.classList.contains('qp-trig'))return;
     var m=match(el);el.classList.add('qp-trig');if(!/^(BUTTON|A)$/.test(el.tagName)){el.setAttribute('role','button');el.setAttribute('tabindex','0');}

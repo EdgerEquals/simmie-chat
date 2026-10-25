@@ -487,6 +487,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="css/quiz-front-orbit.css?v=c55ddc97"><!-- front orbit emojis over the greeting + scroll fade of both orbit layers (Danny 13:22-13:24 AWST 24 Oct, t641u-t644u) -->
 <link rel="stylesheet" href="css/quiz-popups.css?v=1"><!-- pop-up panels for every tappable item in the page chrome (Danny t660u 13:43 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-tty-detail.css?v=1"><!-- Simmie tty detail back: bright dots, amber timestamps, dashed teal top rule, amber AWST · AGE (Danny 25 Oct 12:26 AWST) -->
+<link rel="stylesheet" href="css/dad-mark-zoom.css?v=1"><!-- Dad's mark tap-to-enlarge (Danny t699u 25 Oct) -->
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
@@ -529,7 +530,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   </div></div>
   <!-- bottom row (Danny 02:59 AWST): where the dashboard's masthead carries the mark; the questionnaire's own tagline sits here -->
   <header class="qh-mast"><div class="qh-c">
-    <div class="dh-brand"><img class="dad-mark" src="dash/img/dad-mark-2026-10-24c.svg?v=20261024d" width="32" height="32" alt=""><div class="dh-words"><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you.</p></div></div><!-- tagline under the title, mark x2 (Danny t681u 18:09 AWST 24 Oct) -->
+    <div class="dh-brand"><button type="button" class="dad-zoom" aria-label="Enlarge Dad's logo" aria-haspopup="dialog"><img class="dad-mark" src="dash/img/dad-mark-2026-10-24c.svg?v=20261024d" width="32" height="32" alt=""></button><div class="dh-words"><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you.</p></div></div><!-- tagline under the title, mark x2 (Danny t681u 18:09 AWST 24 Oct) -->
   </div></header>
 </div>
 <main class="wrap">
@@ -1050,6 +1051,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
 <script src="data/foot-line-data.js?v=1" defer></script>
 <script src="js/foot-line.js?v=1" defer></script>
 <script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth"}); });</script>
-<script src="js/quiz-popups.js?v=4" defer></script>
+<script src="js/quiz-popups.js?v=5" defer></script>
+<script src="js/dad-mark-zoom.js?v=1" defer></script><!-- Dad's mark tap-to-enlarge (Danny t699u 25 Oct) -->
 </body>
 </html>
