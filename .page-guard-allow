@@ -36,3 +36,8 @@ questionnaire-preview.html :: style:previews/shared/command-centre-quiz.css
 questionnaire-preview.html :: style:previews/shared/command-centre.css
 questionnaire-preview.html :: style:previews/shared/dad-dj-quiz.css
 questionnaire-preview.html :: style:previews/shared/quiz-foot-lock.css
+questionnaire-preview.html :: script:dash/js/tide-swell.js
+questionnaire-preview.html :: script:js/dad-autodj-quiz.js
+questionnaire-preview.html :: script:js/quiz-front-orbit.js
+questionnaire-preview.html :: script:js/quiz-space-sweep.js
+questionnaire-preview.html :: script:js/quiz-term-status.js
