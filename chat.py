@@ -25,6 +25,10 @@ Other subcommands
                              text box). Her answer comes back as a normal daughter message with the label she picked:
                              '[Answer to Dad: "QUESTION"] Yes' or
                              '[Answer to Simmie: "QUESTION"] Ask more: <her text>' (+ reply_to=<question id>, answer, comment)
+  form --from dad|simmie --text TEXT --form-file SPEC.json [--button LABEL]
+                             post a message with a button that opens an in-chat questions sheet (js/chat-form.js);
+                             the questions live only inside this encrypted entry. Her answers come back like a question
+                             answer: '[Answer to Simmie: "<form title>"] <one line per answer>' (+ reply_to=<message id>)
   pending [--ingest]         her messages still on the relay (last ~12 h) that are not in the log yet
   relay                      run the relay forever (relay topic -> routine webhook); normally via relay-ensure
   relay-ensure               start the relay in the background if it isn't running
@@ -261,6 +265,7 @@ class Chat:
 def fmt(m):
     t = time.strftime('%a %d %b %H:%M', time.localtime(int(m.get('ts', 0)) / 1000))
     q = ' [question, buttons: %s / Ask more]' % ' / '.join(m.get('options') or ['Yes', 'No']) if m.get('kind') == 'question' else ''
+    if m.get('kind') == 'form': q = ' [questions sheet: "%s", button "%s"]' % ((m.get('form') or {}).get('title', ''), m.get('button', ''))
     return f"[{t}] {m.get('from')}{q}: {m.get('text')}"
 
 
@@ -383,6 +388,9 @@ def main():
     q = sub.add_parser('ask'); q.add_argument('--from', dest='frm', choices=['dad', 'simmie'], required=True)
     q.add_argument('--options', nargs=2, metavar=('FIRST', 'SECOND'), default=['Yes', 'No'], help='labels of the two choice buttons (default: Yes No); Ask more is always the third')
     q.add_argument('--text', required=True); q.add_argument('--id'); q.add_argument('--ts', type=int); q.add_argument('--no-ping', action='store_true')
+    fm = sub.add_parser('form'); fm.add_argument('--from', dest='frm', choices=['dad', 'simmie'], required=True)
+    fm.add_argument('--text', required=True); fm.add_argument('--form-file', required=True); fm.add_argument('--button', default='Open the questions')
+    fm.add_argument('--id'); fm.add_argument('--ts', type=int); fm.add_argument('--no-ping', action='store_true')
     p = sub.add_parser('pending'); p.add_argument('--ingest', action='store_true')
     sub.add_parser('relay'); sub.add_parser('relay-ensure'); sub.add_parser('relay-status'); sub.add_parser('relay-restart')
     c = sub.add_parser('context'); c.add_argument('-n', type=int, default=8)
@@ -414,6 +422,18 @@ def main():
         plain.sort(key=lambda m: m.get('ts', 0))
         for m in plain[-args.n:] if args.n else plain:
             print(json.dumps(m, ensure_ascii=False) if args.json else fmt(m))
+    elif args.cmd == 'form':
+        spec = load_json(args.form_file)
+        if not isinstance(spec, dict) or not spec.get('title') or not isinstance(spec.get('sections'), list): die('--form-file needs a JSON object with title + sections')
+        m = {'id': args.id or {'simmie': 's-', 'dad': 'dad-'}[args.frm] + uuid.uuid4().hex[:12], 'ts': args.ts or int(time.time() * 1000),
+             'from': args.frm, 'text': args.text, 'kind': 'form', 'button': args.button[:40], 'form': spec}
+        _, plain = chat.read_log()
+        if m['id'] in {x.get('id') for x in plain}: print('already in log ' + m['id']); return
+        # ntfy caps a message at ~4 KB; a bigger ping would arrive as an attachment, so big sheets ride the log only.
+        if not args.no_ping and len(json.dumps({'v': 1, **encrypt_json(chat.key, m)})) < 3800: chat.ping(m)
+        staged = chat.read_staged()
+        new = chat.append(staged + [m]); chat.write_staged([])
+        print(('appended ' if any(x['id'] == m['id'] for x in new) else 'already in log ') + m['id'] + (f' (+{len(staged)} staged)' if staged else ''))
     elif args.cmd in ('append', 'ask'):
         m = {'id': args.id or {'simmie': 's-', 'dad': 'dad-'}.get(args.frm, 'd-') + uuid.uuid4().hex[:12],
              'ts': args.ts or int(time.time() * 1000), 'from': args.frm, 'text': args.text}

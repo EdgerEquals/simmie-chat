@@ -50,10 +50,12 @@
   });
 
   $('lock-btn').addEventListener('click', () => {
+    if (window.SimmieForm) window.SimmieForm.close();
     sessionStorage.removeItem(SKEY); key = null; cfg = null; msgs.clear(); $('log').innerHTML = '';
     lockOut('');
   });
   function lockOut(msg) {
+    if (window.SimmieForm) window.SimmieForm.close();
     sessionStorage.removeItem(SKEY); key = null; cfg = null; msgs.clear(); $('log').innerHTML = ''; lastLogText = '';
     clearTimeout(pollTimer); stopLive();
     const err = $('login-error'); if (msg) { err.textContent = msg; err.hidden = false; } else err.hidden = true;
@@ -181,6 +183,10 @@
       rec.kind = 'question'; rec.options = Array.isArray(m.options) && m.options.length ? m.options.map(String).filter((o) => o && o !== 'Ask more').slice(0, 2) : ['Yes', 'No'];
       if (rec.options.length < 2) rec.options = ['Yes', 'No'];
     }
+    // In-chat questions sheet (Danny 15:41 AWST 25 Oct): the questions ride inside this encrypted entry (gated).
+    if (from !== 'daughter' && m.kind === 'form' && m.form && typeof m.form === 'object') {
+      rec.kind = 'form'; rec.form = m.form; rec.button = String(m.button || 'Open the questions').slice(0, 40);
+    }
     if (from === 'daughter' && m.reply_to) { rec.reply_to = String(m.reply_to); rec.answer = String(m.answer || ''); if (m.comment) rec.comment = String(m.comment); }
     msgs.set(m.id, rec);
   }
@@ -189,8 +195,9 @@
   // Her tap is sent like any other message of hers (same encrypted relay -> webhook path), with reply_to + answer.
   const senderName = (from) => (from === 'dad' ? 'Dad' : 'Simmie');
   const ASK = 'Ask more';
+  const quoteOf = (q) => (q.kind === 'form' ? String((q.form && q.form.title) || 'Questions') : q.text);
   function answerFor(q) {
-    const prefix = '[Answer to ' + senderName(q.from) + ': "' + q.text + '"] ';
+    const prefix = '[Answer to ' + senderName(q.from) + ': "' + quoteOf(q) + '"] ';
     for (const m of msgs.values()) {
       if (m.from !== 'daughter' || m.state === 'failed') continue;
       if (m.reply_to === q.id) return m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text.slice(m.text.indexOf('"] ') + 3));
@@ -201,7 +208,7 @@
   async function answerQuestion(q, opt, comment) {
     if (answerFor(q) !== null) return;
     const m = { id: 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8), ts: Date.now(), from: 'daughter',
-      text: '[Answer to ' + senderName(q.from) + ': "' + q.text + '"] ' + (comment ? opt + ': ' + comment : opt), reply_to: q.id, answer: opt };
+      text: '[Answer to ' + senderName(q.from) + ': "' + quoteOf(q) + '"] ' + (comment ? opt + ': ' + comment : opt), reply_to: q.id, answer: opt };
     if (comment) m.comment = comment;
     addMsg(m, 'pending'); render();
     await deliver(m);
@@ -290,6 +297,7 @@
         b.appendChild(linkified(m.comment ? m.answer + ': ' + m.comment : (m.answer || m.text)));
       } else b.appendChild(linkified(m.text));
       if (m.from !== 'daughter' && m.kind === 'question') b.appendChild(questionControls(m));
+      if (m.from !== 'daughter' && m.kind === 'form') b.appendChild(formButton(m));
       const meta = document.createElement('span'); meta.className = 'meta';
       let label = fmtTime(m.ts);
       if (mine) label += m.state === 'pending' ? ' · sending…' : m.state === 'sent' ? ' · sent ✓' : m.state === 'failed' ? ' · ' + (m.err || "didn't send") : ' · ✓✓';
@@ -339,6 +347,18 @@
       f.appendChild(t); f.appendChild(s); wrap.appendChild(f);
     }
     return wrap;
+  }
+  // Message button -> in-chat questions sheet (js/chat-form.js). Her answers go back like a question answer.
+  function formButton(m) {
+    const ans = answerFor(m), btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'cf-open-btn' + (ans !== null ? ' done' : '');
+    btn.textContent = ans !== null ? '✓ Answers sent · see them' : m.button;
+    btn.onclick = () => {
+      if (!window.SimmieForm || !key) return;
+      const a = answerFor(m);
+      window.SimmieForm.open(m.form, { answered: a, onSubmit: (summary) => answerQuestion(m, summary) });
+    };
+    return btn;
   }
   // The answer as the page knows it: "Yes" / "No" / "Ask more: <text>"
   setInterval(() => { if (key && !askOpen) render(); }, 30000);
