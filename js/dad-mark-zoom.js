@@ -6,6 +6,8 @@
    the X, or Esc; focus sits on the X while open (Tab stays inside) and returns to the logo's button on close. See css/dad-mark-zoom.css (file names kept from the dad-mark version).
    Light load (Danny t713u 25 Oct): the header <img> is a slim mark; its data-zoom-src names the DETAILED mark, which is fetched only when the
    zoom opens (or earlier from cache if js/load-tiers.js prefetched it at idle).
+   Live physics (Danny t717u/t719u): when js/eq-physics.js is loaded (tier 3) and the mark has data-zoom-stage, the zoom shows the bar-less stage
+   file and EqPhysics.attach() draws the equals, its particles, pulses and reflecting waves on a canvas over it; otherwise the CSS version shows.
    API: LogoZoom.open(name) / close() / isOpen(); DadMarkZoom kept as an alias for the dad mark. */
 (function(){
   'use strict';
@@ -14,7 +16,8 @@
   var ov=document.createElement('div');ov.className='dmz';ov.hidden=true;ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');
   ov.innerHTML='<button type="button" class="dmz-x" aria-label="Close">&times;</button><figure class="dmz-fig"></figure>';
   document.body.appendChild(ov);
-  var fig=ov.querySelector('.dmz-fig'),x=ov.querySelector('.dmz-x'),cur=null,t=null;
+  var fig=ov.querySelector('.dmz-fig'),x=ov.querySelector('.dmz-x'),cur=null,t=null,phys=null;
+  function endPhys(){if(phys){phys.stop();phys=null;}}
   function srcEl(b){return b.querySelector('img,svg');}
   // Rebella neon (Danny t710u): rim + halo behind, small letter holes painted black on top of the glow, then the logo. Units = logo viewBox (1810 wide).
   var NS='http://www.w3.org/2000/svg';
@@ -30,10 +33,12 @@
     var g=u.cloneNode(false);g.setAttribute('filter','url(#rbz-glow)');svg.insertBefore(g,u);
     var h=u.cloneNode(false);h.setAttribute('href',href.replace(/#bonnies-logo$/,'#bonnies-logo-holes'));svg.insertBefore(h,u);}
   function build(b){var name=b.getAttribute('data-zoom'),s=srcEl(b),c;
-    if(s.tagName.toLowerCase()==='img'){c=document.createElement('img');c.decoding='async';c.src=s.getAttribute('data-zoom-src')||s.src;c.alt=s.getAttribute('data-zoom-alt')||'';}
+    var live=name==='dad'&&window.EqPhysics&&!!s.getAttribute('data-zoom-stage');   // Danny t717u: live physics equals over the bar-less stage file
+    if(s.tagName.toLowerCase()==='img'){c=document.createElement('img');c.decoding='async';c.src=(live&&s.getAttribute('data-zoom-stage'))||s.getAttribute('data-zoom-src')||s.src;c.alt=s.getAttribute('data-zoom-alt')||'';}
     else{c=s.cloneNode(true);c.removeAttribute('class');c.removeAttribute('width');c.removeAttribute('height');c.removeAttribute('style');c.setAttribute('preserveAspectRatio','xMidYMid meet');}
     if(name==='rebella'&&c.tagName.toLowerCase()==='svg'){glow(c);}
     fig.className='dmz-fig dmz--'+name;fig.innerHTML='';var w=document.createElement('div');w.className='dmz-art';w.appendChild(c);fig.appendChild(w);
+    if(phys){phys.stop();phys=null;}if(live){try{phys=EqPhysics.attach(ov,c);}catch(e){phys=null;}}
     ov.setAttribute('aria-label',(b.getAttribute('data-zoom-title')||'Logo')+', enlarged');}
   function fromBtn(){var a=srcEl(cur).getBoundingClientRect();fig.style.transition='none';fig.style.transform='none';
     var b=fig.getBoundingClientRect();if(!b.width||!a.width)return 'none';
@@ -44,8 +49,8 @@
     requestAnimationFrame(function(){ov.classList.add('is-open');fig.style.transform='none';});
     x.focus({preventScroll:true});}
   function close(){if(!cur)return;var b=cur;b.setAttribute('aria-expanded','false');ov.classList.remove('is-open');
-    if(rm.matches){ov.hidden=true;}else{var f=fromBtn();fig.style.transform='none';void fig.offsetWidth;fig.style.transition='';fig.style.transform=f;
-      t=setTimeout(function(){ov.hidden=true;fig.style.transform='';},D);}
+    if(rm.matches){ov.hidden=true;endPhys();}else{var f=fromBtn();fig.style.transform='none';void fig.offsetWidth;fig.style.transition='';fig.style.transform=f;
+      t=setTimeout(function(){ov.hidden=true;fig.style.transform='';endPhys();},D);}
     cur=null;b.focus({preventScroll:true});}
   btns.forEach(function(b){b.setAttribute('aria-expanded','false');b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();open(b);});});
   x.addEventListener('click',function(e){e.stopPropagation();close();});

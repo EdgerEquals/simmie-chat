@@ -531,7 +531,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   </div></div>
   <!-- bottom row (Danny 02:59 AWST): where the dashboard's masthead carries the mark; the questionnaire's own tagline sits here -->
   <header class="qh-mast"><div class="qh-c">
-    <div class="dh-brand"><button type="button" class="dad-zoom" data-zoom="dad" data-zoom-title="Dad's logo" aria-label="Enlarge Dad's logo" aria-haspopup="dialog"><img class="dad-mark" data-zoom-alt="Dad’s world equals mark" src="dash/img/dad-mark-v2-head-2026-10-25b.svg?v=emerald1" data-zoom-src="dash/img/dad-mark-v2-2026-10-25b.svg?v=emerald1" width="32" height="32" alt=""></button><div class="dh-words"><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you.</p></div></div><!-- tagline under the title, mark x2 (Danny t681u 18:09 AWST 24 Oct) -->
+    <div class="dh-brand"><button type="button" class="dad-zoom" data-zoom="dad" data-zoom-title="Dad's logo" aria-label="Enlarge Dad's logo" aria-haspopup="dialog"><img class="dad-mark" data-zoom-alt="Dad’s world equals mark" src="dash/img/dad-mark-v2-head-2026-10-25c.svg?v=breathe1" data-zoom-src="dash/img/dad-mark-v2-2026-10-25c.svg?v=breathe1" data-zoom-stage="dash/img/dad-mark-v2-stage-2026-10-25c.svg?v=breathe1" width="32" height="32" alt=""></button><div class="dh-words"><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you.</p></div></div><!-- tagline under the title, mark x2 (Danny t681u 18:09 AWST 24 Oct) -->
   </div></header>
 </div>
 <main class="wrap">
@@ -1054,7 +1054,7 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
 <script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth", rate:2, bounce:true}); });</script>
 <script src="js/quiz-popups.js?v=6" defer></script>
 <script>LoadTiers.script("js/matrix-rain.js?v=1",2)</script><!-- matrix rain background, tier 2 idle (Danny t713u 25 Oct) -->
-<script src="js/dad-mark-zoom.js?v=5" defer></script><script>(function(){var i=document.querySelector(".q-head .dad-mark[data-zoom-src]");if(i&&window.LoadTiers)LoadTiers.prefetch(i.getAttribute("data-zoom-src"));})();</script><!-- tier 3: detailed zoom mark prefetched at idle --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<script src="js/dad-mark-zoom.js?v=6" defer></script><script>(function(){var i=document.querySelector(".q-head .dad-mark[data-zoom-src]");if(i&&window.LoadTiers)LoadTiers.prefetch(i.getAttribute("data-zoom-src"));if(i.getAttribute("data-zoom-stage"))LoadTiers.prefetch(i.getAttribute("data-zoom-stage"));LoadTiers.script("js/eq-physics.js?v=1",3);})();</script><!-- tier 3: detailed zoom mark prefetched at idle --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 <link rel="stylesheet" href="css/quiz-tty2.css?v=2"><!-- tty redesign 2 (Danny t709u 25 Oct 13:11 AWST): live bar graphs, deeper granular palette, rising lines, rain; foot line 2x + bounce -->
 <script src="js/quiz-tty2.js?v=2" defer></script>
 </body>
