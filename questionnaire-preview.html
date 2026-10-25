@@ -575,12 +575,12 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
     <span class="ro" id="ro" aria-hidden="true"></span>
   </div></div>
   <div class="tty" id="tty">
-    <div class="ttybar" aria-hidden="true"><i></i><i></i><i></i><span class="tt">simmie &mdash; tty</span><span class="sat">&#x1F6F0;&#xFE0F;</span></div>
+    <div class="ttybar"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i><span class="tt" aria-hidden="true"></span><span class="sat" aria-hidden="true">&#x1F6F0;&#xFE0F;</span></div><!-- t709u: dots -> live bar graphs + rolling readout, title text removed (js/quiz-tty2.js) -->
     <div class="ttybody">
       <span class="simmie" data-simmie id="footSimmie"></span>
       <div class="ttyl">
         <div class="tout" id="tout"><div class="lp" id="tprev" aria-hidden="true"></div><div class="lc" id="tcur" aria-live="polite"></div></div>
-        <label class="tin"><span class="pr">simmie$</span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
+        <label class="tin"><span class="pr">simmie<b class="dl">$</b></span><span class="sr">Type to Simmie (preview, nothing is sent)</span><span class="tfield"><input id="tinp" type="text" autocomplete="off" spellcheck="false" maxlength="140"><span class="blk" aria-hidden="true"></span></span></label>
       </div>
     </div>
   </div>
@@ -1049,9 +1049,11 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
 <script src="js/quiz-front-orbit.js?v=8548b767" defer></script>
 <link rel="stylesheet" href="css/foot-line.css?v=1">
 <script src="data/foot-line-data.js?v=1" defer></script>
-<script src="js/foot-line.js?v=1" defer></script>
-<script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth"}); });</script>
+<script src="js/foot-line.js?v=2" defer></script>
+<script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth", rate:2, bounce:true}); });</script>
 <script src="js/quiz-popups.js?v=6" defer></script>
 <script src="js/dad-mark-zoom.js?v=3" defer></script><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<link rel="stylesheet" href="css/quiz-tty2.css?v=1"><!-- tty redesign 2 (Danny t709u 25 Oct 13:11 AWST): live bar graphs, deeper granular palette, rising lines, rain; foot line 2x + bounce -->
+<script src="js/quiz-tty2.js?v=1" defer></script>
 </body>
 </html>

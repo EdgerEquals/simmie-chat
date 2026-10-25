@@ -11,6 +11,10 @@
    Timing (phi rules): each item shows for PHI^6 = 17.94 s (PHI^7 / PHI^8 if a long item needs the time to scroll), shifted by the
    page's weather sweep when window.PhiTiming exists; long items wait PHI^2 = 2.618 s, glide left, then wait again; PHI^-1 = 0.618 s
    cross-fade. Pauses while hovered or focused. Reduced motion: no glide or fade, items still swap (long ones end in an ellipsis).
+   Options added 25 Oct 2026 (Danny t709u, questionnaire): rate:2 runs every duration (dwell, waits, fades, glide) twice as fast;
+   bounce:true gives each item an entrance choreography picked by golden angle: "ricochet" (text and its label fly in from
+   opposite sides, collide about halfway and rebound), "headon" (the same, mirrored), "drop" (falls in and bounces vertically)
+   and "pingpong" (long text bounces off the far wall and comes back); long text also rebounds off its end stop.
    Picks are deterministic by the local calendar date in tz, so everyone sees the same items all day; they change at midnight. */
 (function(root){
   "use strict";
@@ -71,21 +75,24 @@
     if(!el || el._fl) return; el._fl = true; opts = opts || {};
     var D = opts.data || root.FOOT_LINE_DATA; if(!D){ return; }
     var tz = opts.tz || "Australia/Perth", order = FL.order = opts.order || ["quote","onthisday","word","countdown","science"];
+    var RATE = +opts.rate > 0 ? +opts.rate : 1, BOUNCE = !!opts.bounce, cyc = 0;
+    var MODES = ["ricochet", "drop", "headon", "pingpong"];
     var sweep = opts.sweep || function(){ return root.PhiTiming && root.PhiTiming.sweep ? root.PhiTiming.sweep() : 0; };
     el.classList.add("fl"); el.setAttribute("aria-live", "off");
-    el.innerHTML = '<span class="fl-e" aria-hidden="true"></span><span class="fl-w"><span class="fl-t"></span></span><span class="fl-sr"></span>';
-    var E = el.querySelector(".fl-e"), W = el.querySelector(".fl-w"), Tt = el.querySelector(".fl-t"), SR = el.querySelector(".fl-sr");
-    var dayKey = "", timer = null, endAt = 0, left = 0, paused = false, glide = null, fade = null;
+    el.innerHTML = '<span class="fl-e" aria-hidden="true"></span><span class="fl-w"><span class="fl-t"></span>' + (BOUNCE ? '<span class="fl-k" aria-hidden="true"></span>' : '') + '</span><span class="fl-sr"></span>';
+    var E = el.querySelector(".fl-e"), W = el.querySelector(".fl-w"), Tt = el.querySelector(".fl-t"), SR = el.querySelector(".fl-sr"), K = el.querySelector(".fl-k");
+    var dayKey = "", timer = null, endAt = 0, left = 0, paused = false, glide = null, fade = null, kick = null;
     function refresh(){ var t = ymd(tz), k = t.y + "-" + t.m + "-" + t.d; if(k !== dayKey){ dayKey = k; FL.items = build(D, t); } }
     FL._item = function(type){ var it = FL.items[type]; return {type:type, emoji:D.emoji[type], label:D.label[type], text:it.text, full:it.full, by:it.by, src:it.src}; };
-    function per(n){ return Math.pow(PHI, n + (RM.matches ? 0 : (+sweep() || 0))); }
+    function per(n){ return Math.pow(PHI, n + (RM.matches ? 0 : (+sweep() || 0))) / RATE; }
     function show(){
       refresh(); var it = FL._item(order[FL.i]);
-      if(glide){ glide.cancel(); glide = null; }
+      if(glide){ glide.cancel(); glide = null; } if(kick){ kick.cancel(); kick = null; }
       E.textContent = it.emoji; Tt.textContent = it.text; SR.textContent = it.label + ": " + it.text;
       el.setAttribute("data-type", it.type); el.setAttribute("title", it.label);
       var over = Math.ceil(Tt.scrollWidth - W.clientWidth), wait = per(2), fd = RM.matches ? 0 : per(-1), n = 6, dwell = per(6);
       el.classList.toggle("fl-long", over > 1);
+      if(BOUNCE && !RM.matches && Tt.animate){ dance(it, over, wait, fd, dwell); arm(dwell * 1000); return; }
       if(over > 1 && !RM.matches){
         while(dwell < 2 * wait + 2 * fd + over / SPEED && n < 8){ n++; dwell = per(n); }
         var dur = Math.max(1, dwell - 2 * wait - 2 * fd);
@@ -96,14 +103,80 @@
       if(fd && Tt.animate){ if(fade) fade.cancel(); fade = el.animate([{opacity:0},{opacity:1}], {duration:fd * 1000, easing:"ease-out"}); }
       arm(dwell * 1000);
     }
+    // ---- bounce choreography (opts.bounce): one Web Animation per element, keyframe offsets in fractions of the dwell ----
+    function dance(it, over, wait, fd, dwell){
+      var mode = MODES[Math.floor(((++cyc) * G % 1) * MODES.length)], ww = W.clientWidth, tw = Math.min(Tt.scrollWidth, ww);
+      var D = dwell * 1000, ent = per(1) * 1000, f = function(ms){ return Math.max(0, Math.min(1, ms / D)); };
+      var hit = Math.round(ww * 0.5), tf = [], kf = [];
+      el.setAttribute("data-dance", mode);
+      if(K){ K.textContent = (it.label || "").replace(/ of the day$/i, "").toUpperCase(); }
+      var kw = K ? (K.offsetWidth || 40) : 40;
+      if(mode === "ricochet" || mode === "headon"){
+        // text and label come from opposite sides, meet about halfway, both rebound; the label flies back out, the text settles home
+        var R = mode === "ricochet";
+        var t0 = R ? ww + 4 : -tw - 4, tHit = R ? hit : hit - tw, tBack = R ? hit + 22 : hit - tw - 22;
+        var k0 = R ? -kw - 4 : ww + 4, kHit = R ? hit - kw : hit, kBack = R ? -kw - 6 : ww + 6;
+        tf = [{transform:"translateX(" + t0 + "px)", offset:0, easing:"cubic-bezier(.25,.6,.4,1)"},
+              {transform:"translateX(" + tHit + "px) scaleX(.94)", offset:f(ent * 0.55)},
+              {transform:"translateX(" + tBack + "px)", offset:f(ent * 0.78), easing:"cubic-bezier(.3,1.5,.6,1)"},
+              {transform:"translateX(0)", offset:f(ent * 1.6)}];
+        kf = [{transform:"translateX(" + k0 + "px)", opacity:1, offset:0, easing:"cubic-bezier(.25,.6,.4,1)"},
+              {transform:"translateX(" + kHit + "px) scaleX(.9)", opacity:1, offset:f(ent * 0.55)},
+              {transform:"translateX(" + kBack + "px)", opacity:0, offset:f(ent * 1.25)},
+              {transform:"translateX(" + kBack + "px)", opacity:0, offset:1}];
+      } else if(mode === "drop"){
+        // falls in from above and bounces on the line (vertical movement), the label pops up out of the floor and away
+        tf = [{transform:"translateY(-120%)", offset:0, easing:"cubic-bezier(.5,0,1,.6)"},
+              {transform:"translateY(0) scaleY(.9)", offset:f(ent * 0.5), easing:"cubic-bezier(0,.4,.5,1)"},
+              {transform:"translateY(-28%)", offset:f(ent * 0.72), easing:"cubic-bezier(.5,0,1,.6)"},
+              {transform:"translateY(0)", offset:f(ent * 0.9), easing:"cubic-bezier(0,.4,.5,1)"},
+              {transform:"translateY(-8%)", offset:f(ent * 1.02), easing:"cubic-bezier(.5,0,1,.6)"},
+              {transform:"translateY(0)", offset:f(ent * 1.12)}];
+        kf = [{transform:"translate(" + (ww - kw) + "px,110%)", opacity:0, offset:0},
+              {transform:"translate(" + (ww - kw) + "px,110%)", opacity:1, offset:f(ent * 0.5)},
+              {transform:"translate(" + (ww - kw) + "px,-10%)", opacity:1, offset:f(ent * 0.8), easing:"cubic-bezier(.5,0,1,.6)"},
+              {transform:"translate(" + (ww - kw) + "px,-130%)", opacity:0, offset:f(ent * 1.4)},
+              {transform:"translate(" + (ww - kw) + "px,-130%)", opacity:0, offset:1}];
+      } else {
+        // pingpong: the label serves from the right wall, the text recoils left and springs back
+        tf = [{transform:"translateX(0)", offset:0},
+              {transform:"translateX(0)", offset:f(ent * 0.5), easing:"cubic-bezier(.2,.8,.3,1)"},
+              {transform:"translateX(-18px)", offset:f(ent * 0.7), easing:"cubic-bezier(.3,1.6,.5,1)"},
+              {transform:"translateX(0)", offset:f(ent * 1.2)}];
+        kf = [{transform:"translateX(" + (ww + 4) + "px)", opacity:1, offset:0, easing:"cubic-bezier(.4,0,1,1)"},
+              {transform:"translateX(" + Math.min(ww - kw, tw) + "px)", opacity:1, offset:f(ent * 0.5), easing:"cubic-bezier(0,.6,.4,1)"},
+              {transform:"translateX(" + (ww + 6) + "px)", opacity:0, offset:f(ent * 1.1)},
+              {transform:"translateX(" + (ww + 6) + "px)", opacity:0, offset:1}];
+      }
+      // long text: glide to its end, rebound off the end stop; pingpong glides back home again
+      if(over > 1){
+        var s0 = Math.max(tf[tf.length - 1].offset, f(ent * 1.6 + wait * 600)), back = mode === "pingpong";
+        var room = (1 - s0) * D - wait * 500, g = Math.min(room / (back ? 2.3 : 1.2), over / (SPEED * RATE) * 1000);
+        tf[tf.length - 1].easing = "linear";
+        tf.push({transform:"translateX(0)", offset:s0, easing:"ease-in-out"});
+        tf.push({transform:"translateX(" + (-over - 14) + "px)", offset:f(s0 * D + g), easing:"cubic-bezier(.3,1.6,.5,1)"});
+        tf.push({transform:"translateX(" + (-over) + "px)", offset:f(s0 * D + g + 380)});
+        if(back){ var s1 = f(s0 * D + g + 380 + wait * 400);
+          tf.push({transform:"translateX(" + (-over) + "px)", offset:s1, easing:"ease-in-out"});
+          tf.push({transform:"translateX(10px)", offset:f(s1 * D + g), easing:"cubic-bezier(.3,1.6,.5,1)"});
+          tf.push({transform:"translateX(0)", offset:f(s1 * D + g + 380)}); }
+      }
+      var last = tf[tf.length - 1]; if(last.offset < 1) tf.push({transform:last.transform, offset:1});
+      tf.forEach(function(k, i){ if(i && k.offset < tf[i-1].offset) k.offset = tf[i-1].offset; });
+      kf.forEach(function(k, i){ if(i && k.offset < kf[i-1].offset) k.offset = kf[i-1].offset; });
+      glide = Tt.animate(tf, {duration:D, fill:"both"});
+      if(K) kick = K.animate(kf, {duration:D, fill:"both"});
+      if(paused){ glide.pause(); if(kick) kick.pause(); }
+      if(fd && el.animate){ if(fade) fade.cancel(); fade = el.animate([{opacity:0},{opacity:1}], {duration:fd * 1000, easing:"ease-out"}); }
+    }
     function arm(ms){ clearTimeout(timer); left = ms; endAt = Date.now() + ms; if(!paused) timer = setTimeout(next, ms); }
     function next(){
       var go = function(){ FL.i = (FL.i + 1) % order.length; show(); };
       if(!RM.matches && el.animate){ var o = el.animate([{opacity:1},{opacity:0}], {duration:per(-1) * 1000, easing:"ease-in", fill:"forwards"}); o.onfinish = function(){ o.cancel(); go(); }; }
       else go();
     }
-    function pause(){ if(paused) return; paused = true; clearTimeout(timer); left = Math.max(0, endAt - Date.now()); if(glide) glide.pause(); el.classList.add("fl-paused"); }
-    function resume(){ if(!paused) return; paused = false; if(glide) glide.play(); el.classList.remove("fl-paused"); endAt = Date.now() + left; timer = setTimeout(next, Math.max(400, left)); }
+    function pause(){ if(paused) return; paused = true; clearTimeout(timer); left = Math.max(0, endAt - Date.now()); if(glide) glide.pause(); if(kick) kick.pause(); el.classList.add("fl-paused"); }
+    function resume(){ if(!paused) return; paused = false; if(glide) glide.play(); if(kick) kick.play(); el.classList.remove("fl-paused"); endAt = Date.now() + left; timer = setTimeout(next, Math.max(400, left)); }
     el.addEventListener("mouseenter", pause); el.addEventListener("mouseleave", function(){ if(document.activeElement !== el) resume(); });
     el.addEventListener("focusin", pause); el.addEventListener("focusout", resume);
     root.addEventListener("resize", function(){ clearTimeout(FL._rz); FL._rz = setTimeout(function(){ if(!paused) show(); }, 300); });

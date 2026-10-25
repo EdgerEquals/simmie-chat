@@ -1,0 +1,103 @@
+/* quiz-tty2.css: Simmie tty footer, redesign 2 (Danny t709u, 25 Oct 2026 13:11 AWST), questionnaire only. Loaded last in the footer.
+   Dad's palette, deeper and more granular: pure black, #143A57, #1F5478, #85A6BB, #9DBCCE, accent #0AF2FF, with matrix green
+   #00FF41 and matrix red #FF0033 for the CLI. Live bar graphs (js/quiz-tty2.js) replace the window dots; the 'simmie - tty' title
+   is gone (a rolling numbers readout sits there). Vertical movement: bars spring, readout rolls up, log lines rise, rain falls,
+   satellite bobs, the foot line's emoji bobs. Phi timings on Simmie's ladder (PHI^n x PHI^-1.5). Heights unchanged (quiz-foot-lock). */
+:root{--k0:#000;--k1:#01050A;--k2:#020911;--k3:#030D18;--k4:#04121F;--k5:#061827;--k6:#081E30;--k7:#0B2539;--k8:#0F2C43;--k9:#143A57;
+  --b1:#174566;--b2:#1F5478;--b3:#2A6688;--b4:#3C7898;--b5:#5689A8;--b6:#6E98B4;--b7:#85A6BB;--b8:#92B1C4;--b9:#9DBCCE;
+  --c1:#0A7F9C;--c2:#06B4CC;--c3:#0AF2FF;--g1:#003B10;--g2:#007A22;--g3:#00B32D;--g4:#00E03A;--g5:#00FF41;--r1:#5A0012;--r2:#B0001F;--r3:#FF0033}
+
+/* ---- the whole footer: near-black with a deep blue floor, many stops ---- */
+.foot{background:
+  radial-gradient(120% 140% at 50% 120%,rgba(20,58,87,.55) 0%,rgba(15,44,67,.38) 22%,rgba(11,37,57,.24) 40%,rgba(6,24,39,.12) 60%,transparent 78%),
+  linear-gradient(180deg,#000 0%,#000308 9%,var(--k1) 17%,var(--k2) 27%,var(--k3) 38%,var(--k4) 50%,var(--k5) 62%,var(--k6) 74%,var(--k7) 86%,var(--k8) 100%);
+  border-top:2px dashed var(--b3)}
+.foot .strip{color:var(--b7)}
+.foot .lt b{color:#E3F1F8}
+.foot .ro{background:linear-gradient(90deg,var(--b9),#BFE6F2 30%,var(--c3) 55%,var(--b8) 80%,var(--b9));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---- tty panel: gradient border, scanlines, inner vignette ---- */
+.foot .tty{position:relative;border:1px solid transparent;border-radius:6px;
+  background:
+    repeating-linear-gradient(180deg,rgba(10,242,255,.035) 0 1px,transparent 1px 3px) padding-box,
+    radial-gradient(90% 160% at 12% 0%,rgba(31,84,120,.42),rgba(20,58,87,.22) 35%,rgba(11,37,57,.1) 60%,transparent 80%) padding-box,
+    radial-gradient(60% 140% at 100% 100%,rgba(0,255,65,.06),transparent 70%) padding-box,
+    linear-gradient(90deg,#000,var(--k1) 8%,var(--k2) 16%,var(--k3) 26%,var(--k4) 38%,var(--k5) 50%,var(--k4) 62%,var(--k3) 74%,var(--k2) 84%,var(--k1) 92%,#000) padding-box,
+    linear-gradient(90deg,var(--k9),var(--b1) 8%,var(--b2) 16%,var(--b4) 26%,var(--b7) 36%,var(--b9) 44%,var(--c3) 50%,var(--b9) 56%,var(--b7) 64%,var(--b4) 74%,var(--b2) 84%,var(--b1) 92%,var(--k9)) border-box;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 10px rgba(10,242,255,.08),inset 0 0 14px rgba(0,0,0,.8)}
+.foot .tty::after{content:"";position:absolute;left:0;top:0;width:40%;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(10,242,255,.0) 10%,rgba(10,242,255,.9) 50%,rgba(157,188,206,.0) 90%,transparent);
+  animation:t2sheen 8.721s cubic-bezier(.45,0,.55,1) -3.331s infinite alternate}
+@keyframes t2sheen{from{transform:translateX(-30%)}to{transform:translateX(180%)}}
+
+/* ---- top bar: graphs (left), rolling readout (middle), satellite (right) ---- */
+.foot .ttybar{gap:6px;padding:0 6px 0 5px;color:var(--b7);
+  background:linear-gradient(180deg,var(--k7) 0%,var(--k6) 20%,var(--k5) 40%,var(--k4) 60%,var(--k3) 80%,var(--k1) 100%);
+  border-bottom:1px solid rgba(20,58,87,.9);box-shadow:inset 0 1px 0 rgba(157,188,206,.08)}
+.tgs{display:inline-flex;align-items:center;gap:7px;flex:none}
+.tg{display:inline-flex;align-items:flex-end;gap:2px;height:13px}
+.foot .ttybar .tg .tgl{font:700 7.5px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.3px;color:var(--b6);align-self:center}
+.foot .ttybar .tg .tgb{display:inline-flex;align-items:flex-end;gap:1px;height:12px;padding:0 1px;border-bottom:1px solid var(--b2);background:linear-gradient(0deg,rgba(20,58,87,.35),rgba(20,58,87,0))}
+.foot .ttybar .tg .tgb i{display:block;box-shadow:none;width:3px;height:12px;border-radius:1px 1px 0 0;transform-origin:50% 100%;transform:scaleY(var(--v,.08));
+  transition:transform .618s cubic-bezier(.3,1.7,.5,1);
+  background:linear-gradient(0deg,var(--k9) 0%,var(--b1) 14%,var(--b2) 28%,var(--b4) 42%,var(--b6) 56%,var(--b9) 70%,#BFE6F2 84%,var(--c3) 100%)}
+.foot .ttybar .tg-log .tgb i{background:linear-gradient(0deg,var(--g1) 0%,#00521A 15%,var(--g2) 30%,#009A28 45%,var(--g3) 60%,var(--g4) 76%,var(--g5) 90%,#B8FFC9 100%);
+  box-shadow:0 0 3px rgba(0,255,65,.25)}
+.foot .ttybar .tg-qz .tgb i{background:linear-gradient(0deg,var(--k9) 0%,var(--b2) 18%,var(--b3) 34%,var(--b5) 50%,var(--b7) 66%,var(--b9) 82%,#D8EEF6 100%)}
+.foot .ttybar .tg-qz .tgb i.on{animation:t2step 1.272s ease-in-out infinite;box-shadow:0 0 4px rgba(10,242,255,.7)}
+@keyframes t2step{0%,100%{filter:brightness(1)}50%{filter:brightness(1.8)}}
+.foot .ttybar .tg-net .tgb i{background:linear-gradient(0deg,#03303F 0%,#05506A 16%,var(--c1) 32%,#079AB6 48%,var(--c2) 62%,#08D6EA 78%,var(--c3) 92%,#B8FBFF 100%);box-shadow:0 0 3px rgba(10,242,255,.25)}
+.foot .ttybar .tg-net.slow .tgb i:last-child,.foot .ttybar .tg-net.off .tgb i{background:linear-gradient(0deg,var(--r1) 0%,#7A0018 25%,var(--r2) 50%,#E0002C 75%,var(--r3) 100%);box-shadow:0 0 4px rgba(255,0,51,.45)}
+/* idle shimmer so the graphs never look dead: a tiny phi-staggered bob on top of the real value */
+.foot .ttybar .tg .tgb i{animation:t2bob 2.058s ease-in-out infinite;animation-delay:calc(var(--k) * -0.318s)}
+@keyframes t2bob{0%,100%{translate:0 0}50%{translate:0 -1px}}
+.foot .ttybar .tg-qz .tgb i.on{animation:t2step 1.272s ease-in-out infinite,t2bob 2.058s ease-in-out infinite}
+.foot .troll{flex:1;min-width:0;height:12px;overflow:hidden;text-align:center;display:flex;justify-content:center;gap:14px;font:600 9px/12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.3px}
+.troll .trw{display:block;flex:0 1 auto;min-width:0;will-change:transform}
+.troll b{display:block;height:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.troll u{text-decoration:none;color:var(--b5)}
+.troll .t-c{color:var(--c3);text-shadow:0 0 4px rgba(10,242,255,.4)}.troll .t-g{color:var(--g5);text-shadow:0 0 4px rgba(0,255,65,.4)}
+.troll .t-b{color:var(--b9)}.troll .t-r{color:var(--r3);text-shadow:0 0 4px rgba(255,0,51,.5)}
+.foot .ttybar .sat{display:inline-block;animation:t2sat 2.058s ease-in-out -0.786s infinite;filter:drop-shadow(0 0 2px rgba(10,242,255,.6))}
+@keyframes t2sat{0%,100%{transform:translateY(1px) rotate(-6deg)}50%{transform:translateY(-1.5px) rotate(6deg)}}
+
+/* ---- body: CLI colours (matrix green, red accents), Dad's blues for timestamps ---- */
+.foot .ttybody{position:relative;padding-right:4px}
+.foot .ttyl{position:relative;z-index:1}
+.foot .tout .lc{color:var(--g5);text-shadow:0 0 6px rgba(0,255,65,.45),0 0 1px rgba(0,255,65,.9)}
+.foot .tout .lp{color:var(--g3);opacity:.78}
+.foot .tout .lc .ts{color:var(--b9);opacity:1;text-shadow:0 0 4px rgba(157,188,206,.35)}
+.foot .tout .lp .ts{color:var(--b5);opacity:1;text-shadow:none}
+.foot .tout .lc .pr{color:var(--c3);text-shadow:0 0 5px rgba(10,242,255,.5)}
+.foot .tout .lp .pr{color:var(--b4);text-shadow:none}
+.foot .tout .lp,.foot .tout .lc{will-change:transform}
+.foot .ttyl .tin .pr{color:var(--g5);font-weight:700;text-shadow:0 0 5px rgba(0,255,65,.6),0 0 12px rgba(0,255,65,.25)}
+.foot .ttyl .tin .pr .dl{font-weight:700;color:var(--r3);text-shadow:0 0 5px rgba(255,0,51,.75)}
+.foot .ttybody .simmie{filter:drop-shadow(0 0 4px rgba(10,242,255,.25)) drop-shadow(0 0 1px rgba(157,188,206,.4))}
+/* matrix rain: a few thin columns at the right edge, behind the text, fading top and bottom */
+.foot .train{position:absolute;right:3px;top:0;bottom:0;display:flex;gap:2px;overflow:hidden;pointer-events:none;z-index:0;opacity:.55;
+  font:700 7px/8px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--g4);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(180deg,transparent,#000 30%,#000 70%,transparent)}
+.foot .train span{display:block;width:6px;text-align:center;animation:t2rain 5.39s linear infinite;text-shadow:0 0 3px rgba(0,255,65,.6)}
+.foot .train span:nth-child(even){color:var(--g3)}
+.foot .train em{font-style:normal;color:var(--r3);text-shadow:0 0 4px rgba(255,0,51,.7)}
+@keyframes t2rain{from{transform:translateY(-50%)}to{transform:translateY(0)}}
+
+/* ---- bottom foot line: the label 'kicker' that bounces against the text; emoji bobs; deeper blue text ---- */
+.foot .note{color:#D6E9F2}
+.foot .note .fl-w{position:relative}
+.foot .note .fl-t{color:#E3F1F8;text-shadow:0 0 6px rgba(10,242,255,.18)}
+.foot .note .fl-k{position:absolute;left:0;top:50%;margin-top:-6px;height:12px;padding:0 4px;border-radius:3px;pointer-events:none;
+  font:700 8px/12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.5px;white-space:nowrap;color:#000;
+  background:linear-gradient(90deg,var(--b7),var(--b9) 30%,var(--c3) 60%,var(--b9) 85%,var(--b7));box-shadow:0 0 6px rgba(10,242,255,.55);
+  transform:translateX(-120%);opacity:0}
+.foot .note .fl-e{display:inline-block;animation:t2bob2 1.272s ease-in-out -0.486s infinite}
+@keyframes t2bob2{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}
+
+body.paused .foot .tty::after,body.paused .foot .ttybar .tg .tgb i,body.paused .foot .ttybar .sat,body.paused .foot .train span,body.paused .foot .note .fl-e{animation-play-state:paused}
+@media (max-width:480px){.foot .train{opacity:.4}}
+@media (max-width:400px){.tgs{gap:5px}.foot .ttybar .tg{gap:1px}.foot .ttybar .tg .tgl{font-size:6.5px}.foot .ttybar{gap:5px}}
+@media (prefers-reduced-motion:reduce){
+  .foot .tty::after,.foot .ttybar .tg .tgb i,.foot .ttybar .tg-qz .tgb i.on,.foot .ttybar .sat,.foot .train span,.foot .note .fl-e{animation:none!important}
+  .foot .ttybar .tg .tgb i{transition:none}.foot .note .fl-k{display:none}
+}
