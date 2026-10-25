@@ -4,6 +4,8 @@
    animations keep running) with a soft cyan glow; the Rebella logo as the same vector <use> (crisp at any size), raspberry with a soft pink neon glow.
    It scales up from the small logo's spot over PHI^-2 = 0.382 s (reduced motion: appears/disappears instantly). Closes on a tap outside the logo,
    the X, or Esc; focus sits on the X while open (Tab stays inside) and returns to the logo's button on close. See css/dad-mark-zoom.css (file names kept from the dad-mark version).
+   Light load (Danny t713u 25 Oct): the header <img> is a slim mark; its data-zoom-src names the DETAILED mark, which is fetched only when the
+   zoom opens (or earlier from cache if js/load-tiers.js prefetched it at idle).
    API: LogoZoom.open(name) / close() / isOpen(); DadMarkZoom kept as an alias for the dad mark. */
 (function(){
   'use strict';
@@ -15,7 +17,7 @@
   var fig=ov.querySelector('.dmz-fig'),x=ov.querySelector('.dmz-x'),cur=null,t=null;
   function srcEl(b){return b.querySelector('img,svg');}
   function build(b){var name=b.getAttribute('data-zoom'),s=srcEl(b),c;
-    if(s.tagName.toLowerCase()==='img'){c=document.createElement('img');c.src=s.src;c.alt=s.getAttribute('data-zoom-alt')||'';}
+    if(s.tagName.toLowerCase()==='img'){c=document.createElement('img');c.decoding='async';c.src=s.getAttribute('data-zoom-src')||s.src;c.alt=s.getAttribute('data-zoom-alt')||'';}
     else{c=s.cloneNode(true);c.removeAttribute('class');c.removeAttribute('width');c.removeAttribute('height');c.removeAttribute('style');c.setAttribute('preserveAspectRatio','xMidYMid meet');}
     fig.className='dmz-fig dmz--'+name;fig.innerHTML='';var w=document.createElement('div');w.className='dmz-art';w.appendChild(c);fig.appendChild(w);
     ov.setAttribute('aria-label',(b.getAttribute('data-zoom-title')||'Logo')+', enlarged');}

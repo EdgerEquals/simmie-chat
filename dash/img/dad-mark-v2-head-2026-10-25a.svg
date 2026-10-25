@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Dad's world equals mark">
+<!-- Dad mark v2, SLIM HEADER version (cyan). Two orbits, two bodies, the equals. 6 animations, transform and opacity only, no filters.
+     The detailed mark (toroid field lines) loads only in the tap-to-zoom view. Timings: Dad ladder PHI^n x PHI^-1.5. -->
+<style>
+.v{transform-box:view-box;transform-origin:32px 32px}
+#s{animation:a 46.98s linear -29.03s infinite}
+#p1{animation:b 29.03s linear -6.85s infinite}
+#p2{animation:b 17.94s linear -15.32s infinite}
+#b1{animation:a 2.62s linear -1.62s infinite}
+#b2{animation:a 4.24s linear -1.00s infinite}
+#g{animation:c 2.06s ease-in-out -0.56s infinite alternate}
+@keyframes a{to{transform:rotate(360deg)}}
+@keyframes b{to{transform:rotate(-360deg)}}
+@keyframes c{from{opacity:.45}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<defs>
+<linearGradient id="r1" x1="0" x2="1"><stop offset="0" stop-color="#1F5478"/><stop offset=".5" stop-color="#9DBCCE"/><stop offset="1" stop-color="#0AF2FF"/></linearGradient>
+<linearGradient id="r2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#143A57"/><stop offset=".55" stop-color="#85A6BB"/><stop offset="1" stop-color="#0AF2FF"/></linearGradient>
+<linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#143A57"/><stop offset="1" stop-color="#3A84B0"/></linearGradient>
+<linearGradient id="u" x1="0" x2="1"><stop offset="0" stop-color="#1F8FC0"/><stop offset=".35" stop-color="#0AF2FF"/><stop offset=".5" stop-color="#BFFBFF"/><stop offset=".65" stop-color="#0AF2FF"/><stop offset="1" stop-color="#1F8FC0"/></linearGradient>
+</defs>
+<g id="s" class="v">
+<g id="p1" class="v"><g transform="rotate(-20 32 32)">
+ <ellipse cx="32" cy="32" rx="29" ry="11" fill="none" stroke="url(#r1)" stroke-width="2.0" opacity="1"/>
+ <g transform="translate(0 19.862) scale(1 0.3793)"><g id="b1" class="v"><circle cx="61" cy="32" r="4.6" fill="#0AF2FF" opacity=".35"/><circle cx="61" cy="32" r="2.6" fill="#E6FDFF"/></g></g>
+</g></g>
+<g id="p2" class="v"><g transform="rotate(25 32 32)">
+ <ellipse cx="32" cy="32" rx="26" ry="14" fill="none" stroke="url(#r2)" stroke-width="1.6" opacity="1"/>
+ <g transform="translate(0 14.769) scale(1 0.5385)"><g id="b2" class="v"><rect x="4.1" y="30.1" width="3.8" height="3.8" fill="#9DBCCE" transform="rotate(45 6 32)"/></g></g>
+</g></g>
+</g>
+<g transform="translate(32 32) scale(1.25) translate(-32 -32)">
+<rect x="17.7" y="31.7" width="28.6" height="9.4" fill="#0AF2FF" opacity=".18"/>
+<rect id="g" x="18.6" y="32.6" width="26.8" height="7.6" fill="#0AF2FF" opacity=".4"/>
+<rect x="19.2" y="24.4" width="25.6" height="6.4" fill="url(#t)" stroke="#9DBCCE" stroke-width=".7"/>
+<rect x="19.2" y="33.2" width="25.6" height="6.4" fill="url(#u)"/>
+</g>
+</svg>

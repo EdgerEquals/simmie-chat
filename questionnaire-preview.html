@@ -188,7 +188,7 @@ window.QUIZ_COPY = {
 <meta name="referrer" content="no-referrer">
 <title>Questionnaire preview for Bonnie</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&family=Lora:wght@500&display=swap"></noscript><!-- web fonts no longer block first paint (Danny t713u: lighter load) -->
 <link rel="stylesheet" href="css/dad-palette.css?v=2">
 <style>
 /* PREVIEW ONLY. Nothing Bonnie types is sent anywhere: no forms, no POSTs. Answers live in page memory and vanish on reload.
@@ -490,8 +490,8 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="css/dad-mark-zoom.css?v=2"><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 </head>
 <body>
-<video class="bgloop" id="bgloop" muted autoplay loop playsinline aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp"><source src="media/space-loop.webm" type="video/webm"><source src="media/space-loop.mp4" type="video/mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
-<script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();})();</script>
+<video class="bgloop" id="bgloop" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp" data-src-webm="media/space-loop.webm" data-src-mp4="media/space-loop.mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
+<script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;function go(){if(v.getAttribute('data-on'))return;v.setAttribute('data-on','1');[['webm','video/webm'],['mp4','video/mp4']].forEach(function(t){var s=document.createElement('source');s.src=v.getAttribute('data-src-'+t[0]);s.type=t[1];v.appendChild(s);});v.preload='auto';v.load();document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();}/* space loop video starts after load, when idle (poster shows until then; Danny t713u lighter load) */function later(){(window.requestIdleCallback||function(f){setTimeout(f,1200)})(go,{timeout:4000});}if(document.readyState==='complete')later();else addEventListener('load',later);window.__bgloopGo=go;})();</script>
 <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
 <!-- Questionnaire header (Danny 24 Oct 2026 02:50 AWST): the live Bonnie's Dashboard header STRUCTURE (rebella 517e809 moderation/:
@@ -530,7 +530,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
   </div></div>
   <!-- bottom row (Danny 02:59 AWST): where the dashboard's masthead carries the mark; the questionnaire's own tagline sits here -->
   <header class="qh-mast"><div class="qh-c">
-    <div class="dh-brand"><button type="button" class="dad-zoom" data-zoom="dad" data-zoom-title="Dad's logo" aria-label="Enlarge Dad's logo" aria-haspopup="dialog"><img class="dad-mark" data-zoom-alt="Dad’s world equals mark" src="dash/img/dad-mark-v2-2026-10-25a.svg?v=20261025a" width="32" height="32" alt=""></button><div class="dh-words"><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you.</p></div></div><!-- tagline under the title, mark x2 (Danny t681u 18:09 AWST 24 Oct) -->
+    <div class="dh-brand"><button type="button" class="dad-zoom" data-zoom="dad" data-zoom-title="Dad's logo" aria-label="Enlarge Dad's logo" aria-haspopup="dialog"><img class="dad-mark" data-zoom-alt="Dad’s world equals mark" src="dash/img/dad-mark-v2-head-2026-10-25a.svg?v=quizlight1" data-zoom-src="dash/img/dad-mark-v2-2026-10-25a.svg?v=20261025a" width="32" height="32" alt=""></button><div class="dh-words"><span class="dh-title" data-copy="headTitle">Questions for Bonnie</span><span class="dh-pill" data-copy="headPill">from Dad</span><p class="dh-sub" data-copy="headSub">Go with whatever feels right to you.</p></div></div><!-- tagline under the title, mark x2 (Danny t681u 18:09 AWST 24 Oct) -->
   </div></header>
 </div>
 <main class="wrap">
@@ -1052,6 +1052,6 @@ addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive
 <script src="js/foot-line.js?v=1" defer></script>
 <script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth"}); });</script>
 <script src="js/quiz-popups.js?v=6" defer></script>
-<script src="js/dad-mark-zoom.js?v=2" defer></script><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<script src="js/dad-mark-zoom.js?v=3" defer></script><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 </body>
 </html>
