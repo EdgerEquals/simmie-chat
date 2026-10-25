@@ -32,11 +32,16 @@ Other subcommands
   pending [--ingest]         her messages still on the relay (last ~12 h) that are not in the log yet
   relay                      run the relay forever (relay topic -> routine webhook); normally via relay-ensure
   relay-ensure               start the relay in the background if it isn't running
-  relay-status               is the relay running, when did it last forward
+  relay-status               is the relay running, when did it last forward, heartbeat age
+  Ask Dad: a daughter message typed after the chat page's Ask Dad key ("Dad: ..." prefix) or sent by the dashboard's
+  Ask Dad window (type "ask-dad") shows as [ASK DAD] in context/history/pending, and the relay pings Dad's phone
+  (tools/ping_dad.py, generic text only, never the message) as soon as it arrives.
+  Stall check: the relay writes a heartbeat on every stream line / reconnect; a watchdog thread restarts the relay
+  in place if it goes quiet for RELAY_STALL_S, and relay-ensure restarts a relay whose heartbeat is stale.
   relay-restart              stop the relay and start it again (after code/password changes)
 Global: --repo DIR (default: this script's folder), --no-git (local tests: no pull/commit/push)
 """
-import argparse, base64, json, os, subprocess, sys, time, uuid, urllib.request, urllib.error, signal
+import argparse, base64, json, os, subprocess, sys, threading, time, uuid, urllib.request, urllib.error, signal
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -52,6 +57,9 @@ LOG_FILE = os.path.join(STATE_DIR, 'relay.log')
 IGNORE_FILE = os.path.join(STATE_DIR, 'ignore.json')   # ["id", ...] never (re)ingest / forward
 STAGED_FILE = os.path.join(STATE_DIR, 'staged.enc.json')  # her ingested-but-not-yet-committed msgs (encrypted, 0600)
 TEST_PREFIX = 'TEST from setup'
+HB_FILE = os.path.join(STATE_DIR, 'relay.heartbeat')     # mtime = last sign of life of the relay loop
+RELAY_STALL_S = 240                                       # ntfy keepalives every ~45 s; socket timeout 60 s
+PING_DAD = os.environ.get('SIMMIE_PING_DAD', os.path.join(HERE, 'tools', 'ping_dad.py'))  # box-only, not in the repo
 ITER = 250000
 
 
@@ -262,8 +270,17 @@ class Chat:
         except Exception: return None
 
 
+def is_ask_dad(m):
+    """Bonnie's Ask Dad messages: dashboard window (type ask-dad) or the chat page's Ask Dad key ("Dad: " prefix)."""
+    return m.get('from') == 'daughter' and (m.get('type') == 'ask-dad' or str(m.get('text', '')).lstrip().lower().startswith('dad:'))
+
+
 def fmt(m):
     t = time.strftime('%a %d %b %H:%M', time.localtime(int(m.get('ts', 0)) / 1000))
+    if is_ask_dad(m):
+        pinged = m.get('id') in set((load_json(STATE_FILE, {}) or {}).get('askdad_pinged', []))
+        src = ' from dashboard' if m.get('source') == 'moderation' else ''
+        return f"[{t}] {m.get('from')} [ASK DAD{src}: " + ("Dad's phone already pinged by the relay" if pinged else 'ping Dad') + f"]: {m.get('text')}"
     q = ' [question, buttons: %s / Ask more]' % ' / '.join(m.get('options') or ['Yes', 'No']) if m.get('kind') == 'question' else ''
     if m.get('kind') == 'form': q = ' [questions sheet: "%s", button "%s"]' % ((m.get('form') or {}).get('title', ''), m.get('button', ''))
     return f"[{t}] {m.get('from')}{q}: {m.get('text')}"
@@ -286,11 +303,24 @@ def relay_forever(chat):
             chat.ping({'type': 'typing', 'id': 't-' + uuid.uuid4().hex[:10], 'ref': m['id'], 'ts': int(time.time() * 1000)})
         except Exception as e: logline(f'typing ping failed: {type(e).__name__}')
 
+    def ping_dad(m):
+        """Ask Dad: generic phone ping (never the message text), once per message id, recorded in relay state."""
+        if m['id'] in st.setdefault('askdad_pinged', []): return
+        src = 'dashboard' if m.get('source') == 'moderation' else 'chat page'
+        try:
+            r = subprocess.run([sys.executable, PING_DAD, '--kind', 'question', '--title', 'Simmie: Bonnie pressed Ask Dad'],
+                               capture_output=True, text=True, timeout=40)
+            res = f'rc {r.returncode}'
+        except Exception as e: res = type(e).__name__
+        logline(f'ask-dad {m["id"]} ({src}) -> phone ping {res}')
+        st['askdad_pinged'] = (st['askdad_pinged'] + [m['id']])[-200:]; save_private(STATE_FILE, st)
+
     def forward(ev, m):
         if m.get('from') != 'daughter' or m['id'] in st['seen']: return
         if skip_msg(m):
             logline(f'skip {m["id"]} (test/ignored; not forwarded)')
             st['seen'] = (st['seen'] + [m['id']])[-500:]; save_private(STATE_FILE, st); return
+        if is_ask_dad(m): ping_dad(m)   # phone first: the routine may be slow; it sees [ASK DAD ...] in context
         now = time.time()
         sent_times[:] = [t for t in sent_times if now - t < 600]
         if len(sent_times) >= 20: logline('rate limit hit; holding message ' + m['id']); return
@@ -312,15 +342,34 @@ def relay_forever(chat):
         st['last_forward'] = int(now)
         save_private(STATE_FILE, st)
 
-    logline('relay started')
+    hb = {'t': time.time()}
+    def beat():
+        hb['t'] = time.time()
+        try: os.utime(HB_FILE)
+        except FileNotFoundError:
+            fd = os.open(HB_FILE, os.O_WRONLY | os.O_CREAT, 0o600); os.close(fd)
+        except Exception: pass
+
+    def watchdog():   # stall check: a hung read / DNS lookup / box pause -> restart this relay in place (same pid)
+        while True:
+            time.sleep(20)
+            quiet = time.time() - hb['t']
+            if quiet > RELAY_STALL_S:
+                logline(f'relay stalled ({int(quiet)}s without a stream line); restarting in place')
+                try: os.execv(sys.executable, [sys.executable, os.path.abspath(__file__), '--repo', chat.repo, 'relay'])
+                except Exception as e: logline(f'restart failed: {type(e).__name__}'); hb['t'] = time.time()
+    threading.Thread(target=watchdog, daemon=True).start()
+
+    logline('relay started'); beat()
     backoffs, fails = [2, 5, 10], 0
     while True:
         since = st.get('last_id') or '10m'
         try:
             req = urllib.request.Request(f"{relay['base']}/{relay['topic']}/json?since={since}")
             with urllib.request.urlopen(req, timeout=60) as r:  # ntfy sends keepalives every ~45 s
-                fails = 0
+                fails = 0; beat()
                 for line in r:
+                    beat()
                     ev = json.loads(line)
                     if ev.get('event') != 'message': continue
                     m = chat.open_payload_quiet(ev.get('message', ''))
@@ -329,7 +378,7 @@ def relay_forever(chat):
         except Exception as e:
             backoff = backoffs[min(fails, len(backoffs) - 1)]; fails += 1
             logline(f'stream ended: {type(e).__name__}; reconnecting in {backoff}s')
-            time.sleep(backoff)
+            time.sleep(backoff); beat()
 
 
 def relay_pid():
@@ -354,8 +403,19 @@ def relay_start(chat):
     return None
 
 
+def heartbeat_age():
+    try: return time.time() - os.path.getmtime(HB_FILE)
+    except Exception: return None
+
+
 def relay_ensure(chat, quiet=False):
     pid = relay_pid()
+    age = heartbeat_age()
+    if pid and age is not None and age > RELAY_STALL_S + 60:   # keep-alive path: a stalled relay gets restarted
+        relay_stop()
+        with open(LOG_FILE, 'a') as f: f.write(time.strftime('%Y-%m-%d %H:%M:%S ') + f'relay-ensure: heartbeat {int(age)}s old; restarted\n')
+        pid = relay_start(chat)
+        return f'relay was stalled ({int(age)}s); restarted (pid {pid})' if pid else 'relay FAILED to restart; see ' + LOG_FILE
     if pid: return f'relay running (pid {pid})'
     pid = relay_start(chat)
     return f'relay started (pid {pid})' if pid else 'relay FAILED to start; see ' + LOG_FILE
@@ -470,7 +530,8 @@ def main():
         pid = relay_pid(); st = load_json(STATE_FILE, {}) or {}
         lf = st.get('last_forward')
         print(('running pid %s' % pid) if pid else 'NOT running',
-              '| last forward:', time.strftime('%Y-%m-%d %H:%M', time.localtime(lf)) if lf else 'never')
+              '| last forward:', time.strftime('%Y-%m-%d %H:%M', time.localtime(lf)) if lf else 'never',
+              '| heartbeat:', ('%ds ago' % heartbeat_age()) if heartbeat_age() is not None else 'none yet')
 
 
 def cmd_context(chat, raw, n=8):
