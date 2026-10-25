@@ -8,10 +8,21 @@
   --c1:#0A7F9C;--c2:#06B4CC;--c3:#0AF2FF;--g1:#003B10;--g2:#007A22;--g3:#00B32D;--g4:#00E03A;--g5:#00FF41;--r1:#5A0012;--r2:#B0001F;--r3:#FF0033}
 
 /* ---- the whole footer: near-black with a deep blue floor, many stops ---- */
-.foot{background:
-  radial-gradient(120% 140% at 50% 120%,rgba(20,58,87,.55) 0%,rgba(15,44,67,.38) 22%,rgba(11,37,57,.24) 40%,rgba(6,24,39,.12) 60%,transparent 78%),
-  linear-gradient(180deg,#000 0%,#000308 9%,var(--k1) 17%,var(--k2) 27%,var(--k3) 38%,var(--k4) 50%,var(--k5) 62%,var(--k6) 74%,var(--k7) 86%,var(--k8) 100%);
-  border-top:2px dashed var(--b3)}
+.foot{background:#000;border-top:2px dashed var(--b3)}
+/* t721u (Danny 13:31 AWST 25 Oct): the deep-blue floor drifts in a slow seamless loop. One oversized layer moved by transform only
+   (compositor, no repaint, no filters): 200% wide, its glows repeat every half-width, so translating -50% lands on the same picture.
+   Period PHI^9 x PHI^-1.5 = PHI^7.5 = 36.96 s (Simmie slow loop). Static under reduced motion; paused with the page. */
+.foot::before{content:"";position:absolute;left:0;top:-10px;width:200%;height:calc(100% + 20px);z-index:-1;pointer-events:none;will-change:transform;
+  background:
+    radial-gradient(28% 120% at 12% 115%,rgba(31,84,120,.5) 0%,rgba(20,58,87,.36) 30%,rgba(11,37,57,.18) 58%,transparent 80%),
+    radial-gradient(28% 120% at 62% 115%,rgba(31,84,120,.5) 0%,rgba(20,58,87,.36) 30%,rgba(11,37,57,.18) 58%,transparent 80%),
+    radial-gradient(20% 90% at 37% 120%,rgba(10,242,255,.07) 0%,rgba(42,102,136,.16) 35%,transparent 75%),
+    radial-gradient(20% 90% at 87% 120%,rgba(10,242,255,.07) 0%,rgba(42,102,136,.16) 35%,transparent 75%),
+    linear-gradient(180deg,#000 0%,#000308 12%,var(--k1) 20%,var(--k2) 29%,var(--k3) 39%,var(--k4) 50%,var(--k5) 61%,var(--k6) 72%,var(--k7) 84%,var(--k8) 100%);
+  animation:t2floor 36.957s linear -14.117s infinite}
+@keyframes t2floor{0%{transform:translate3d(0,0,0)}25%{transform:translate3d(-12.5%,-6px,0)}50%{transform:translate3d(-25%,0,0)}75%{transform:translate3d(-37.5%,6px,0)}100%{transform:translate3d(-50%,0,0)}}
+body.paused .foot::before{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.foot::before{animation:none;transform:none}}
 .foot .strip{color:var(--b7)}
 .foot .lt b{color:#E3F1F8}
 .foot .ro{background:linear-gradient(90deg,var(--b9),#BFE6F2 30%,var(--c3) 55%,var(--b8) 80%,var(--b9));-webkit-background-clip:text;background-clip:text;color:transparent}
