@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Dad's world equals mark">
+<!-- Dad mark v2, SLIM HEADER version (emerald). Two orbits, two bodies, the equals. 6 animations, transform and opacity only, no filters.
+     The detailed mark (toroid field lines) loads only in the tap-to-zoom view. Timings: Dad ladder PHI^n x PHI^-1.5. -->
+<style>
+.v{transform-box:view-box;transform-origin:32px 32px}
+#s{animation:a 46.98s linear -29.03s infinite}
+#p1{animation:b 29.03s linear -6.85s infinite}
+#p2{animation:b 17.94s linear -15.32s infinite}
+#b1{animation:a 2.62s linear -1.62s infinite}
+#b2{animation:a 4.24s linear -1.00s infinite}
+#gx{animation:c 2.06s ease-in-out -0.56s infinite alternate}
+@keyframes a{to{transform:rotate(360deg)}}
+@keyframes b{to{transform:rotate(-360deg)}}
+@keyframes c{from{opacity:.45}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<defs>
+<linearGradient id="r1" x1="0" x2="1"><stop offset="0" stop-color="#143A57"/><stop offset=".5" stop-color="#1F5478"/><stop offset="1" stop-color="#2B6A92"/></linearGradient>
+<linearGradient id="r2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E2A40"/><stop offset=".55" stop-color="#1F5478"/><stop offset="1" stop-color="#2B6A92"/></linearGradient>
+<linearGradient id="u" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2ECC71"/><stop offset=".5" stop-color="#C8FFE6"/><stop offset="1" stop-color="#2ECC71"/></linearGradient>
+<linearGradient id="u2" x1="0" x2="1"><stop offset="0" stop-color="#50FFB0" stop-opacity=".0"/><stop offset=".5" stop-color="#50FFB0" stop-opacity=".9"/><stop offset="1" stop-color="#50FFB0" stop-opacity="0"/></linearGradient>
+<radialGradient id="lit" gradientUnits="userSpaceOnUse" cx="32" cy="32" r="24"><stop offset=".3" stop-color="#00C896" stop-opacity=".8"/><stop offset=".62" stop-color="#00C896" stop-opacity=".25"/><stop offset="1" stop-color="#00C896" stop-opacity="0"/></radialGradient>
+<radialGradient id="h"><stop offset="0" stop-color="#00C896" stop-opacity=".42"/><stop offset=".5" stop-color="#00C896" stop-opacity=".14"/><stop offset="1" stop-color="#00C896" stop-opacity="0"/></radialGradient>
+</defs>
+<ellipse cx="32" cy="32" rx="27" ry="20" fill="url(#h)"/>
+<g id="s" class="v">
+<g id="p1" class="v"><g transform="rotate(-20 32 32)">
+ <ellipse cx="32" cy="32" rx="29" ry="11" fill="none" stroke="url(#r1)" stroke-width="2.0" opacity="0.85"/><ellipse cx="32" cy="32" rx="29" ry="11" fill="none" stroke="url(#lit)" stroke-width="2.3"/>
+ <g transform="translate(0 19.862) scale(1 0.3793)"><g id="b1" class="v"><circle cx="61" cy="32" r="4.2" fill="url(#lit)" opacity=".7"/><circle cx="61" cy="32" r="2.5" fill="#6F93AB"/><circle cx="61" cy="32" r="2.5" fill="url(#lit)"/></g></g>
+</g></g>
+<g id="p2" class="v"><g transform="rotate(25 32 32)">
+ <ellipse cx="32" cy="32" rx="26" ry="14" fill="none" stroke="url(#r2)" stroke-width="1.6" opacity="0.85"/><ellipse cx="32" cy="32" rx="26" ry="14" fill="none" stroke="url(#lit)" stroke-width="1.9000000000000001"/>
+ <g transform="translate(0 14.769) scale(1 0.5385)"><g id="b2" class="v"><rect x="4.1" y="30.1" width="3.8" height="3.8" fill="#5F86A0" transform="rotate(45 6 32)"/><rect x="4.1" y="30.1" width="3.8" height="3.8" fill="url(#lit)" transform="rotate(45 6 32)"/></g></g>
+</g></g>
+</g>
+<g transform="translate(32 32) scale(1.25) translate(-32 -32)">
+<rect x="16.9" y="22.099999999999998" width="30.2" height="11" rx="5.5" fill="#00C896" opacity=".12"/>
+<rect x="18" y="23.2" width="28" height="8.8" rx="3.2" fill="#00C896" opacity=".26"/>
+<rect x="19.2" y="24.4" width="25.6" height="6.4" fill="url(#u)"/>
+<rect x="21" y="27.0" width="22" height="1.2" fill="url(#u2)"/>
+<rect x="16.9" y="30.900000000000002" width="30.2" height="11" rx="5.5" fill="#00C896" opacity=".12"/>
+<rect x="18" y="32.0" width="28" height="8.8" rx="3.2" fill="#00C896" opacity=".26"/>
+<rect x="19.2" y="33.2" width="25.6" height="6.4" fill="url(#u)"/>
+<rect x="21" y="35.800000000000004" width="22" height="1.2" fill="url(#u2)"/>
+</g>
+</svg>
