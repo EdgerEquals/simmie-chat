@@ -1,33 +1,43 @@
-/* Dad's mark tap-to-enlarge (Danny t699u 25 Oct 2026, questionnaire only). See css/dad-mark-zoom.css.
-   Opens a centred modal with the mark large (same SVG, so its satellite/sweep animations keep running), scaling up from the small
-   mark's position over PHI^-2 = 0.382 s (reduced motion: appears/disappears instantly). Closes on a tap outside the mark, the X, or Esc;
-   focus moves to the X while open (Tab stays inside) and returns to the small mark on close. Self-contained: DadMarkZoom.open()/close(). */
+/* Logo tap-to-enlarge, one module for both header logos (questionnaire only).
+   Dad's mark: Danny t699u 25 Oct 2026. Bonnie's Rebella logo: Danny t701u 12:45 AWST 25 Oct ("Replicate that for the Rebella logo").
+   Any <button data-zoom="…"> in .q-head opens one shared modal showing its logo large: Dad's mark as the same SVG <img> (its satellite/sweep
+   animations keep running) with a soft cyan glow; the Rebella logo as the same vector <use> (crisp at any size), raspberry with a soft pink neon glow.
+   It scales up from the small logo's spot over PHI^-2 = 0.382 s (reduced motion: appears/disappears instantly). Closes on a tap outside the logo,
+   the X, or Esc; focus sits on the X while open (Tab stays inside) and returns to the logo's button on close. See css/dad-mark-zoom.css (file names kept from the dad-mark version).
+   API: LogoZoom.open(name) / close() / isOpen(); DadMarkZoom kept as an alias for the dad mark. */
 (function(){
   'use strict';
-  var btn=document.querySelector('.q-head .dad-zoom');if(!btn)return;
-  var src=(btn.querySelector('img')||{}).src||'';
+  var btns=[].slice.call(document.querySelectorAll('.q-head [data-zoom]'));if(!btns.length)return;
   var D=382,rm=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
-  var ov=document.createElement('div');ov.className='dmz';ov.hidden=true;ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label',"Dad's logo, enlarged");
-  ov.innerHTML='<button type="button" class="dmz-x" aria-label="Close">&times;</button><figure class="dmz-fig"><img alt="Dad\u2019s world equals mark" src="'+src.replace(/"/g,'&quot;')+'"></figure>';
+  var ov=document.createElement('div');ov.className='dmz';ov.hidden=true;ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');
+  ov.innerHTML='<button type="button" class="dmz-x" aria-label="Close">&times;</button><figure class="dmz-fig"></figure>';
   document.body.appendChild(ov);
-  var fig=ov.querySelector('.dmz-fig'),x=ov.querySelector('.dmz-x'),isOpen=false,t=null;
-  function fromMark(){var a=btn.querySelector('img').getBoundingClientRect();fig.style.transition='none';fig.style.transform='none';
-    var b=fig.getBoundingClientRect();if(!b.width)return 'none';return 'translate('+(a.left-b.left)+'px,'+(a.top-b.top)+'px) scale('+(a.width/b.width)+')';}
-  function open(){if(isOpen)return;isOpen=true;clearTimeout(t);try{window.QuizPopups&&QuizPopups.close();}catch(e){}
-    ov.hidden=false;btn.setAttribute('aria-expanded','true');
-    if(!rm.matches){var f=fromMark();fig.style.transform=f;void fig.offsetWidth;fig.style.transition='';}
+  var fig=ov.querySelector('.dmz-fig'),x=ov.querySelector('.dmz-x'),cur=null,t=null;
+  function srcEl(b){return b.querySelector('img,svg');}
+  function build(b){var name=b.getAttribute('data-zoom'),s=srcEl(b),c;
+    if(s.tagName.toLowerCase()==='img'){c=document.createElement('img');c.src=s.src;c.alt=s.getAttribute('data-zoom-alt')||'';}
+    else{c=s.cloneNode(true);c.removeAttribute('class');c.removeAttribute('width');c.removeAttribute('height');c.removeAttribute('style');c.setAttribute('preserveAspectRatio','xMidYMid meet');}
+    fig.className='dmz-fig dmz--'+name;fig.innerHTML='';var w=document.createElement('div');w.className='dmz-art';w.appendChild(c);fig.appendChild(w);
+    ov.setAttribute('aria-label',(b.getAttribute('data-zoom-title')||'Logo')+', enlarged');}
+  function fromBtn(){var a=srcEl(cur).getBoundingClientRect();fig.style.transition='none';fig.style.transform='none';
+    var b=fig.getBoundingClientRect();if(!b.width||!a.width)return 'none';
+    return 'translate('+(a.left-b.left)+'px,'+(a.top-b.top)+'px) scale('+(a.width/b.width)+','+(a.height/b.height)+')';}
+  function open(b){if(cur)return;clearTimeout(t);try{window.QuizPopups&&QuizPopups.close();}catch(e){}
+    cur=b;build(b);ov.hidden=false;b.setAttribute('aria-expanded','true');ov.classList.remove('is-open');
+    if(!rm.matches){var f=fromBtn();fig.style.transform=f;void fig.offsetWidth;fig.style.transition='';}
     requestAnimationFrame(function(){ov.classList.add('is-open');fig.style.transform='none';});
     x.focus({preventScroll:true});}
-  function close(){if(!isOpen)return;isOpen=false;btn.setAttribute('aria-expanded','false');ov.classList.remove('is-open');
-    if(rm.matches){ov.hidden=true;}else{var f=fromMark();fig.style.transform='none';void fig.offsetWidth;fig.style.transition='';fig.style.transform=f;
+  function close(){if(!cur)return;var b=cur;b.setAttribute('aria-expanded','false');ov.classList.remove('is-open');
+    if(rm.matches){ov.hidden=true;}else{var f=fromBtn();fig.style.transform='none';void fig.offsetWidth;fig.style.transition='';fig.style.transform=f;
       t=setTimeout(function(){ov.hidden=true;fig.style.transform='';},D);}
-    btn.focus({preventScroll:true});}
-  btn.setAttribute('aria-expanded','false');
-  btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();open();});
+    cur=null;b.focus({preventScroll:true});}
+  btns.forEach(function(b){b.setAttribute('aria-expanded','false');b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();open(b);});});
   x.addEventListener('click',function(e){e.stopPropagation();close();});
   ov.addEventListener('click',function(e){if(!fig.contains(e.target))close();});
-  document.addEventListener('keydown',function(e){if(!isOpen)return;
+  document.addEventListener('keydown',function(e){if(!cur)return;
     if(e.key==='Escape'||e.key==='Esc'){e.preventDefault();e.stopPropagation();close();}
     else if(e.key==='Tab'){e.preventDefault();x.focus({preventScroll:true});}},true);
-  window.DadMarkZoom={open:open,close:close,isOpen:function(){return isOpen;}};
+  function byName(n){for(var i=0;i<btns.length;i++)if(btns[i].getAttribute('data-zoom')===n)return btns[i];return btns[0];}
+  window.LogoZoom={open:function(n){open(byName(n));},close:close,isOpen:function(){return !!cur;}};
+  window.DadMarkZoom={open:function(){open(byName('dad'));},close:close,isOpen:function(){return !!cur;}};
 })();

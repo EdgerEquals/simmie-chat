@@ -1,4 +1,5 @@
-/* Dad's mark tap-to-enlarge (Danny t699u 25 Oct 2026, questionnaire only). The small mark is now a real <button class="dad-zoom">
+/* Logo tap-to-enlarge, shared by Dad's mark (Danny t699u) and Bonnie's Rebella logo (Danny t701u 12:45 AWST 25 Oct); questionnaire only.
+   (File name kept from the dad-mark version.) The small mark is now a real <button class="dad-zoom">
    wrapping the same <img class="dad-mark">; the button adds no box of its own (no layout shift), so every existing .dad-mark rule
    still sizes the tile. Overlay: black dim backdrop, the mark centred at min(70vw,70vh) with its own SVG animations running and a soft
    cyan (#0AF2FF) glow. Scales up from the small mark's spot in PHI^-2 = 0.382 s; no motion under prefers-reduced-motion. See js/dad-mark-zoom.js. */
@@ -13,9 +14,24 @@
 .dmz.is-open{opacity:1}
 .dmz-fig{position:relative;margin:0;width:min(70vw,70vh);height:min(70vw,70vh);box-sizing:border-box;padding:5%;background:#000;border:1px solid #143A57;border-radius:16%;
   box-shadow:0 0 28px rgba(10,242,255,.30),0 0 72px rgba(10,242,255,.16);transform-origin:0 0;transition:transform .382s cubic-bezier(.2,.8,.2,1)}
+.dmz-art{width:100%;height:100%}
 .dmz-fig img{display:block;width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(10,242,255,.35))}
 .dmz-x{position:absolute;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   margin:0;padding:0;border:1px solid #1F5478;border-radius:50%;background:rgba(0,0,0,.6);color:#9DBCCE;font:400 26px/1 system-ui,sans-serif;cursor:pointer}
 .dmz-x:hover{color:#0AF2FF;border-color:#0AF2FF}
 .dmz-x:focus{outline:none}.dmz-x:focus-visible{outline:2px solid #0AF2FF;outline-offset:2px}
+/* Rebella logo: a wide raspberry tile (logo 1810:893), tilted -5.5deg like in the bar, pink neon glow (core #F8CFDB, glow #E58AA6, the
+   dashboard's neon recipe) instead of Dad's cyan. The logo is the same vector <use>, so it stays crisp at any size. */
+.q-head .rb-zoom{-webkit-appearance:none;appearance:none;flex:none;display:block;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;line-height:0;cursor:pointer;border-radius:10px;overflow:visible;-webkit-tap-highlight-color:transparent}
+.q-head .rb-zoom .qh-logo{transition:filter .236s ease}
+@media (hover:hover){.q-head .rb-zoom:hover .qh-logo{filter:drop-shadow(0 0 4px rgba(229,138,166,.75))}}
+.q-head .rb-zoom:active .qh-logo{filter:drop-shadow(0 0 2px rgba(248,207,219,.9)) brightness(1.15)}
+.q-head .rb-zoom:focus{outline:none}
+.q-head .rb-zoom:focus-visible{outline:2px solid #E58AA6;outline-offset:3px}
+.dmz-fig.dmz--rebella{width:min(88vw,900px,110vh);height:calc(min(88vw,900px,110vh) * .635);padding:6%;border-color:#5A1F38;border-radius:9%;
+  box-shadow:0 0 28px rgba(229,138,166,.30),0 0 72px rgba(229,138,166,.16)}
+.dmz--rebella .dmz-art{display:flex;align-items:center;justify-content:center}
+.dmz--rebella svg{display:block;width:100%;height:100%;overflow:visible;color:#B0275A;transform:rotate(-5.5deg);
+  filter:drop-shadow(0 0 1px #F8CFDB) drop-shadow(0 0 6px rgba(229,138,166,.85)) drop-shadow(0 0 16px rgba(229,138,166,.45))}
+@media (prefers-reduced-motion:reduce){.q-head .rb-zoom .qh-logo{transition:none}}
 @media (prefers-reduced-motion:reduce){.dmz,.dmz-fig,.q-head .dad-zoom .dad-mark{transition:none}.q-head .dad-zoom:active .dad-mark{transform:none}}

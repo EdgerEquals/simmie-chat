@@ -20,7 +20,7 @@
 
   // [selector, title, render()] ; the DJ pill is excluded (it already has its own pop-up)
   var T=[
-    ['.qh-logo','Rebella',function(){return '<p>Bonnie&rsquo;s logo. Rebella is Bonnie&rsquo;s site; this questionnaire from Dad helps shape what goes on it.</p><p class="qp-note">Nothing here leaves this page.</p>';}],
+    // '.qh-logo' (Rebella) pop-up removed (Danny t701u 25 Oct): the logo is now a button that opens the enlarged view (js/logo-zoom.js)
     ['#beacon','Rebella status',function(){var b=$('beacon');return kv([['state',beacon().toUpperCase()],['detail',(b&&b.title)||''],['response',latency()],['device',online()?'online':'offline']])+
       '<p class="qp-note">The page checks Rebella on load and every 60 s.</p><button type="button" class="qp-btn" data-qp-act="recheck">&#x21bb; Check again</button>';}],
     ['#tstat','Terminal status',function(){var ts=window.TermStatus,ph=ts&&ts.phase?ts.phase():'',live=ts&&ts.live?ts.live():online();
@@ -55,7 +55,7 @@
   function tty(){return '<div class="qp-term">'+esc(txt($('tprev')))+'\n'+esc(txt($('tcur')))+'</div><p class="qp-note">Type in the simmie$ box to chat. Preview only, nothing is sent.</p>';}
   var SEL=T.map(function(t){return t[0];}).join(',');
   function match(el){if(!el||!el.closest)return null;for(var i=0;i<T.length;i++){var m=el.closest(T[i][0]);if(m)return {el:m,t:T[i]};}return null;}
-  function excluded(el){return !el||!el.closest||!!el.closest('.qp-pop,.dad-zoom,.dmz,#dj-pill,#qh-djpop,.tin,input,textarea,select,main');}
+  function excluded(el){return !el||!el.closest||!!el.closest('.qp-pop,.dad-zoom,.rb-zoom,.dmz,#dj-pill,#qh-djpop,.tin,input,textarea,select,main');}
 
   function decorate(){[].forEach.call(document.querySelectorAll(SEL),function(el){if(el.classList.contains('qp-trig'))return;
     var m=match(el);el.classList.add('qp-trig');if(!/^(BUTTON|A)$/.test(el.tagName)){el.setAttribute('role','button');el.setAttribute('tabindex','0');}
