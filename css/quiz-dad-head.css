@@ -220,3 +220,8 @@ textarea:focus-visible{border-color:#0AF2FF;outline-color:#0AF2FF!important}
 .q-head .qh-logo{transform:translate(7.76px,.87px) rotate(-5.5deg) scale(1.155)}
 @media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{transform:translate(5.88px,1.24px) rotate(-5.5deg) scale(1.152)}}
 @media(max-width:480px){.q-head .qh-logo{transform:translate(9.7px,.86px) rotate(-5.5deg) scale(1.2495)}}
+/* Nudged down a touch more (Danny t705u 13:03 AWST 25 Oct: "move it slightly down a little bit more, otherwise it's perfect"): +3px desktop,
+   +2.5px phones and phone landscape; size, x, -5.5deg unchanged. */
+.q-head .qh-logo{transform:translate(7.76px,3.87px) rotate(-5.5deg) scale(1.155)}
+@media (orientation:landscape) and (max-height:500px){.q-head .qh-logo{transform:translate(5.88px,3.74px) rotate(-5.5deg) scale(1.152)}}
+@media(max-width:480px){.q-head .qh-logo{transform:translate(9.7px,3.36px) rotate(-5.5deg) scale(1.2495)}}
