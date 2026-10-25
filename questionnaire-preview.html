@@ -136,6 +136,7 @@
   if(typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : this);
 </script>
+<script src="js/load-tiers.js?v=1"></script><!-- load tiers 0-3 (Danny t715u 25 Oct): see the comment at the top of js/load-tiers.js -->
 <script src="js/ratio-pump.js?v=1" data-site="dad" data-freq="0.75"></script><!-- ratio pump + Dad's palette frequency dial 0.75 (all motion 25% slower; Danny 12:15 AWST 24 Oct) -->
 <script>
 /* ALL wording for this page lives here. Curated for a reader aged 13 (age dial ~/.config/rebella-age-dial.json, field "age").
@@ -476,14 +477,14 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 <link rel="stylesheet" href="css/quiz-startbtn-portrait.css?v=b3ac5a78"><!-- Start button slimmer in phone portrait (Danny 13:04 AWST 24 Oct, t630u) -->
 <link rel="stylesheet" href="css/quiz-foot-lock.css?v=footline1">
 <link rel="stylesheet" href="dash/css/tide-swell.css?v=1"><!-- tide + swell after the critters (Danny 03:43 AWST 24 Oct; live 12:39) -->
-<script src="dash/js/tide-swell.js?v=2" defer></script>
-<script src="js/dad-autodj-quiz.js?v=e892ad8e" defer></script>
+<script>LoadTiers.script("dash/js/tide-swell.js?v=2",2)</script>
+<script>LoadTiers.script("js/dad-autodj-quiz.js?v=e892ad8e",2)</script>
 <link rel="stylesheet" href="css/quiz-dots-glow.css?v=19d4b8ab"><!-- travelling glow on the four footer lights (Danny 10:42 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-dj-pill.css?v=c0c7afb8"><!-- Dad's DJ pill + pop-up (Danny 11:06 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-space-sweep.css?v=fceab935"><!-- slow space orbit layer, middle band (Danny 13:01-13:03 AWST 24 Oct, t626u/t628u/t629u) -->
 <link rel="stylesheet" href="css/quiz-term-status.css?v=pillfit3"><!-- terminal status pill + matrix terminal colours + footer simmie$ light (Danny 13:18 AWST 24 Oct, t637u-t639u) -->
 <link rel="stylesheet" href="css/quiz-head-row.css?v=1"><!-- header row: weather right in portrait, ticker in the middle in landscape (Danny 13:26 AWST 24 Oct, t646u) -->
-<script src="js/quiz-term-status.js?v=pillpulse7" defer></script>
+<script>LoadTiers.script("js/quiz-term-status.js?v=pillpulse7",2)</script>
 <link rel="stylesheet" href="css/quiz-front-orbit.css?v=c55ddc97"><!-- front orbit emojis over the greeting + scroll fade of both orbit layers (Danny 13:22-13:24 AWST 24 Oct, t641u-t644u) -->
 <link rel="stylesheet" href="css/quiz-popups.css?v=1"><!-- pop-up panels for every tappable item in the page chrome (Danny t660u 13:43 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/quiz-tty-detail.css?v=1"><!-- Simmie tty detail back: bright dots, amber timestamps, dashed teal top rule, amber AWST · AGE (Danny 25 Oct 12:26 AWST) -->
@@ -491,7 +492,7 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 </head>
 <body>
 <video class="bgloop" id="bgloop" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" disablepictureinpicture poster="media/space-loop-poster.webp" data-src-webm="media/space-loop.webm" data-src-mp4="media/space-loop.mp4"></video><div class="bgloop-still" aria-hidden="true"></div>
-<script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;function go(){if(v.getAttribute('data-on'))return;v.setAttribute('data-on','1');[['webm','video/webm'],['mp4','video/mp4']].forEach(function(t){var s=document.createElement('source');s.src=v.getAttribute('data-src-'+t[0]);s.type=t[1];v.appendChild(s);});v.preload='auto';v.load();document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();}/* space loop video starts after load, when idle (poster shows until then; Danny t713u lighter load) */function later(){(window.requestIdleCallback||function(f){setTimeout(f,1200)})(go,{timeout:4000});}if(document.readyState==='complete')later();else addEventListener('load',later);window.__bgloopGo=go;})();</script>
+<script>(function(){var v=document.getElementById('bgloop'),rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)');function sync(){if((rm&&rm.matches)||document.hidden){v.pause();}else{var p=v.play();if(p&&p.catch)p.catch(function(){});}}v.muted=true;function go(){if(v.getAttribute('data-on'))return;v.setAttribute('data-on','1');[['webm','video/webm'],['mp4','video/mp4']].forEach(function(t){var s=document.createElement('source');s.src=v.getAttribute('data-src-'+t[0]);s.type=t[1];v.appendChild(s);});v.preload='auto';v.load();document.addEventListener('visibilitychange',sync);if(rm&&rm.addEventListener)rm.addEventListener('change',sync);sync();}/* space loop video starts after load, when idle (poster shows until then; Danny t713u lighter load) */if(window.LoadTiers)LoadTiers.add(2,go,'space-loop video');else addEventListener('load',go);window.__bgloopGo=go;})();</script>
 <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <div class="fx" id="fxA" aria-hidden="true"></div><div class="fx" id="fxB" aria-hidden="true"></div>
 <!-- Questionnaire header (Danny 24 Oct 2026 02:50 AWST): the live Bonnie's Dashboard header STRUCTURE (rebella 517e809 moderation/:
@@ -1045,14 +1046,14 @@ body.paused #start.panel::before,body.paused #quiz.panel::before,body.paused #su
 (function(){var h=document.getElementById('q-head');if(!h)return;var c=false,r=0;
 function f(){r=0;var y=window.scrollY||document.documentElement.scrollTop||0,w=c?y>8:y>72;if(w!==c){c=w;h.classList.toggle('is-scrolled',c);}}
 addEventListener('scroll',function(){if(!r)r=requestAnimationFrame(f);},{passive:true});f();})();</script>
-<script src="js/quiz-space-sweep.js?v=0da0a804" defer></script>
-<script src="js/quiz-front-orbit.js?v=8548b767" defer></script>
+<script>LoadTiers.script("js/quiz-space-sweep.js?v=0da0a804",2)</script>
+<script>LoadTiers.script("js/quiz-front-orbit.js?v=8548b767",2)</script>
 <link rel="stylesheet" href="css/foot-line.css?v=1">
 <script src="data/foot-line-data.js?v=1" defer></script>
 <script src="js/foot-line.js?v=2" defer></script>
 <script>addEventListener("DOMContentLoaded",function(){ if(window.FootLine) FootLine.init(document.getElementById("footLine"), {tz:"Australia/Perth", rate:2, bounce:true}); });</script>
 <script src="js/quiz-popups.js?v=6" defer></script>
-<script src="js/dad-mark-zoom.js?v=4" defer></script><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
+<script src="js/dad-mark-zoom.js?v=4" defer></script><script>(function(){var i=document.querySelector(".q-head .dad-mark[data-zoom-src]");if(i&&window.LoadTiers)LoadTiers.prefetch(i.getAttribute("data-zoom-src"));})();</script><!-- tier 3: detailed zoom mark prefetched at idle --><!-- tap-to-enlarge for Dad's mark (Danny t699u) and the Rebella logo (t701u), 25 Oct -->
 <link rel="stylesheet" href="css/quiz-tty2.css?v=1"><!-- tty redesign 2 (Danny t709u 25 Oct 13:11 AWST): live bar graphs, deeper granular palette, rising lines, rain; foot line 2x + bounce -->
 <script src="js/quiz-tty2.js?v=1" defer></script>
 </body>
