@@ -40,7 +40,7 @@
   var root = window, doc = document;
   if (root.PhiDials || !root.PhiAdapt) return;
   var PA = root.PhiAdapt, PHI = 1.6180339887, IP = 1 / PHI, CLOSED = 8;   // phi: the golden ratio; anchor: Danny's ladder, 8 rungs then closed (t816u)
-  var RUNGS = []; for (var k = 0; k < CLOSED; k++) RUNGS.push(+Math.pow(IP, k).toFixed(4)); RUNGS.push(0);
+  var RUNGS = []; for (var k = 0; k < CLOSED; k++) RUNGS.push(val(k)); RUNGS.push(0);
   function val(r) { return r >= CLOSED ? 0 : Math.pow(IP, r); }
   // Danny's floor and ceiling per dial, as rungs (ceiling = the highest value allowed = the smaller rung index). Only Danny changes these.
   var SPEC = {
@@ -60,8 +60,8 @@
 
   // ---------- moves: one rung, inside floor/ceiling, logged; outside -> proposal ----------
   function bounds(id) { return SPEC[id.split(":")[0]]; }
-  function cur(id) { if (id.indexOf("filter:") === 0) { var c = X.f[id.slice(7)]; return c != null ? c : X.pos.filter; } return X.pos[id]; }
-  function setPos(id, r) { if (id.indexOf("filter:") === 0) X.f[id.slice(7)] = r; else X.pos[id] = r; }
+  function cur(id) { if (id.indexOf("filter:") === 0) { var c = X.f[id.slice("filter:".length)]; return c != null ? c : X.pos.filter; } return X.pos[id]; }
+  function setPos(id, r) { if (id.indexOf("filter:") === 0) X.f[id.slice("filter:".length)] = r; else X.pos[id] = r; }
   function propose(id, dir, why) {
     var p = X.prop.filter(function (q) { return q.d === id && q.dir === dir; })[0];
     if (p) { p.c = (p.c | 0) + 1; p.s = PA.sessions(); } else X.prop.push({ d: id, dir: dir, w: why, c: 1, s: PA.sessions() });
@@ -93,7 +93,7 @@
     clearTimeout(gT[id]);
     (function step() {
       var dlt = target - shown[id];
-      if (Math.abs(dlt) < 1e-3 || RM.matches) shown[id] = target; else shown[id] += dlt * IP;   // each PHI^-1 s step closes 61.8% of the gap
+      if (Math.abs(dlt) < val(CLOSED - 1) * val(CLOSED - 1) || RM.matches) shown[id] = target; else shown[id] += dlt * IP;   // done within the last rung squared; each PHI^-1 s step closes 61.8% of the gap
       apply(id); if (shown[id] !== target) gT[id] = setTimeout(step, Math.round(MS * IP));
     })();
   }
@@ -145,7 +145,6 @@
         if (X.pace == null) X.pace = rate;
         else { var q = rate / X.pace; if (q >= PHI) move("pace", 1, "quicker than usual"); else if (q <= IP) move("pace", -1, "gentler than usual");
                X.pace = X.pace + (rate - X.pace) * IP * IP; }
-        X.pace = +X.pace.toFixed(5);
       }
     }
     if (!final) { persist(); return; }
