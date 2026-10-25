@@ -43,14 +43,21 @@
     ov.setAttribute('aria-label',(b.getAttribute('data-zoom-title')||'Logo')+', enlarged');}
   // Rebella zoom life + sound (Danny t724u 14:04 AWST 25 Oct): js/rebella-zoom-life.js is injected the first time the Rebella zoom opens
   // (shimmer, stars, breathing glow, wall echo, sweep/star sounds). The AudioContext is made HERE, inside the tap (iOS needs the gesture);
-  // it is this module's own context (the auto-DJ is never touched), suspended again PHI^0 s after close. Open/close chords use the same
-  // harmonic set as the life sounds (G3 196 Hz x 4,6,8,12): open rises, close falls; notes PHI^-5 = 0.09 s apart.
-  var AC=null,acT=null,LIFE='js/rebella-zoom-life.js?v=1',lifeLoading=false;
+  // it is this module's own context (the auto-DJ is never touched), suspended again PHI^0 s after close.
+  // Open/close sounds (Danny t740u 25 Oct: the old G3 chords were "too baby and too scary" -> fairies): a breathy airy whoosh, high-passed
+  // noise whose soft band rises 2.8 -> 8.5 kHz on open (with two faint glass sparkles) and falls 7 -> 2.6 kHz on close. No chords, no low end.
+  var AC=null,acT=null,LIFE='js/rebella-zoom-life.js?v=2',lifeLoading=false,NB=null;
   function audio(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return null;if(!AC)AC=new C();clearTimeout(acT);if(AC.state!=='running')AC.resume();return AC;}catch(e){return null;}}
-  function chord(up){if(!AC)return;try{var t=AC.currentTime+0.02,H=up?[4,6,8,12]:[12,8,6,4];
-    H.forEach(function(h,i){var o=AC.createOscillator(),g=AC.createGain(),w=t+i*0.09,pk=(up?0.045:0.035)/(1+i*0.35);o.type='sine';o.frequency.value=196*h;
-      g.gain.setValueAtTime(0,w);g.gain.linearRampToValueAtTime(pk,w+0.015);g.gain.exponentialRampToValueAtTime(0.0001,w+(up?1:0.618));
-      o.connect(g);g.connect(AC.destination);o.start(w);o.stop(w+1.05);});}catch(e){}}
+  function chord(up){if(!AC)return;try{var t=AC.currentTime+0.02,d=up?0.618:0.382;
+    if(!NB){var n=Math.floor(AC.sampleRate*0.8);NB=AC.createBuffer(1,n,AC.sampleRate);var c=NB.getChannelData(0);for(var i=0;i<n;i++)c[i]=Math.random()*2-1;}
+    var s=AC.createBufferSource(),hp=AC.createBiquadFilter(),bp=AC.createBiquadFilter(),g=AC.createGain();s.buffer=NB;hp.type='highpass';hp.frequency.value=2000;bp.type='bandpass';bp.Q.value=1.2;
+    bp.frequency.setValueAtTime(up?2800:7000,t);bp.frequency.exponentialRampToValueAtTime(up?8500:2600,t+d);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(up?0.03:0.02,t+d*0.382);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+    s.connect(hp);hp.connect(bp);bp.connect(g);g.connect(AC.destination);s.start(t);s.stop(t+d+0.05);
+    if(up)[1976,2637].forEach(function(f,i){var w=t+0.236+i*0.09,dec=0.3;f*=Math.pow(2,(Math.random()*24-12)/1200);
+      [[1,0.009,dec],[2.76,0.0025,dec*0.5]].forEach(function(q){var o=AC.createOscillator(),gg=AC.createGain();o.type='sine';o.frequency.value=f*q[0];
+        gg.gain.setValueAtTime(0,w);gg.gain.linearRampToValueAtTime(q[1],w+0.004);gg.gain.exponentialRampToValueAtTime(0.0001,w+q[2]);o.connect(gg);gg.connect(AC.destination);o.start(w);o.stop(w+q[2]+0.05);});});
+  }catch(e){}}
   function life(){if(!cur||cur.getAttribute('data-zoom')!=='rebella')return;
     if(window.RebellaZoomLife){try{RebellaZoomLife.start(fig,AC);}catch(e){}return;}
     if(lifeLoading)return;lifeLoading=true;var sc=document.createElement('script');sc.src=LIFE;sc.async=true;
