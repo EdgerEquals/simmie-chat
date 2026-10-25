@@ -48,6 +48,7 @@
   (SCRIPT && SCRIPT.getAttribute("data-slow") || "").split(";").forEach(function (p) {
     var m = p.split("="); var k = parseFloat(m[1]); if (m[0] && m[0].trim() && k > 0) slow.push([m[0].trim(), k]); });
   var wxKey = null, msgKey = null, master = 1, masterFeed = null, rate = SITE_FREQ;
+  var userK = 1;   // Kids Club dial 2 (kid-pace retune, js/phi-dials.js): a phi-rung factor inside Danny's range; 1 without dials
 
   function perthHour() { try { var s = new Date().toLocaleString("en-AU", { timeZone: "Australia/Perth", hour: "2-digit", minute: "2-digit", hour12: false }).split(":");
     return (+s[0] % 24) + (+s[1] || 0) / 60; } catch (e) { var d = new Date(); return d.getHours() + d.getMinutes() / 60; } }
@@ -64,7 +65,7 @@
     var o = feeds(), lo = 2, who = null;
     Object.keys(o).forEach(function (k) { if (o[k] < lo) { lo = o[k]; who = k; } });
     master = Math.round(lo * 20) / 20; masterFeed = who;
-    rate = SITE_FREQ * pumpOf(master);
+    rate = SITE_FREQ * pumpOf(master) * userK;
     if (doc) { var r = doc.documentElement; r.style.setProperty("--site-freq", String(SITE_FREQ)); r.style.setProperty("--pump-rate", rate.toFixed(4)); r.style.setProperty("--pump", (rate / SITE_FREQ).toFixed(4));
       r.style.setProperty("--pump-master", String(master)); r.setAttribute("data-site-freq", SITE + ":" + SITE_FREQ);
       r.setAttribute("data-pump-master", who || ""); }
@@ -115,6 +116,9 @@
     master: function () { return { feed: masterFeed, ratio: master }; }, feeds: feeds,
     info: function () { return { site: SITE, dial: SITE_FREQ, pumpOn: pumpOn && !RM.matches, feeds: feeds(), master: masterFeed, masterRatio: master, pump: rate / SITE_FREQ, rate: rate, slow: slow }; },
     refresh: refresh,
+    // kid-pace factor from js/phi-dials.js (glided there, so no jumps); accepted only within PHI^-1 .. PHI
+    user: function () { return userK; },
+    setUser: function (k) { k = +k; if (!(k >= 1 / PHI && k <= PHI) || Math.abs(k - userK) < 1e-4) return userK; userK = k; compute(); applyAll(); return userK; },
     // subscribe: fn(info) is called after every pump/feed change (and once now); returns an unsubscribe function
     on: function (fn) { subs.push(fn); try { fn(api.info()); } catch (e) {} return function () { subs = subs.filter(function (x) { return x !== fn; }); }; }
   };
@@ -131,6 +135,14 @@
     if (LITE) { var ric = root.requestIdleCallback || function (f) { return setTimeout(f, 300); }; var goIdle = function () { ric(go, { timeout: 1500 }); };
       if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", goIdle); else goIdle(); }
     else if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", go); else go();
+  }
+  // Kids Club golden-ratio dials (Danny's go t816u 25 Oct 2026): at idle, load the shared usage record (js/phi-adapt.js) and the dials
+  // (js/phi-dials.js) from this script's own folder. Two same-origin static files, nothing else; data-dials="off" on this tag skips them.
+  if (doc && SCRIPT && SCRIPT.getAttribute("data-dials") !== "off" && SCRIPT.src) {
+    var base = SCRIPT.src.replace(/[^\/]*$/, ""), ric2 = root.requestIdleCallback || function (f) { return setTimeout(f, 618); };
+    var add = function (src, then) { var s = doc.createElement("script"); s.src = base + src; s.async = true; if (then) s.onload = then; doc.head.appendChild(s); };
+    var dials = function () { ric2(function () { if (root.PhiAdapt) add("phi-dials.js?v=1"); else add("phi-adapt.js?v=2", function () { add("phi-dials.js?v=1"); }); }, { timeout: 4236 }); };
+    if (doc.readyState === "complete") dials(); else root.addEventListener("load", dials);
   }
   if (typeof module !== "undefined") module.exports = api;
 })(typeof window !== "undefined" ? window : this);
