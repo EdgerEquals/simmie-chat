@@ -1,0 +1,12 @@
+/* Rebella header logo: REDUCED state (Danny t744u 25 Oct: "a stripped-down version when it reduces ... much lighter"). The enlarged view has the
+   bluebird, companions and the dawn sky (js/rebella-zoom-life.js); the small header logo gets only this: one faint dawn glow behind the
+   letters that drifts and breathes very slowly (PHI^7 = 29.03 s, alternate, so the loop is seamless). No creatures, no canvas, no JS.
+   Loaded late: tier 3 of js/load-tiers.js (after tier 2 drains + PHI^1 s, skipped on save-data / 2g). Transform + opacity only.
+   Reduced motion: the same glow, still. Light theme: a touch softer. */
+.q-head .rb-zoom{position:relative;isolation:isolate}
+.q-head .rb-zoom::before{content:"";position:absolute;left:-28%;right:-28%;top:-30%;bottom:-70%;z-index:-1;pointer-events:none;border-radius:50%;
+  background:radial-gradient(ellipse 50% 42% at 50% 58%,rgba(229,138,166,.16),rgba(133,166,187,.08) 48%,rgba(10,242,255,.03) 66%,rgba(10,242,255,0) 76%);
+  opacity:.55;will-change:transform,opacity;animation:rbgl-drift 29.03s ease-in-out -11.09s infinite alternate}
+@keyframes rbgl-drift{0%{opacity:.4;transform:translate3d(-7%,0,0) scale(.96)}100%{opacity:.8;transform:translate3d(7%,-3%,0) scale(1.04)}}
+html[data-theme=light] .q-head .rb-zoom::before{opacity:.35}
+@media (prefers-reduced-motion:reduce){.q-head .rb-zoom::before{animation:none;opacity:.6}}
