@@ -1,0 +1,14 @@
+/* Questionnaire footer: detail back in the Simmie tty (Danny 25 Oct 2026 12:26 AWST, "fix both"), within Dad's palette.
+   Restores what 68d38b5 / a95c128 (24 Oct) flattened: bright window dots with soft glows, amber timestamps, a clear
+   prompt > message > timestamp hierarchy (older line dimmer but readable), the 2px dashed teal top rule and the amber
+   AWST · AGE readout. Colours/sizes only: no layout, so the panel height is unchanged. Kept as is: simmie$ prompt,
+   the matrix green/red status pill and the synced green cursors (never red), and the foot-line quote cycle. */
+.foot{border-top:2px dashed #2A8FA3}
+.foot .ttybar i{background:#F4B6B6;box-shadow:0 0 4px rgba(244,182,182,.6)}
+.foot .ttybar i:nth-child(2){background:#F6E3A1;box-shadow:0 0 4px rgba(246,227,161,.6)}
+.foot .ttybar i:nth-child(3){background:#0AF2FF;box-shadow:0 0 4px rgba(10,242,255,.65)}
+.foot .tout .ts{color:#F2A541;opacity:.9}
+.foot .tout .lc{color:var(--mx-g,#00FF41)}
+.foot .tout .lp{color:#7FD99A;opacity:.62}
+.foot .ttyl .pr{color:var(--mx-g,#00FF41);font-weight:700;text-shadow:0 0 5px rgba(0,255,65,.55)}
+.foot .ro{color:#F2A541}
