@@ -3,7 +3,7 @@
 .msg .cf-open-btn:hover{background:#F4B8CA}
 .msg .cf-open-btn.done{background:#fff;border-color:var(--line,#EBCFC2);color:var(--muted,#6E5A66)}
 .cf-sheet{position:fixed;inset:0;z-index:9000;display:flex;align-items:flex-end;justify-content:center;background:rgba(58,43,53,.38)}
-.cf-panel{width:100%;max-width:560px;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;background:var(--bg,#FFF8F4);color:var(--ink,#3A2B35);border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(58,43,53,.22);animation:cfUp .382s cubic-bezier(.2,.8,.2,1)}
+.cf-panel{width:100%;max-width:560px;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;background:var(--bg,#FFF8F4);color:var(--ink,#3A2B35);border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(58,43,53,.22);animation:cfUp var(--b-m7,.382s) cubic-bezier(.2,.8,.2,1)}
 @media (min-width:600px){.cf-sheet{align-items:center}.cf-panel{border-radius:22px}}
 @keyframes cfUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.cf-panel{animation:none}}

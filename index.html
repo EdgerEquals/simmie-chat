@@ -12,17 +12,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;700&family=Gochi+Hand&family=Kaushan+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/dad-palette.css?v=1">
-<link rel="stylesheet" href="css/chat.css?v=8">
+<link rel="stylesheet" href="css/chat.css?v=9">
 <link rel="stylesheet" href="css/chat-dashlayout.css?v=3">
-<link rel="stylesheet" href="dash/css/dash-shared.css?v=2">
-<link rel="stylesheet" href="dash/css/chat-dash.css?v=7">
+<link rel="stylesheet" href="dash/css/dash-shared.css?v=3">
+<link rel="stylesheet" href="dash/css/chat-dash.css?v=8">
 <link rel="stylesheet" href="css/dots-glow.css?v=1">
-<link rel="stylesheet" href="css/chat-form.css?v=1">
-<script src="dash/js/phi-timing.js?v=1"></script>
-<script src="js/ratio-pump.js?v=5" data-site="chat" data-freq="0.75" data-warm=".chat-bg" data-slow=".ad-orbit=0.5"></script><!-- ratio pump + site frequency dial 0.75 (all motion 25% slower); Ask Dad rocket a further 50% slower (Danny 12:15 AWST 24 Oct) -->
+<link rel="stylesheet" href="css/chat-form.css?v=2">
+<script src="js/season-pumps.js?v=2"></script>
+<script src="js/phi-b.js?v=1"></script>
+<script src="js/phi-pause.js?v=1"></script>
+<script src="dash/js/phi-timing.js?v=2"></script>
+<script src="js/ratio-pump.js?v=6" data-site="chat" data-rung="-1" data-warm=".chat-bg" data-slow=".ad-orbit=0.618"></script><!-- ratio pump + site frequency dial rung PHI^-1 = 0.618 (Rule phi B; was 0.75); Ask Dad rocket a further step slower (Danny 12:15 AWST 24 Oct asked 50%; whole phi rung PHI^-1 under Rule phi B) -->
 <script src="js/phi-reset.js?v=1" defer></script>
 <link rel="stylesheet" href="css/tagline-breathe.css?v=1"><!-- tagline breathing + wave, chat palette (Danny 12:11 AWST 24 Oct) -->
-<link rel="stylesheet" href="css/bg-accents.css?v=1"><!-- background accents: wave + shimmer over the unchanged dots (Danny 12:19 AWST 24 Oct) -->
+<link rel="stylesheet" href="css/bg-accents.css?v=2"><!-- background accents: wave + shimmer over the unchanged dots (Danny 12:19 AWST 24 Oct) -->
 <link rel="stylesheet" href="css/bar-ticker.css?v=1"><!-- fun-fact ticker in the simmie> bar, answer pending, Simmie reply (Danny 12:23-12:24 AWST 24 Oct) -->
 </head>
 <body>
@@ -77,7 +80,7 @@
          no mission log, sound picker, animal lane, answered gauge or tide strip. -->
     <div id="chat-foot" class="chat-foot">
       <div id="typing" class="typing" hidden><span class="dots"><i></i><i></i><i></i></span> <span id="typing-text">Waiting for Simmie…</span></div>
-      <footer class="footer" id="app-foot"><div class="container"><button type="button" class="pr-btn" data-phi-reset title="Reset what this page learned"><span aria-hidden="true">↺</span> Reset what this page learned</button><span>Messages are encrypted and sent securely to Simmie</span></div></footer>
+      <footer class="footer" id="app-foot"><div class="container"><button type="button" class="pp-btn" data-phi-pause aria-pressed="false" aria-label="Pause motion on this page">Pause motion</button><button type="button" class="pr-btn" data-phi-reset title="Reset what this page learned"><span aria-hidden="true">↺</span> Reset what this page learned</button><span>Messages are encrypted and sent securely to Simmie</span></div></footer>
       <!-- message box + Send removed (Danny 12:20 AWST 24 Oct, t594u): Bonnie taps the simmie> line, types, Enter sends (js/app.js, same encrypted path) -->
   <div id="wx-foot" class="wx-foot" role="region" aria-label="Simmie and status">
     <div id="tty" class="tty">

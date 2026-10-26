@@ -49,8 +49,8 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 .typing{padding:4px 16px 6px;font-size:.88rem;color:var(--muted)}
 .typing.active{color:var(--ink,#333);font-weight:700}
 .dots{display:inline-flex;gap:3px;vertical-align:middle;margin-right:4px}
-.dots i{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.35;animation:b 1.2s infinite}
-.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.35;animation:b var(--b-m5,1.2s) infinite}
+.dots i:nth-child(2){animation-delay:var(--b-m8,.2s)}.dots i:nth-child(3){animation-delay:var(--b-m7,.4s)}
 @keyframes b{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
 .composer{display:flex;gap:8px;align-items:flex-end;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:#fff;border-top:2px solid var(--line)}
 .composer textarea{resize:none;max-height:140px;border-radius:20px;padding:.6rem 1rem}
@@ -85,5 +85,7 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 
 /* Reset what this page learned (js/phi-reset.js, Danny 10:06 AWST 26 Oct 2026): a quiet link at the left of the footer line;
    the line keeps its height. */
-html #app #app-foot .pr-btn{margin-right:auto;background:none;border:0;padding:0 .4rem;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;white-space:nowrap;flex:0 0 auto}
+html #app #app-foot .pr-btn{pointer-events:auto;margin-right:auto;background:none;border:0;padding:0 .4rem;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 html #app #app-foot .pr-btn+span{margin-left:.6rem}
+html #app #app-foot .pp-btn{pointer-events:auto;background:none;border:0;padding:0 .4rem;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;white-space:nowrap;flex:0 0 auto}
+html.phi-paused *,html.phi-paused *::before,html.phi-paused *::after{animation-play-state:paused!important}   /* Pause motion, page-wide (js/phi-pause.js, WCAG 2.2.2) */

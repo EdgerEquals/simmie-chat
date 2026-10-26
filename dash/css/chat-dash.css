@@ -36,10 +36,10 @@ html #app #screen-chat #app-foot .container{color:var(--muted)}
    the hue walks dot to dot. Infinite CSS animation, so PhiTiming's weather sweep re-aligns it at cycle boundaries. */
 #wx-foot .wx-light b{position:relative;overflow:hidden}
 #wx-foot .wx-light b::before{content:"";position:absolute;inset:0;border-radius:50%;background:hsl(0 85% 55%);
-  animation:chat-rainbow 5.390s linear infinite}
-#wx-foot .wx-strip .wx-light:nth-child(2) b::before{animation-delay:-1.3475s}
-#wx-foot .wx-strip .wx-light:nth-child(3) b::before{animation-delay:-2.695s}
-#wx-foot .wx-strip .wx-light:nth-child(4) b::before{animation-delay:-4.0425s}
+  animation:chat-rainbow var(--b-m2,5.390s) linear infinite}
+#wx-foot .wx-strip .wx-light:nth-child(2) b::before{animation-delay:calc(-1 * var(--b-m5,1.3475s))}
+#wx-foot .wx-strip .wx-light:nth-child(3) b::before{animation-delay:calc(-1 * var(--b-m3,2.695s))}
+#wx-foot .wx-strip .wx-light:nth-child(4) b::before{animation-delay:calc(-1 * var(--b-m2,4.0425s))}
 @keyframes chat-rainbow{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){
   #wx-foot .wx-light b::before{animation:none}

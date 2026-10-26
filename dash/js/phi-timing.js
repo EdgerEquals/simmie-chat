@@ -1,80 +1,78 @@
 /* GENERATED copy of rebella moderation/js/phi-timing.js (tools/sync_dash_header.py): shared header/footer, chat-page scope. */
 /* PHI TIMING (shared module; same file on every Bonnie site/preview).
-   Standing rules: /home/box/.config/phi-timing-rules.md (set by Danny, 2026-10-23). Summary, follow it in future builds:
-   1. PHI = 1.6180339887; every timed interval is PHI^n seconds. Fast elements make small moves, slow ones big moves.
-   2. Start offsets: element k (fixed order below) starts at period * frac(k * 0.6180339887), the golden angle.
+   Standing rules: /home/box/.config/phi-timing-rules.md (Danny, 2026-10-23), moved onto Rule phi build B (Danny, 26 Oct 2026):
+   1. Every timed interval is B x PHI^k seconds with k a WHOLE number. B is the anchor from js/phi-b.js (no typed term:
+      the weather feed's update period and the sky clocks, moved by the Moon, the temperature's own daily range and
+      Bonnie's measured rhythm). Fast elements make small moves, slow ones big moves.
+   2. Start offsets: element number i (fixed order below) starts at period x frac(i / PHI), the golden angle.
       CSS uses a negative animation-delay (var(--phi-NAME-d)) so nothing waits blank on load.
-   3. Bonnie's ladder: blinks PHI^2 2.618 / weather faces PHI^2,3,4 / facts PHI^4 6.854 / loop effect PHI^5 11.09 /
-      animals PHI^5 11.09 / offering story PHI^6 17.94 / sticker sway PHI^7 29.03 / slow drift PHI^8 46.98 s.
-   4. Simmie's palette runs 1.5 phi steps faster: period = Bonnie slot * PHI^-1.5 (~0.486), so the two ladders never
-      share a period and never lock into a repeating alignment (space set 8.72, cloud orbit + space drift 22.84,
-      mission log ambient 5.39, Ask Dad glow 2.06, Ask Dad satellite 3.33, cursor + status blinks 1.27 s).
-   5. New elements: give them a Bonnie slot by role; Simmie's elements get * PHI^-1.5. Respect reduced motion.
-   6. Weather sweep: the weather loop (faces, offering story + loop effect, sticker/chip sway) never changes; the weather
-      state shifts every OTHER element's exponent by s steps: hot -1, sun -0.5, storm 0, cloud 0, rain +0.5, fog +1,
-      clear night +1.5, deep night (00:00-05:00 Perth) +2. Same s for Bonnie and Simmie (still 1.5 steps apart),
-      offsets kept, a new s lands at each element's next cycle boundary, reduced motion ignores it. No weather data: s=0.
+   3. Bonnie's ladder (old PHI^n s -> rung k = n - 5, B is about PHI^5 s): blinks B x PHI^-3, weather faces PHI^-3..-1,
+      facts PHI^-1, loop effect / animals B, offering story PHI^1, sticker sway PHI^2, slow drift PHI^3.
+   4. Simmie's palette was 1.5 steps faster; whole steps only, so it is now ONE step faster (half steps round toward
+      slower, the safe side). Golden-angle offsets still keep the two from starting together.
+   5. Pulse floor: every blink / glow / breathe / ring / beacon / twinkle / bob / light (flag p) is never faster than
+      B x PHI^-2, after the weather sweep. Walking gaits and typing pace are movement, not pulses, and are exempt.
+   6. Weather sweep in whole steps: hot -1, sun 0, storm 0, cloud 0, rain +1, fog +1, clear night +2, deep night +2
+      (deep night = the sun below civil twilight, from js/season-pumps.js; no clock hours). The weather loop (flag w)
+      never sweeps. A new sweep lands at each element's next cycle boundary; reduced motion ignores it. No weather: 0.
       Preview override: ?weather=hot|sun|storm|cloud|rain|fog|night|deep.
-   7. Message-status layer (separate pump, never changes weather or swept elements): a soft pulse ring on the terminal
-      LED, Chat/Ask Dad buttons and the feed edge: idle PHI^5 11.09, new PHI^3 4.24, unread from Dad PHI^2 2.62,
-      urgent (Ask Dad waiting / unanswered question) PHI^1 1.62 s. Only where messages exist (chat + dashboard
-      previews and side copies), never on Rebella; it never reads or shows message text. Preview: ?msg=idle|new|dad|urgent.
-   Functional timers (network polls, debounces, passcode back-off, one-shot event feedback) are not animations and
-   stay as they were. */
+   7. Message-status layer (own pump): urgent B x PHI^-2, unread from Dad PHI^-1, new B, idle PHI^1 (the pulse floor
+      is the fastest). Only where messages exist; never reads or shows message text. Preview: ?msg=idle|new|dad|urgent.
+   8. Pause motion (js/phi-pause.js, html.phi-paused): every() timers skip their ticks while paused.
+   Functional timers (network polls, debounces, passcode back-off) are not animations and stay as they were. */
 (function(root){
   "use strict";
-  var PHI = 1.6180339887, G = 0.6180339887, SIM = Math.pow(PHI, -1.5);
-  // [name, Bonnie-ladder exponent, Simmie palette?]  ORDER IS THE k NUMBERING: append new elements, never reorder.
+  var PHI = (1 + Math.sqrt(5)) / 2, G = 1 / PHI, SEC = 1000;                     // phi: the golden ratio; unit: ms per second
+  var PULSE_FLOOR = -2;                                                           // phi: Danny's pulse floor, B x PHI^-2
+  // B from js/phi-b.js (seconds). unit: with no anchor measured at all (sky clocks unavailable) a rung is PHI^k SI seconds.
+  function anchor(){ var b = root.PhiB && root.PhiB.value; return b > 0 ? b : 1; }
+  // [name, whole rung k of B, flags: s Simmie palette, w weather loop (never swept), p pulse (floor)]  ORDER IS THE NUMBERING: append, never reorder.
   var E = [
-    ["light-queue",2,1],["light-fresh",2,1],["light-link",2,1],["light-sky",2,1],["cursor",2,1],
-    ["face-a",2,0,1],["face-b",3,0,1],["face-c",4,0,1],
-    ["askdad-glow",3,1],["askdad-orbit",4,1],
-    ["fact",4,0],["loop-effect",5,0,1],["mlog-ambient",5,1],["animals",5,0],["space",6,1],["story",6,0,1],
-    ["sway",7,0,1],["cloud-orbit",8,1],["bg-drift",8,1],
-    // other timers found, on the nearest readable step for their role
-    ["cloud-breathe",2,1],["cloud-blink",4,1],["cloud-shine",5,1],["cloud-bob",0,1],
-    ["wave",4,1],["wave-busy",1,1],["marquee",8,0,1],["chip-drift",7,0,1],["panel-dot",2,1],
-    ["gait-trot",-2,0],["gait-hop",-1,0],["gait-dog",2,0],["gait-fly",0,0],["gait-glow",0,0],["animal-cross",4,0],
-    ["space-cross",5,1],["space-ring",3,1],["space-ring-slow",4,1],["space-spark",2,1],
-    ["tty-hold",4,1],["tty-hold-multi",3,1],["tty-gap",1,1],["mlog-pace",2,1],
-    ["band-sway",7,0,1],
-    ["askdad-breathe",5,1],   // Ask Dad circle breathing: Simmie slot PHI^5 * PHI^-1.5 = 5.39 s (swept)
-    // questionnaire preview
-    ["offer-cycle",2,0,1],["cloud-wobble",4,1],["beacon",2,1],["beacon-chk",1,1],["beacon-down",0,1],
-    ["bg-fall",6,0],["bg-float",5,0],["bg-sail",7,0],["bg-twinkle",2,0],["bg-cross",6,0],["bg-spin",8,0],["bg-bob",2,0],["bg-pulse",5,0],
-    ["rain",5,0],["code-panel",9,1],
-    ["askdad-remind",4.75,0,1]   // Ask Dad reminder pulse (preview): PHI^4.75 = 9.83 s, fixed (not swept) so it stays ~10 s
+    ["light-queue",-4,"sp"],["light-fresh",-4,"sp"],["light-link",-4,"sp"],["light-sky",-4,"sp"],["cursor",-4,"sp"],["face-a",-3,"w"],   // phi: whole rungs of B
+    ["face-b",-2,"w"],["face-c",-1,"w"],["askdad-glow",-3,"sp"],["askdad-orbit",-2,"s"],["fact",-1],["loop-effect",0,"w"],   // phi: whole rungs of B
+    ["mlog-ambient",-1,"s"],["animals",0],["space",0,"s"],["story",1,"w"],["sway",2,"w"],["cloud-orbit",2,"s"],   // phi: whole rungs of B
+    ["bg-drift",2,"s"],["cloud-breathe",-4,"sp"],["cloud-blink",-2,"sp"],["cloud-shine",-1,"sp"],["cloud-bob",-6,"sp"],["wave",-2,"sp"],   // phi: whole rungs of B
+    ["wave-busy",-5,"sp"],["marquee",3,"w"],["chip-drift",2,"w"],["panel-dot",-4,"sp"],["gait-trot",-7],["gait-hop",-6],   // phi: whole rungs of B
+    ["gait-dog",-3],["gait-fly",-5],["gait-glow",-5],["animal-cross",-1],["space-cross",-1,"s"],["space-ring",-3,"sp"],   // phi: whole rungs of B
+    ["space-ring-slow",-2,"sp"],["space-spark",-4,"sp"],["tty-hold",-2,"s"],["tty-hold-multi",-3,"s"],["tty-gap",-5,"s"],["mlog-pace",-4,"s"],   // phi: whole rungs of B
+    ["band-sway",2,"w"],["askdad-breathe",-1,"sp"],["offer-cycle",-3,"w"],["cloud-wobble",-2,"s"],["beacon",-4,"sp"],["beacon-chk",-5,"sp"],   // phi: whole rungs of B
+    ["beacon-down",-6,"sp"],["bg-fall",1],["bg-float",0],["bg-sail",2],["bg-twinkle",-3,"p"],["bg-cross",1],   // phi: whole rungs of B
+    ["bg-spin",3],["bg-bob",-3,"p"],["bg-pulse",0,"p"],["rain",0],["code-panel",3,"s"],["askdad-remind",0,"wp"]   // phi: whole rungs of B
   ];
+  var doc = (typeof document !== "undefined") ? document : null, rootStyle = doc && doc.documentElement.style;
   var T = {}, list = [];
   E.forEach(function(e, i){
-    var k = i + 1, n = e[2] ? e[1] - 1.5 : e[1], s = Math.pow(PHI, n), f = (k * G) % 1;
-    T[e[0]] = {k:k, n:n, simmie:!!e[2], weather:!!e[3], base:s, frac:f};
+    var fl = e[2] || "", f = ((i + 1) * G) % 1;
+    T[e[0]] = {k:i + 1, n:e[1], simmie:fl.indexOf("s") >= 0, weather:fl.indexOf("w") >= 0, pulse:fl.indexOf("p") >= 0, base:anchor() * Math.pow(PHI, e[1]), frac:f};
     list.push(e[0]);
   });
-  var SWEEP = {hot:-1, sun:-0.5, storm:0, cloud:0, rain:0.5, fog:1, night:1.5, deep:2};
-  var MSG = {idle:5, "new":3, dad:2, urgent:1};
+  var SWEEP = {hot:-1, sun:0, storm:0, cloud:0, rain:1, fog:1, night:2, deep:2};   // phi: whole steps
+  var MSG = {idle:1, "new":0, dad:-1, urgent:-2};                                   // phi: whole rungs of B
   var sw = 0, msgState = null, msgForced = null, wxForced = null;
   var RM = (typeof window !== "undefined" && window.matchMedia) ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
   try{ var q = new URLSearchParams(location.search); wxForced = q.get("weather"); if(!(wxForced in SWEEP)) wxForced = null;
     msgForced = q.get("msg"); if(!(msgForced in MSG)) msgForced = null; }catch(e){}
   function g(name){ var t = T[name]; if(!t) throw new Error("phi-timing: unknown element " + name); return t; }
   function shift(t){ return (t.weather || RM.matches) ? 0 : sw; }
-  function per(name){ var t = g(name); return t.base * Math.pow(PHI, shift(t)); }
-  function perthHour(){ try{ return +new Date().toLocaleString("en-AU", {timeZone:"Australia/Perth", hour:"2-digit", hour12:false}) % 24; }catch(e){ return new Date().getHours(); } }
+  function rungOf(t){ var k = t.n + shift(t); return t.pulse ? Math.max(k, PULSE_FLOOR) : k; }
+  function per(name){ return anchor() * Math.pow(PHI, rungOf(g(name))); }
+  // deep night: the sun's centre below civil twilight (js/season-pumps.js rest share reaches 1); no clock hours
+  function deepNight(){ try{ var SP = root.SeasonPumps; return !!SP && SP.restShare(SP.sunHeight(new Date())) >= 1; }catch(e){ return false; } }
+  function paused(){ return !!(doc && doc.documentElement.classList.contains("phi-paused")); }
   var weatherKey = null;   // last weather mood the page reported (null = no weather state on this page)
   function sweepFor(key){ if(wxForced) return SWEEP[wxForced];   // ?weather= preview wins exactly (use ?weather=deep for deep night)
-    if(key == null) return 0; var h = perthHour(); if(h >= 0 && h < 5) key = "deep"; return SWEEP[key] || 0; }
+    if(key == null) return 0; if(deepNight()) key = "deep"; return SWEEP[key] || 0; }
   var api = {
     PHI:PHI, list:list, SWEEP:SWEEP, MSG:MSG,
-    s:per, ms:function(n){ return Math.round(per(n) * 1000); },
+    B:anchor, s:per, ms:function(n){ return Math.round(per(n) * SEC); },
     base:function(n){ return g(n).base; },
-    off:function(n){ return per(n) * g(n).frac; }, offMs:function(n){ return Math.round(api.off(n) * 1000); },
-    info:function(n){ var t = g(n); return {k:t.k, n:t.n, simmie:t.simmie, weather:t.weather, base:t.base, s:per(n), off:api.off(n), shift:shift(t)}; },
+    off:function(n){ return per(n) * g(n).frac; }, offMs:function(n){ return Math.round(api.off(n) * SEC); },
+    info:function(n){ var t = g(n); return {k:t.k, n:t.n, rung:rungOf(t), simmie:t.simmie, weather:t.weather, pulse:t.pulse, base:t.base, s:per(n), off:api.off(n), shift:shift(t)}; },
     sweep:function(){ return RM.matches ? 0 : sw; },
     // repeating timer: first tick at the golden-angle offset, then one per period; re-reads the period every cycle,
     // so a new sweep lands at the next cycle boundary. returns {stop}
     every:function(n, fn){ var h = {t:null, dead:false};
-      function tick(){ if(h.dead) return; fn(); h.t = setTimeout(tick, api.ms(n)); }
+      function tick(){ if(h.dead) return; if(!paused()) fn(); h.t = setTimeout(tick, api.ms(n)); }
       h.t = setTimeout(tick, api.offMs(n)); h.stop = function(){ h.dead = true; clearTimeout(h.t); }; return h; },
     // the page tells the module its weather mood (sun|hot|cloud|fog|rain|storm|night) or null when it has none
     setWeather:function(key){ weatherKey = key || null; setSweep(sweepFor(weatherKey)); },
@@ -87,8 +85,7 @@
   root.PhiTiming = api;
 
   // ---------- CSS side ----------
-  var doc = (typeof document !== "undefined") ? document : null, rootStyle = doc && doc.documentElement.style;
-  function writeVars(){ list.forEach(function(n){ var t = T[n]; rootStyle.setProperty("--phi-" + n, per(n).toFixed(3) + "s"); rootStyle.setProperty("--phi-" + n + "-d", (-api.off(n)).toFixed(3) + "s"); }); }
+  function writeVars(){ list.forEach(function(n){ var t = T[n]; rootStyle.setProperty("--phi-" + n, per(n) + "s"); rootStyle.setProperty("--phi-" + n + "-d", (-api.off(n)) + "s"); }); }
   // which keyframes belong to the weather loop (never swept) or the message layer (own pump)
   var FIXED = /^(wx-drift|wx-sway|wx-fadein|wx-blip|bw-|msg-pulse)/;
   function sweepable(a){ return a && a.animationName && !FIXED.test(a.animationName) && a.effect && a.effect.getTiming().iterations === Infinity &&
@@ -116,16 +113,16 @@
       });
     }, true);
     // deep night starts/ends on the Perth clock (functional check once a minute, not an animation)
-    setInterval(function(){ if(weatherKey || wxForced) setSweep(sweepFor(weatherKey)); }, 60000);
+    setInterval(function(){ if(weatherKey || wxForced) setSweep(sweepFor(weatherKey)); }, anchor() * Math.pow(PHI, MSG.idle + MSG.idle + MSG.idle) * SEC);   // phi: re-check the sky every B x PHI^3
     if(wxForced) setTimeout(function(){ setSweep(sweepFor(null)); }, 0);
     if(RM.addEventListener) RM.addEventListener("change", function(){ setSweep(sweepFor(weatherKey)); });
   }
   // ---------- message-status layer ----------
-  function msgPer(st){ return Math.pow(PHI, MSG[st]); }
+  function msgPer(st){ return anchor() * Math.pow(PHI, Math.max(MSG[st], PULSE_FLOOR)); }
   function setMsg(state){
     if(msgForced) state = msgForced; if(!(state in MSG)) state = "idle";
-    if(state === msgState || !doc) return; msgState = state; var D = msgPer(state) * 1000;
-    rootStyle.setProperty("--phi-msg", (D/1000).toFixed(3) + "s");
+    if(state === msgState || !doc) return; msgState = state; var D = msgPer(state) * SEC;
+    rootStyle.setProperty("--phi-msg", (D / SEC) + "s");
     doc.documentElement.setAttribute("data-msg", state);
     if(doc.getAnimations) doc.getAnimations().forEach(function(a){ if(a.animationName === "msg-pulse"){
       var t = a.effect.getTiming(); if(!a._msgPinned){ a.effect.updateTiming({duration:t.duration, delay:t.delay}); a._msgPinned = true; } a._msgNext = D; } });
