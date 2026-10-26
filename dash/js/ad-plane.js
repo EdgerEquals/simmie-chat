@@ -59,7 +59,7 @@
       if(!it.fixed){ var op = it.wrap.offsetParent; if(op){ var r = op.getBoundingClientRect(); o = {left:r.left - op.scrollLeft + op.clientLeft, top:r.top - op.scrollTop + op.clientTop}; } }
       var cx = b.left + b.width / 2 - o.left, cy = b.top + b.height / 2 - o.top;
       var R = it.btn.offsetWidth / 2, H = it.btn.offsetHeight / 2;
-      var rx = R + (it.small ? 8 : 9), ry = it.small ? Math.min(0.32 * rx, H + 5) : 0.32 * rx, tilt = (it.small ? -6 : -18) * D2R;
+      var rx = R + (it.small ? H : R * Math.pow(PHI, -2)), ry = it.small ? Math.min(rx * Math.pow(PHI, -2), H * (1 + 1 / PHI)) : rx * Math.pow(PHI, -2), tilt = axisTilt(it.small);   // phi: diagmotion sizes
       var ph = RM.matches ? null : phase(it);
       // writes
       it.wrap.style.transform = "translate(" + cx.toFixed(2) + "px," + cy.toFixed(2) + "px)";
@@ -100,6 +100,17 @@
     it.vis = cs.visibility !== "hidden" && (fixed || it.btn.offsetParent !== null);
     if(fixed !== it.fixed){ it.fixed = fixed; it.wrap.classList.toggle("is-fixed", fixed); }
     if(z - 1 !== it.zBack){ it.zBack = z - 1; it.zFront = z + 1; it.near = null; }
+  }
+  // DIAGMOTION (Kids Club 'motion rides two corner-to-corner axes', Danny 15:56 AWST 26 Oct 2026; dad-page js/phi-axes.js is the model,
+  // own copy js/phi-axes.js): the orbit's long axis is a phi ratio of screen axis B's own angle (top-right -> bottom-left, so it rises to the
+  // right like the old fixed -18 / -6 deg): PHI^-2 of it round the round button, PHI^-4 along the wide chat key. It follows the axes' slow
+  // phi-pump drift and the screen's shape (portrait about -21 / -8 deg, landscape about -13 / -5 deg on the small phones). Sizes are
+  // phi ratios of the button: long radius = half-width + half-width x PHI^-2 (round) or + half-height (key), short = long x PHI^-2.
+  var PHI = (1 + Math.sqrt(5)) / 2;                                                     // phi: the golden ratio
+  function axisTilt(small){
+    var A = window.PhiAxes, b = A && A.frame && A.frame.b && A.frame.b.h ? A.frame.b : null;
+    var ang = b ? Math.atan2(-b.y, -b.x) : -Math.atan2(innerHeight, innerWidth);      // unit: B's direction as a line, pointing up-right
+    return ang * Math.pow(PHI, small ? -4 : -2);
   }
   function pt(th, rx, ry, tilt){ var x = rx * Math.cos(th), y = ry * Math.sin(th);
     return [x * Math.cos(tilt) - y * Math.sin(tilt), x * Math.sin(tilt) + y * Math.cos(tilt)]; }

@@ -47,6 +47,15 @@
       NOTES=[1318.5,1480,1661.2,1976,2217.5,2637];   // E6 F#6 G#6 B6 C#7 E7: bright E-major pentatonic, nothing minor, nothing low
   var RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
   function P(n){var s=0;try{s=window.PhiTiming?PhiTiming.sweep():0;}catch(e){}return Math.pow(PHI,n+s+drift())*1000;}
+  // DIAGMOTION (Kids Club 'motion rides two corner-to-corner axes', Danny 15:56 AWST 26 Oct 2026; dad-page's js/phi-axes.js is the model,
+  // own copy in js/phi-axes.js): everything that crosses the overlay enters, leaves and travels as ratios on the two screen diagonals,
+  // a along A (top-left -> bottom-right), b along B (top-right -> bottom-left), -1..1 from the centre. Points come from PhiAxes.at() (so they
+  // follow its slow phi-pump drift) shifted into the overlay's own pixels; without PhiAxes the overlay's own four corners give the same frame.
+  var OFF=1+Math.pow(PHI,-4);                                                          // phi: just past a corner, PHI^-4 of a half-diagonal out
+  function axo(ov){var o=ov.getBoundingClientRect();return {l:o.left,t:o.top,W:ov.clientWidth||innerWidth,H:ov.clientHeight||innerHeight};}
+  function axp(o,a,b){var A=window.PhiAxes;if(A&&A.frame&&A.frame.w){var q=A.at(a,b);return [q.x-o.l,q.y-o.t];}return [o.W/2+(a-b)*o.W/2,o.H/2+(a+b)*o.H/2];}   // unit: half the box
+  function axIn(o,side){return side<0?axp(o,-OFF,0):axp(o,0,-OFF);}                  // in past the top-left end of A, or the top-right end of B
+  function axOut(o,side){return side<0?axp(o,0,-OFF):axp(o,-OFF,0);}                 // out past the other top corner
   // SWEET (Danny 14:01 AWST): her motion tile; 'Slow, dreamy drift' (the default) stretches every timing by one PHI step
   function drift(){try{var k=window.KidLogo&&KidLogo.read();return k&&k.drift===0?0:1;}catch(e){return 1;}}
   function mood(){try{var k=window.KidLogo&&KidLogo.read();return (k&&k.mood)||'dreamy';}catch(e){return 'dreamy';}}
@@ -197,11 +206,11 @@
     // ~79.5% of the time it comes in as a perch-then-drop arc (high, then dropping onto the letter), otherwise a low level approach.
     var R=REF().bluebird,bbN=pnode('bluebird',5,2,0.146),dropN=pnode('bb-drop',2,1,0.146,bbN),beatN=pnode('bb-beat',2,1,0.146,bbN),vp=ViewPump(),yaw=0,yawDx=0,yawDy=0;
     var drop=Math.random()<clamp01(R.perchDrop*dropN.out());
-    var IN=[[side<0?-60:W+60,Math.max(24,fr.top-orr.top-fh*0.2)],[T[0]+side*fw*0.18,T[1]+fh*0.55],drop?[T[0]-side*fw*0.1,T[1]-fh*0.75]:[T[0]-side*fw*0.3,T[1]-fh*0.12],H0];
+    var AXO=axo(ov),IN=[axIn(AXO,side),[T[0]+side*fw*0.18,T[1]+fh*0.55],drop?[T[0]-side*fw*0.1,T[1]-fh*0.75]:[T[0]-side*fw*0.3,T[1]-fh*0.12],H0];
     // wingbeats: Pennycuick estimate (ESTIMATED, ~9.7 Hz) x PHI^-1 (Danny's slowed flight) x pump, each beat +-irregularWingbeat (fast but irregular)
     var bph=0,bfr=R.wingbeatHz/PHI,lastNow=performance.now();
     function beatPh(now){var d=(now-lastNow)/1000;lastNow=now;var o=Math.floor(bph);bph+=d*bfr;if(Math.floor(bph)!==o)bfr=R.wingbeatHz/PHI*beatN.out()*(1+(Math.random()*2-1)*R.irregularWingbeat);var f=bph%1;return f<0.72?f*6.2832/0.72:null;}
-    var OUT=[H0,[T[0]+side*fw*0.1,T[1]-fh*0.38],[T[0]-side*fw*0.6,T[1]-fh*0.55],[side<0?W+80:-80,Math.max(-50,fr.top-orr.top-fh*0.45)]];
+    var OUT=[H0,[T[0]+side*fw*0.1,T[1]-fh*0.38],[T[0]-side*fw*0.6,T[1]-fh*0.55],axOut(AXO,side)];
     // Danny t744u: 50% slower = every flight phase twice as long (fairy 1.272 / 0.618 / 1.272 s -> 2.544 / 1.236 / 2.544 s), dust PHI^1
     var D0=0,DIN=2544,DT=1236,DOUT=2544,DUST=1618,t0=performance.now(),parts=[],burst=false,gift=null,lx=IN[0][0],ly=IN[0][1],face=-side,rm=RM.matches,ac=st.ac;
     var pp=function(px){return (px/W-0.5)*1.6;};
@@ -307,7 +316,7 @@
     var dd=Math.max(bump(hr,R.dawnHour,3),bump(hr,R.duskHour,3)),mid=bump(hr,R.middayHour,4);
     var wagHz=R.wagHz*(1+R.wagDawnDuskBoost*dd),flashPerS=0.12*(1+R.flashMiddayBoost*mid);                  // flash base rate ESTIMATED
     if(rm){x.clearRect(0,0,W,H);drawWag(x,face,T[0],T[1],0,null,sz,1,0,0,0.2,0,0);return;}
-    var side=Math.random()<0.5?-1:1,start=[side<0?-50:W+50,Math.max(20,T[1]-H*0.25)],t0=performance.now(),pos=start.slice(),perch=T.slice();
+    var side=Math.random()<0.5?-1:1,WAO=axo(ov),start=axIn(WAO,side),t0=performance.now(),pos=start.slice(),perch=T.slice();
     var state='in',sT=0,sDur=2618,path=null,wagAmp=0,fan=0,preen=0,flash=0,flashT=-1,bph=0,last=t0,lx=pos[0],ly=pos[1],yaw=0;
     function pick(){var tot=0,k,w={};for(k in R.budget){w[k]=R.budget[k]*pw[k].out();tot+=w[k];}var r=Math.random()*tot;for(k in w){r-=w[k];if(r<=0)return k;}return 'perch';}
     function jerky(a,b,dur,twists){var pts=[a];for(var i=1;i<=twists+1;i++){var f=i/(twists+2);pts.push([a[0]+(b[0]-a[0])*f+(Math.random()-0.5)*60*sz,a[1]+(b[1]-a[1])*f-(Math.random()*40+10)*sz]);}pts.push(b);return {pts:pts,dur:dur};}
@@ -318,7 +327,7 @@
       else if(s==='hop'){sDur=1272;var nx=Math.max(-1,Math.min(1,(Math.random()-0.5)*2));perch=[T[0]+nx*14*sz,T[1]];path={pts:[pos.slice(),[(pos[0]+perch[0])/2,pos[1]-7*sz],perch.slice()],dur:sDur};}
       else if(s==='sally'){sDur=1000*Math.pow(PHI,0.5+Math.random()*0.5);var top=[perch[0]+(Math.random()-0.5)*80*sz,perch[1]-(40+Math.random()*40)*sz];
         path={pts:[perch.slice(),[top[0]-20*sz,top[1]+15*sz],top,[top[0]+25*sz,top[1]+5*sz],perch.slice()],dur:sDur};}
-      else if(s==='fly'){sDur=1618;var end=[side<0?W+60:-60,Math.max(-40,T[1]-H*0.3)];path=jerky(pos.slice(),end,sDur,R.sally.twistsPerSally||2);}}
+      else if(s==='fly'){sDur=1618;var end=axOut(WAO,side);path=jerky(pos.slice(),end,sDur,R.sally.twistsPerSally||2);}}
     path=jerky(start,T,2618,2);
     function frame(now){if(me!==st)return;var dt=Math.min(0.05,(now-last)/1000),e=now-t0,k=now-sT,f=Math.min(1,k/sDur),flap=null,tilt=0;last=now;
       if(state==='in'||state==='hop'||state==='sally'||state==='fly'){pos=along(path,state==='in'?Math.min(1,e/2618):f);
@@ -341,26 +350,26 @@
   function companions(){if(!st||RM.matches)return;var me=st,ov=st.fig.parentNode;if(!ov)return;
     var cv=document.createElement('canvas');cv.className='rbz-sky';cv.setAttribute('aria-hidden','true');ov.insertBefore(cv,st.fig);
     var dpr=Math.min(2,window.devicePixelRatio||1),W=0,H=0,x=cv.getContext('2d'),list=[],n=0,raf=0,lastT=0;
-    function size(){W=ov.clientWidth||innerWidth;H=ov.clientHeight||innerHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);x.setTransform(dpr,0,0,dpr,0,0);}
+    var CO=null;function size(){CO=axo(ov);W=ov.clientWidth||innerWidth;H=ov.clientHeight||innerHeight;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);x.setTransform(dpr,0,0,dpr,0,0);}
     size();me.sky={cv:cv,stop:function(){cancelAnimationFrame(raf);raf=0;}};
     function spawn(){if(me!==st)return;n++;var bf=((n*G)%1)<0.618,dir=Math.random()<0.5?1:-1,m=Math.min(W,H),s=Math.max(0.9,Math.min(1.7,m/360));
-      var y0=H*(0.08+0.84*Math.random()),y1=Math.max(H*0.05,Math.min(H*0.95,y0+(Math.random()-0.5)*H*0.3));
-      if(list.length<3)list.push({bf:bf,dir:dir,y0:y0,y1:y1,t0:performance.now(),d:bf?P(4):P(3.5),s:bf?s*1.15:s*0.62,ph:Math.random()*6.28,hue:Math.random()<0.5,wob:0.6+0.8*Math.random()});
+      var c0=(2*((n*G*G)%1)-1)*G,c1=Math.max(-G,Math.min(G,c0+(Math.random()-0.5)*Math.pow(PHI,-2)));   // phi: across-axis lane within PHI^-1, drift within PHI^-2
+      if(list.length<3)list.push({bf:bf,dir:dir,ax:n%2,c0:c0,c1:c1,t0:performance.now(),d:bf?P(4):P(3.5),s:bf?s*1.15:s*0.62,ph:Math.random()*6.28,hue:Math.random()<0.5,wob:0.6+0.8*Math.random()});
       if(!raf)raf=requestAnimationFrame(frame);
       later(spawn,P(2)*(1+((n+1)*G)%1));}
     function frame(now){raf=0;if(me!==st)return;if(now-lastT<30){raf=requestAnimationFrame(frame);return;}lastT=now;   // ~30 fps
       x.clearRect(0,0,W,H);
       for(var i=list.length-1;i>=0;i--){var c=list[i],p=(now-c.t0)/c.d;if(p>=1){list.splice(i,1);continue;}
-        var a=Math.min(1,p/0.236,(1-p)/0.236)*(c.bf?0.85:0.75),px=c.dir>0?-40+p*(W+80):W+40-p*(W+80),py=c.y0+(c.y1-c.y0)*p,tt=(now-c.t0)/1000;
+        var a=Math.min(1,p/0.236,(1-p)/0.236)*(c.bf?0.85:0.75),al=c.dir*(-OFF+2*OFF*p),ac=c.c0+(c.c1-c.c0)*p,pq=c.ax?axp(CO,ac,al):axp(CO,al,ac),px=pq[0],py=pq[1],tt=(now-c.t0)/1000;
         if(c.bf){py+=Math.sin(tt*6.2832/1.618*c.wob+c.ph)*16*c.s+Math.sin(tt*6.2832*1.1)*3*c.s;drawFly(x,px,py,tt*6.2832*2.62+c.ph,c.s,a,c.hue);}
-        else{var cyc=(tt*1.618+c.ph)%1,flapOn=cyc<0.5;py+=(flapOn?-1:1)*Math.sin(cyc*Math.PI*2)*4*c.s;drawBird(x,c.dir,px,py,0,flapOn?tt*6.2832*11:null,c.s,false,a,1,false);}}
+        else{var cyc=(tt*1.618+c.ph)%1,flapOn=cyc<0.5;py+=(flapOn?-1:1)*Math.sin(cyc*Math.PI*2)*4*c.s;drawBird(x,c.ax?-c.dir:c.dir,px,py,0,flapOn?tt*6.2832*11:null,c.s,false,a,1,false);}}
       if(list.length)raf=requestAnimationFrame(frame);}
     later(spawn,P(1)+P(-2));}   // first companion ~2 s after opening, after the bluebird has set off
   // ---- 7 DAWN SKY (Danny t744u "something else in the background ... a background loop ... very aesthetic"): behind the tile, over the
   // dimmed page. A deep-navy-to-dawn horizon glow that breathes (PHI^5 11.09 s), two faint aurora veils drifting sideways (PHI^7 29.03 s and
   // PHI^6 17.94 s, alternate = seamless) and 11 soft bokeh motes rising slowly (PHI^5..PHI^6 s each, golden-angle negative delays so the
   // sky is already full on open). Transform + opacity only, no filters, no canvas. Reduced motion: the same sky, still.
-  var DAWN_CSS='.rbz-dawn{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;opacity:0;transition:opacity .618s ease}.rbz-dawn.on{opacity:1}'+
+  var DAWN_CSS='.rbz-dawn{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;container-type:size;opacity:0;transition:opacity .618s ease}.rbz-dawn.on{opacity:1}'+
     '.rbz-dawn i{position:absolute;display:block;will-change:transform,opacity}'+
     '.rbz-hz{left:-20%;right:-20%;bottom:-30%;height:75%;background:radial-gradient(ellipse 50% 50% at 50% 70%,rgba(229,138,166,.27),rgba(133,166,187,.17) 42%,rgba(31,84,120,.12) 62%,rgba(20,58,87,0) 78%)}'+
     '.rbz-top{left:0;right:0;top:0;height:55%;background:linear-gradient(rgba(20,58,87,.42),rgba(20,58,87,0))}'+
@@ -374,16 +383,19 @@
     d.innerHTML='<i class="rbz-top"></i><i class="rbz-hz"></i><i class="rbz-au rbz-au1"></i><i class="rbz-au rbz-au2"></i>';
     var motion=!RM.matches,cols=['157,188,206','10,242,255','229,138,166','133,166,187'];
     for(var k=1;k<=11;k++){var m=document.createElement('i'),f=(k*G)%1,s=Math.round(6+22*((k*0.382)%1)),c=cols[k%4],al=(c==='10,242,255'?0.22:0.3);
-      m.className='rbz-mote';m.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(4+92*f).toFixed(1)+'%;top:'+(58+36*((k*0.2361)%1)).toFixed(1)+'%;'+
+      var onB=k%2,ga=Math.pow(PHI,-2)+Math.pow(PHI,-2)*f*G,gb=(2*((k*Math.pow(PHI,-3))%1)-1)*Math.pow(PHI,-3),ma=onB?gb:ga,mb=onB?ga:gb;   // phi: along PHI^-2..PHI^-1 from the centre (lower half), across within PHI^-3
+      m.className='rbz-mote';m.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(50+50*(ma-mb)).toFixed(1)+'%;top:'+(50+50*(ma+mb)).toFixed(1)+'%;'+   // unit: percent of the sky box, the axis point (a, b)
         'background:radial-gradient(circle,rgba('+c+','+al+') 0,rgba('+c+','+(al*0.45).toFixed(3)+') 45%,rgba('+c+',0) 70%)';
       d.appendChild(m);
-      if(motion){var dur=P(5+(k%3)/2);anim(m,[{opacity:0,transform:'translate3d(0,0,0)'},{opacity:1,transform:'translate3d('+((f-0.5)*30).toFixed(1)+'px,-22vh,0)',offset:0.5},{opacity:0,transform:'translate3d('+((0.5-f)*20).toFixed(1)+'px,-44vh,0)'}],{duration:dur,delay:-dur*f,iterations:Infinity,easing:'linear'});}
+      if(motion){var dur=P(5+(k%3)/2),mv=function(al,acr){var da=onB?acr:al,db=onB?al:acr;return 'translate3d(calc('+((da-db)/2).toFixed(4)+' * 100cqw),calc('+((da+db)/2).toFixed(4)+' * 100cqh),0)';};   // unit: a step (da, db) on the axes in the sky box's own width / height
+        anim(m,[{opacity:0,transform:'translate3d(0,0,0)'},{opacity:1,transform:mv(-1/2,(f-1/2)*Math.pow(PHI,-3)),offset:1/2},{opacity:0,transform:mv(-1,(1/2-f)*Math.pow(PHI,-4))}],{duration:dur,delay:-dur*f,iterations:Infinity,easing:'linear'});}   // phi: rises one half-diagonal along its axis, sways PHI^-3 / PHI^-4 across
       else m.style.opacity=(0.4+0.5*f).toFixed(2);}
     ov.insertBefore(d,ov.firstChild);st.layers.push(d);
     if(motion){var hz=d.querySelector('.rbz-hz'),a1=d.querySelector('.rbz-au1'),a2=d.querySelector('.rbz-au2');
       anim(hz,[{opacity:.72,transform:'scale(1)'},{opacity:1,transform:'scale(1.06)'}],{duration:P(5),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
-      anim(a1,[{opacity:.45,transform:'translate3d(-9%,0,0)'},{opacity:1,transform:'translate3d(9%,2%,0)'}],{duration:P(7),delay:-P(7)*G,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
-      anim(a2,[{opacity:.9,transform:'translate3d(8%,0,0)'},{opacity:.35,transform:'translate3d(-8%,-3%,0)'}],{duration:P(6),delay:-P(6)*((2*G)%1),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});}
+      var vt=Math.pow(PHI,-4).toFixed(4),vA=function(sg){return 'translate3d(calc('+sg+vt+' * 100cqw),calc('+sg+vt+' * 100cqh),0)';},vB=function(sg){return 'translate3d(calc('+(sg==='-'?'':'-')+vt+' * 100cqw),calc('+sg+vt+' * 100cqh),0)';};   // phi: PHI^-4 of the box along A / B
+      anim(a1,[{opacity:.45,transform:vA('-')},{opacity:1,transform:vA('')}],{duration:P(7),delay:-P(7)*G,iterations:Infinity,direction:'alternate',easing:'ease-in-out'});
+      anim(a2,[{opacity:.9,transform:vB('-')},{opacity:.35,transform:vB('')}],{duration:P(6),delay:-P(6)*((2*G)%1),iterations:Infinity,direction:'alternate',easing:'ease-in-out'});}
     requestAnimationFrame(function(){d.classList.add('on');});}
   function start(fig,ac){stop();var svg=fig.querySelector('.dmz-art svg'),use=svg&&svg.querySelector('use:last-of-type');if(!svg||!use)return;style();
     st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,snd:null,bird:null,wag:null,sky:null,layers:[]};
