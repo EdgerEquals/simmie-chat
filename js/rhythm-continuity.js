@@ -209,7 +209,7 @@
   function retrim() { var tau = glideTau(), v = logoOn ? trimTarget() : musicLevel(); trims.forEach(function (T) { try { T.gain.setTargetAtTime(v, T.context.currentTime, tau); } catch (e) {} }); }
   function logoOut(ctx) {
     for (var i = 0; i < trims.length; i++) if (trims[i].context === ctx) return trims[i];
-    var T = ctx.createGain(); T.gain.value = musicLevel();   // starts at the radio level, retrim() glides it up T.connect(media(ctx).input); trims.push(T); if (logoOn) retrim(); return T;
+    var T = ctx.createGain(); T.gain.value = musicLevel(); T.connect(media(ctx).input); trims.push(T); if (logoOn) retrim(); return T;   // starts at the radio level, retrim() glides it up
   }
   function setLogo(on) {
     on = !!on; if (on === logoOn) return; logoOn = on;
