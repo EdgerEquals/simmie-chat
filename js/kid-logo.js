@@ -7,6 +7,8 @@
    State: ONE localStorage key per site, 'kidlogo.v1.<site>' (Stream 1, this device only; never sent, no names, kept out of phiAdapt.v1).
    Every site starts from the same logo (the vector file on her dashboard, img/bonnies-logo.svg) and then keeps its own state.
    Sound: no audio and no AudioContext until the first tap; the context is created INSIDE that tap (iOS-safe), never on load.
+   Keep alive (Kids Club 'Rhythms keep going while you're away'): inside that same tap the logo sound joins js/rhythm-continuity.js's
+   media bridge (hidden <audio> + Media Session), so it keeps playing when she switches apps and resumes on return.
    Second way in (Ask your bot to edit the logo): a link ending in #edit-logo opens this site's editor once the logo is on screen.
    API: window.KidLogo = {site, key, cfg, read(), write(s), apply(), open(edit), logos()}. */
 (function (root) {
@@ -91,6 +93,7 @@
   function audio() {                                                                     // only ever called inside a tap
     if (read().sound === false) return AC;
     try { var C = root.AudioContext || root.webkitAudioContext; if (!C) return null; if (!AC) AC = new C(); if (AC.state !== 'running') AC.resume(); } catch (e) { AC = null; }
+    try { if (AC && root.RhythmContinuity) RhythmContinuity.media(AC).play('logo', { pause: function () { root.KidLogoView && root.KidLogoView.close(); } }); } catch (e) {}   // keep alive: the media bridge starts inside this tap (iOS)
     return AC;
   }
   function css(href) { if (doc.querySelector('link[data-kl]')) return; var l = doc.createElement('link'); l.rel = 'stylesheet'; l.href = href; l.setAttribute('data-kl', ''); doc.head.appendChild(l); }

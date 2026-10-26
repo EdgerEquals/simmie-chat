@@ -106,6 +106,7 @@
   }
 
   // ---- life + sound (own copies; lazy) ----
+  function outOf(ac) { try { if (root.RhythmContinuity) return RhythmContinuity.loud.logoOut(ac); } catch (e) {} return ac.destination; }   // logo trim (music x PHI^-1) -> keep-alive bridge (js/rhythm-continuity.js)
   function startLife() {
     var s = S(), motion = s.motion !== false && !still(), sound = s.sound !== false && AC;
     if (motion && !s.art) {
@@ -115,7 +116,7 @@
       Promise.all([root.PhiPumps ? 0 : inj(cfg.dir + 'phi-pumps.js' + V)]).then(function () { return root.RebellaZoomLife ? 0 : inj(cfg.dir + 'rebella-zoom-life.js' + V); }).then(go);
     } else if (sound) {
       var go2 = function () { if (!cur || eng || !root.LogoSound) return;
-        try { eng = LogoSound.create(AC, AC.destination, { logo: 'kid-logo:' + KL.site, mood: s.mood || 'dreamy', events: { 'star-drop': Math.pow(PHI, -3), shimmer: Math.pow(PHI, -3) } }); } catch (e) { eng = null; } };
+        try { eng = LogoSound.create(AC, outOf(AC), { logo: 'kid-logo:' + KL.site, mood: s.mood || 'dreamy', events: { 'star-drop': Math.pow(PHI, -3), shimmer: Math.pow(PHI, -3) } }); } catch (e) { eng = null; } };
       if (root.LogoSound) return go2();
       (root.PhiPumps ? Promise.resolve() : inj(cfg.dir + 'phi-pumps.js' + V)).then(function () { return root.LogoSound ? 0 : inj(cfg.dir + 'logo-sound.js' + V); }).then(go2);
     }
@@ -136,6 +137,7 @@
     ov.classList.remove('is-open', 'kl-editing'); ed.hidden = true;
     var done = function () { ov.hidden = true; art.innerHTML = ''; };
     if (still()) done(); else setTimeout(done, ms(-8));   // phi: B x PHI^-8
+    try { if (AC && root.RhythmContinuity) RhythmContinuity.media(AC).rest('logo'); } catch (e) {}   // the media bridge rests with the view
     clearTimeout(acT); acT = setTimeout(function () { try { if (AC && !cur && AC.state === 'running') AC.suspend(); } catch (e) {} }, ms(-5) || 0);   // phi: B x PHI^-5 after close
     cur = null; if (root.location.hash === '#edit-logo') try { history.replaceState(null, '', root.location.pathname + root.location.search); } catch (e) {}
     var s = S(); if (!s.hinted) { s.hinted = Date.now(); KL.write(s); showHint(c); }

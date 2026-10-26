@@ -388,7 +388,7 @@
   function start(fig,ac){stop();var svg=fig.querySelector('.dmz-art svg'),use=svg&&svg.querySelector('use:last-of-type');if(!svg||!use)return;style();
     st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,snd:null,bird:null,wag:null,sky:null,layers:[]};
     dawn();companions();
-    if(st.ac){try{st.out=st.ac.createGain();st.out.gain.value=1;st.out.connect(st.ac.destination);}catch(e){st.out=null;}}
+    if(st.ac){try{st.out=st.ac.createGain();st.out.gain.value=1;st.out.connect(window.RhythmContinuity?RhythmContinuity.loud.logoOut(st.ac):st.ac.destination);}catch(e){st.out=null;}}
     music();
     var bg=document.createElement('canvas');bg.className='rbz-bg';bg.setAttribute('aria-hidden','true');fig.insertBefore(bg,fig.firstChild);
     var wall=document.createElement('div');wall.className='rbz-wall';wall.setAttribute('aria-hidden','true');fig.insertBefore(wall,st.art);

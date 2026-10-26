@@ -318,9 +318,9 @@
       R.ready.then(function(){if(!alive)return;next=ac.currentTime+0.1;R.fadeIn(ac.currentTime);tick();});
     }).catch(function(){});
     function tick(){if(!alive)return;if(next<ac.currentTime)next=ac.currentTime+0.05;
-      while(next<ac.currentTime+0.3){var evs=seq.step(next);for(var i=0;i<evs.length;i++){R.midi(evs[i]);if(log){log.push(evs[i]);if(log.length>4000)log.splice(0,1000);}}next+=(seq.stepLen||STEP);}
+      while(next<ac.currentTime+(document.hidden?Math.pow(PHI,3):0.3)){var evs=seq.step(next);for(var i=0;i<evs.length;i++){R.midi(evs[i]);if(log){log.push(evs[i]);if(log.length>4000)log.splice(0,1000);}}next+=(seq.stepLen||STEP);}
       if(o.logo){try{var q=seq.state();live[o.logo]={at:Date.now(),m:q.m,D:q.D,midi:q.root&&q.root.midi,chord:q.chord,loud:q.loud,day:q.day};}catch(e){}}
-      timer=setTimeout(tick,100);}
+      timer=setTimeout(tick,100);}   // hidden (keep-alive bridge, js/rhythm-continuity.js): look PHI^3 s ahead to ride out throttled timers
     return api;}
   W.LogoSound={create:create,Sequencer:Sequencer,wave:wave,feedTide:feedTide,dayCurve:dayCurve,THRESHOLDS:E.slice(),CH:CH,CC:CC,STEP:STEP,RSTEP:RSTEP,CALM:CALM,
     voices:voices,live:live,current:function(){return current;},
