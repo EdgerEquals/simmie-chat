@@ -194,27 +194,30 @@
   }
 
   // ---------- loudness relations (shared.md "Loudness", Danny 14:23 and 14:26 AWST 26 Oct 2026) ----------
-  // 1  Logo quieter than the page's music: logo level = the page music's UNDIPPED level x PHI^-1, re-read live while the logo sounds,
-  //    and the level the music would have now when it isn't playing (so the logo never jumps louder on its own). Applied as a trim
-  //    gain after the logo engine, i.e. a ratio of the music's existing level (the amplitude matrix is not defined yet).
-  //    A page with no music engine of its own (the chat) reads the music level as the identity (full level), so the logo sits one
-  //    phi step under it.
+  // 1  Logo a bit louder than the radio (Danny 16:42 AWST 26 Oct, replaces 14:23 'logo quieter'): logo level = the page music's
+  //    UNDIPPED level x PHI, re-read live while the logo sounds, and the level the music would have now when it isn't playing.
+  //    Loudness ceiling rail: the trim never goes past unity (the logo engine's own level; no boost, no master volume), so near the
+  //    top of the music range the step shrinks rather than clipping. Opening glides up from the radio level, closing glides back
+  //    down to it (free-wheel glide timed from B), never a jump. A page with no music engine (the chat) reads the music level as the
+  //    identity, so its logo sits at the ceiling.
   // 2  Page music dips a little under the logo: while the logo sounds, the page music's own dip stage glides to x PHI^-1 and back
   //    (free-wheel glide, rule 6: exponential, no clicks). The trim reads the undipped level, so the two never chase each other.
   //    Glide time constant: B x PHI^-5 (Rule phi B; the logo view's own close timing), PHI^0 s without B. No master volume anywhere.
   var music = null, logoOn = false, trims = [], ltimer = 0;
   function musicLevel() { try { var v = music && music.level ? +music.level() : NaN; if (v >= 0 && isFinite(v)) return v; } catch (e) {} return 1; }
   function glideTau() { try { var B = root.PhiB, r = B && B.rung ? +B.rung(-5) : NaN; if (r > 0 && isFinite(r)) return r; } catch (e) {} return Math.pow(PHI, 0); }   // phi: B x PHI^-5
-  function trimTarget() { return musicLevel() / PHI; }                            // phi: one rung under the music
-  function retrim() { var tau = glideTau(), v = trimTarget(); trims.forEach(function (T) { try { T.gain.setTargetAtTime(v, T.context.currentTime, tau); } catch (e) {} }); }
+  function trimTarget() { return Math.min(musicLevel() * PHI, 1); }              // phi: one rung over the music; anchor: unity = the loudness ceiling rail
+  function retrim() { var tau = glideTau(), v = logoOn ? trimTarget() : musicLevel(); trims.forEach(function (T) { try { T.gain.setTargetAtTime(v, T.context.currentTime, tau); } catch (e) {} }); }
   function logoOut(ctx) {
     for (var i = 0; i < trims.length; i++) if (trims[i].context === ctx) return trims[i];
-    var T = ctx.createGain(); T.gain.value = trimTarget(); T.connect(media(ctx).input); trims.push(T); return T;
+    var T = ctx.createGain(); T.gain.value = musicLevel(); T.connect(media(ctx).input); trims.push(T); if (logoOn) retrim(); return T;   // starts at the radio level, retrim() glides it up
   }
   function setLogo(on) {
     on = !!on; if (on === logoOn) return; logoOn = on;
     try { if (music && music.dip) music.dip(on ? 1 / PHI : 1, glideTau()); } catch (e) {}
-    clearInterval(ltimer); ltimer = 0; retrim();
+    clearInterval(ltimer); ltimer = 0;
+    trims.forEach(function (T) { try { var t = T.context.currentTime; T.gain.cancelScheduledValues(t); T.gain.setValueAtTime(T.gain.value, t); } catch (e) {} });   // glide on from where it is now
+    retrim();
     if (on) ltimer = setInterval(retrim, glideTau() * MS);                         // follow the music live while the logo sounds
   }
   var loud = { music: function (src) { music = src || null; retrim(); if (logoOn && music && music.dip) try { music.dip(1 / PHI, glideTau()); } catch (e) {} },
