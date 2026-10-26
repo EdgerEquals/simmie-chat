@@ -1,3 +1,8 @@
+/* KIDS CLUB COPY for Bonnie's sites (rebella js/rebella-zoom-life.js = simmie-chat js/rebella-zoom-life.js), from dad-page 8e1ce3c.
+   Started by her own zoom shell js/kid-logo-view.js (not dad-mark-zoom.js, which stays with Dad's page). Changes: script paths are
+   relative to this file (works from /moderation/ and every page depth); the zoom output has no master gain (unity: the device volume is
+   the one overall control, Danny 13:08 AWST 26 Oct 2026); the bluebird keeps Dad's colours. Everything else is unchanged and its fixed
+   values stay listed for Danny (/workspace/logo-sound-fixed-params.md). */
 /* Rebella zoom "life" (Danny t724u 14:04 AWST 25 Oct 2026), questionnaire only, ENLARGED view only (header logo and logo artwork untouched).
    Loaded lazily: js/dad-mark-zoom.js injects this file the first time the Rebella zoom opens. Everything stops when the zoom closes.
    1 SHIMMER  a soft light band glides across the letters, clipped to the letter shapes (evenodd, so the holes stay black).
@@ -5,7 +10,7 @@
    2 STARS    very faint static stars on a small canvas behind the logo, plus 6 highlight stars that twinkle in and out just above the top and
               just below the bottom edge of the lettering (positions read from the letter silhouette). Star k (1..6) repeats every
               PHI^(1.5+k/2) s = 2.62 / 3.33 / 4.24 / 5.39 / 6.85 / 8.72 s, each twinkle PHI^1 s, first at period*frac(k*0.618) (golden angle).
-   3 SOUND    (t746u, MIDI rebuild 15:11 AWST) a continuous music bed from js/logo-sound.js v=3 (shared logo engine: a MIDI sequencer on the
+   3 SOUND    (t746u, MIDI rebuild 15:11 AWST) a continuous music bed from js/logo-sound.js v=4 (shared logo engine: a MIDI sequencer on the
               phi grid + ladder, rendered by self-hosted Tone.js like Rebella's Music Playground; root, loudness and pumps come from the
               page via PhiPumps subscriptions; loaded lazily on the first open; the bird's star-drop and each shimmer fire its 'star-drop' / 'shimmer' hooks = +0.236 nudge). On top:
               Fairy palette (Danny t740u 14:2x AWST 25 Oct: the music-box tones were "too baby and too scary"): Web Audio synthesis only, no
@@ -37,6 +42,7 @@
    stars, the stronger glow and the static echo stay; open/close sounds stay. API: RebellaZoomLife.start(fig, audioContext) / stop(). */
 (function(){
   'use strict';
+  var ME=document.currentScript||document.querySelector('script[src*="rebella-zoom-life.js"]'),DIR=ME?ME.src.replace(/[^\/]*$/,''):'js/',VQ=(ME&&/\?v=[^#]*/.exec(ME.src)||[''])[0];
   var PHI=1.6180339887,G=0.6180339887,NS='http://www.w3.org/2000/svg',VB=[413,534,1810,893],
       NOTES=[1318.5,1480,1661.2,1976,2217.5,2637];   // E6 F#6 G#6 B6 C#7 E7: bright E-major pentatonic, nothing minor, nothing low
   var RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
@@ -86,7 +92,7 @@
   function toFig(ux,uy){var a=st.art,W=a.offsetWidth,H=a.offsetHeight,s=Math.min(W/VB[2],H/VB[3]),x=(ux-VB[0])*s+(W-VB[2]*s)/2-W/2,y=(uy-VB[1])*s+(H-VB[3]*s)/2-H/2,r=-5.5*Math.PI/180;
     return [a.offsetLeft+W/2+x*Math.cos(r)-y*Math.sin(r),a.offsetTop+H/2+x*Math.sin(r)+y*Math.cos(r),s];}
   function snd(name){try{st&&st.snd&&st.snd.event(name);}catch(e){}}
-  var SND='js/logo-sound.js?v=3',sndLoading=null;
+  var SND=DIR+'logo-sound.js'+VQ,sndLoading=null;
   function music(){if(!st||!st.ac||!st.out)return;var me=st;
     function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{logo:'rebella-logo',events:{'star-drop':0.236,'shimmer':0.236},
       subscribe:['pump:page','daytime','tide','moon','ratio-pump','clock','component:theme','phi-adapt:rebella-logo']});/* rule 10: the logo listens to the page */}catch(e){}}
@@ -169,7 +175,7 @@
   function clamp01(x){return x<0?0:x>1?1:x;}
   function REF(){return window.BirdRef||{wagtail:{budget:{perch:0.54,preen:0.15,hop:0.12,sally:0.104,fly:0.086},wagHz:3,wagSwingDeg:35,dawnHour:6,duskHour:18.5,middayHour:12.5,wagDawnDuskBoost:0.382,flashMiddayBoost:0.382,sally:{twistsPerSally:2},wingbeatHz:8.54},
     bluebird:{perchDrop:0.795,irregularWingbeat:0.146,wingbeatHz:9.72}};}
-  function loadRef(){if(window.BirdRef||document.getElementById('rbz-birdref'))return;var s=document.createElement('script');s.id='rbz-birdref';s.src='js/bird-ref-data.js?v=1';s.async=true;document.head.appendChild(s);}
+  function loadRef(){if(window.BirdRef||document.getElementById('rbz-birdref'))return;var s=document.createElement('script');s.id='rbz-birdref';s.src=DIR+'bird-ref-data.js'+VQ;s.async=true;document.head.appendChild(s);}
   function bird(){if(!st||st.bird)return;var me=st;st.bird={cv:null,raf:0};later(function(){if(me===st)fly(me);},382);}   // PHI^-2: after the zoom has finished scaling up
   function fly(me){var ov=st.fig.parentNode;if(!ov)return;
     var cv=document.createElement('canvas');cv.className='rbz-bird';cv.setAttribute('aria-hidden','true');ov.appendChild(cv);
@@ -375,7 +381,7 @@
   function start(fig,ac){stop();var svg=fig.querySelector('.dmz-art svg'),use=svg&&svg.querySelector('use:last-of-type');if(!svg||!use)return;style();
     st={fig:fig,art:fig.querySelector('.dmz-art'),ac:ac||null,timers:[],anims:[],stars:[],cols:null,sheen:null,out:null,snd:null,bird:null,wag:null,sky:null,layers:[]};
     dawn();companions();
-    if(st.ac){try{st.out=st.ac.createGain();st.out.gain.value=0.8;st.out.connect(st.ac.destination);}catch(e){st.out=null;}}
+    if(st.ac){try{st.out=st.ac.createGain();st.out.gain.value=1;st.out.connect(st.ac.destination);}catch(e){st.out=null;}}
     music();
     var bg=document.createElement('canvas');bg.className='rbz-bg';bg.setAttribute('aria-hidden','true');fig.insertBefore(bg,fig.firstChild);
     var wall=document.createElement('div');wall.className='rbz-wall';wall.setAttribute('aria-hidden','true');fig.insertBefore(wall,st.art);

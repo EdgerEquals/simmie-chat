@@ -1,3 +1,6 @@
+/* KIDS CLUB COPY for Bonnie's sites (rebella js/phi-pumps.js = simmie-chat js/phi-pumps.js), from dad-page 8e1ce3c. Change: 'daytime'
+   comes from the sun at the one coarse city point (js/season-pumps.js: +1 full day .. -1 full rest, easing through dusk and dawn), not
+   the clock hour. Everything else unchanged (its fixed values stay listed for Danny). */
 /* PHI PUMPS: the page-level pump root (Danny 15:18 AWST 25 Oct 2026). The WHOLE QUESTIONNAIRE PAGE is the parent entity of a pump tree
    whose pump counts follow Fibonacci down the tree: page 13 -> a logo 8 -> each sound layer 5 -> each chain parameter 3 -> small details 2.
    A node with N pumps = N slow sine modes on golden steps: periods PHI^(k0 + j/2) s, j = 0..N-1, phases 2 pi frac((j+1+seed) x 0.618)
@@ -43,7 +46,7 @@
     var v=h.sea_level_height_msl[i0+Number(p.hour)];if(typeof v!=='number'||day.length<2)return null;var lo=Math.min.apply(null,day),hi=Math.max.apply(null,day);
     return hi>lo?2*(v-lo)/(hi-lo)-1:0;}
   provide('pump:page',function(){return page.out();});
-  provide('daytime',function(){return -Math.cos(2*Math.PI*hrs()/24);});
+  provide('daytime',function(){var SP=window.SeasonPumps;if(SP)try{return 1-2*SP.restShare(SP.sunHeight(new Date()));}catch(e){}return -Math.cos(2*Math.PI*hrs()/24);});   // unit: 24 h per day (fallback only)
   provide('clock',function(){return Math.sin(2*Math.PI*((Date.now()/1000)%3600)/3600);});
   provide('moon',function(){var ph=(((Date.now()-947182440000)/86400000/29.530588853)%1+1)%1;return -Math.cos(2*Math.PI*ph);});
   provide('tide',tideRead);

@@ -1,3 +1,14 @@
+/* KIDS CLUB COPY for Bonnie's sites (rebella js/logo-sound.js = simmie-chat js/logo-sound.js), from dad-page 8e1ce3c (v4 CALM voice).
+   Changes from that file (Danny 13:08 AWST 26 Oct 2026 + Kids Club "Loudness" and "Pitch" standards):
+   - QUIET HOURS from the sun, not the clock: rest = SeasonPumps.restShare(SeasonPumps.sunHeight(now)) at the one coarse city point (dusk and
+     dawn ease smoothly, day length sets how long the quiet lasts). Level = PHI^-(n x rest), n = Dial 3's ceiling rung (PhiDials.SPEC.season.ceil,
+     Danny's rung; n = 2 gives the old ~0.382 night as the worked example). The other feeds still only nudge around it (listed for Danny).
+   - NO FIXED ROOT: base pitch = (1/B) x PHI^13 (B = Rule phi anchor B from js/phi-b.js: her own rhythm, the Moon and the temperature), so
+     a busier rhythm (shorter B) lifts it. Pump B (the page feeds' mix S) moves it within +-PHI^-2 of a phi step (about 3 semitones):
+     floor and headroom are phi rungs. Every note, chord and interval stays a ratio of that base.
+   - Tide feed at the city point (SeasonPumps.POINT, -32.0 / 115.9), not Fremantle.
+   - Tone.js path from window.KidLogoCfg.tone (Rebella keeps its copy under music/playground/vendor/tone).
+   - No master volume control anywhere: the device volume is the only overall level. Internal mix levels are unchanged and listed. */
 /* LOGO SOUND ENGINE v2: MIDI end to end (Danny voice 15:11 AWST 25 Oct 2026; t746u blend, free-wheel rule 6, rule 10 'logo = microcosm
    of the site'; spec /home/box/.config/logo-sound-motion-spec.md). Reusable and logo-agnostic. Used by the questionnaire's two header logos only:
    the Rebella zoom (js/rebella-zoom-life.js) and Dad's mark (js/logo-sound-dad.js voice, 15:28 AWST); not on other pages.
@@ -30,7 +41,7 @@
      m = (w+1)/2 (122.99 s and 76.01 s, one sweep about 1.6-2 min, never exactly repeats; t = wall-clock seconds). NUDGES (logo hooks):
      'star-drop' and 'shimmer' add +0.236, fading (1 - t/PHI^2)^2 over PHI^2 s. AFFINITY: the subscribed 'phi-adapt:<logo id>' value
      (0..1, how much this visitor uses the logo) adds +0.09 x affinity toward organic. m is clamped 0..1.
-   GRID  step PHI^-3 = 0.236 s; swing on odd steps, long:short 1:1 -> PHI:1; phrases 8, 13, 21 steps, cycling. HUMANISE: every event
+   GRID  step PHI^-3 = 0.236 s (Rebella: x PHI = 0.382 s since CALM, see below); swing on odd steps, long:short 1:1 -> PHI:1; phrases 8, 13, 21 steps, cycling. HUMANISE: every event
      gets +-0.009 s x (jitter detail pump) of random micro-timing (cap 0.018 s); velocity accent 0.82 + 0.18 x frac(step x 0.618) (golden
      angle); kalimba notes get a further +-PHI^-6 s stagger so it stays a tinker-toy.
    LADDER (free-wheel; spec order; e = soft entry threshold on m, gaps x1.618, shimmer slot 0.618; glide tau = PHI^(i-1) x 0.236 s)
@@ -81,14 +92,25 @@
    VOICES (v3, Danny voice 15:28-15:30 AWST): create(..., {voice:'dad'}) uses a registered voice's own Sequencer/Renderer pair
      (js/logo-sound-dad.js = Dad's mark); the default voice is the Rebella one above. SOLO: only one logo engine sounds at a time (a new
      create() stops the previous engine). LIVE: LogoSound.live[logo id] = {m, D, midi, loud, day} snapshot for live mini-mapped open/close sounds.
+   CALM (Danny t797u 16:11 AWST, Rebella voice only; Dad's voice unchanged): step x PHI = 0.382 s (glide taus keep the spec's 0.236 base);
+     blend m' = 0.382 + 0.618 m (organic-leaning, trap weight lowered); hats on even steps only, chance <= .382, 2-hit rolls <= .09,
+     velocity x0.236, low-passed 5.2 kHz; breath x0.236 (ceiling .14), band 700 Hz + low-pass 900 Hz (no hiss); birds x0.236 (<= .0236
+     per step); 808 x0.382 with a slow 20 ms attack and small pitch drop (soft warmth, no click) on a 2:3 grid (every 3rd step);
+     trap pluck x0.382; plucks <= .382 per step, stepwise melody, upper-mid register; a celesta-like soft lead (FM index <= 2.5, ch8 PC9)
+     doubles organic notes; glass FM index capped at 4; pad I-IV-vi-V an octave higher with nearest-voice leading; modes major
+     pentatonic -> Ionian -> major hexatonic -> Lydian; total timing offset capped +-0.02 s; pump depths on hats layer, density, swing and
+     jitter x0.382. CALM = the ceiling object (LogoSound.CALM); Sequencer.state().calm reports what actually happened.
    API: LogoSound.create(ac, dest, {voice, subscribe, events, logo, feeds, record}) -> engine {event(name), nudge(x), state(), stop(fade), log()}
         LogoSound.Sequencer(opts) (offline/export), LogoSound.feedTide() (lazy tide fetch), LogoSound.wave(t). */
 (function(G0){
   'use strict';
   var W=typeof window!=='undefined'?window:G0;
   var PHI=1.6180339887,G=0.6180339887,STEP=0.2360679775,E=[0,0.0136,0.0357,0.0713,0.1290,0.2225,0.3736,0.618],HYS=0.0136,ZETA=Math.pow(PHI,-0.5),
-      PHR=[8,13,21],MODES=[[0,2,3,5,7,8,10],[0,2,3,5,7,9,10],[0,2,4,6,7,9,11],[0,2,4,7,9]],ROOT=28,
-      CH={synth:0,wood:1,glass:2,pad:3,breath:4,bird:5,sub:6,drums:9,macro:15},
+      PHR=[8,13,21],MODES=[[0,2,4,7,9],[0,2,4,5,7,9,11],[0,2,4,7,9,11],[0,2,4,6,7,9,11]],ROOT=baseMidi(),   // CALM: major pentatonic -> Ionian -> major hexatonic -> Lydian
+      RSTEP=0.2360679775*1.6180339887,   // CALM (Danny t797u 16:11): Rebella step x PHI = 0.382 s (Dad's voice keeps 0.236 s)
+      CALM={hat:0.382,roll:0.09,pluck:0.382,jitter:0.02,noise:0.236,bird:0.0236,fm:4,blendFloor:0.382},   // calm ceiling: no feed/pump/nudge combination can exceed these
+
+      CH={synth:0,wood:1,glass:2,pad:3,breath:4,bird:5,sub:6,cel:7,drums:9,macro:15},
       CC={blend:16,density:17,low:18,filter:74,res:71,swing:19,colour:80,reverb:91,shimmer:93,vol:7,root:81,breath:2},
       DEF_SUBS=['pump:page','daytime','tide','moon','ratio-pump','clock','component:theme'];
   function lerp(a,b,t){return a+(b-a)*t;}
@@ -106,10 +128,14 @@
       clock:function(){return Math.sin(2*Math.PI*(clock.wall()%3600)/3600);},
       moon:function(){var ph=(((clock.wall()*1000-947182440000)/86400000/29.530588853)%1+1)%1;return -Math.cos(2*Math.PI*ph);}};
     return {node:stubNode,page:page,subscribe:function(n){return {name:n,get:function(){return f[n]?f[n]():null;}};}};}
-  function dayCurve(h){h=((h%24)+24)%24;if(h<6||h>=21)return 0;if(h<12)return 0.5-0.5*Math.cos(Math.PI*(h-6)/6);if(h<=17)return 1;return 0.5+0.5*Math.cos(Math.PI*(h-17)/4);}
+  function bNow(){var B=W.PhiB&&W.PhiB.value;if(B)return B;return 86400*Math.pow(PHI,-19);}   // unit: s per day; phi: phi-b.js first-view rung (day x PHI^-19)
+  function baseMidi(){var B=bNow();if(!B)return null;var f=(1/B)*Math.pow(PHI,13);return 69+12*Math.log(f/440)/Math.LN2;}         // cite: ISO 16 / MIDI, A4 = note 69 = 440 Hz, 12 semitones per octave
+  function nightRung(){try{return W.PhiDials.SPEC.season.ceil;}catch(e){return 2;}}                                                // anchor: Dial 3 ceiling rung (Danny's), mirrored when dials are off
+  function restNow(d){var SP=W.SeasonPumps;if(!SP)return 0;try{return SP.restShare(SP.sunHeight(d||new Date()));}catch(e){return 0;}}
+  function dayCurve(d){return 1-restNow(d);}   // daylight share 0..1 from the sun (name kept for the API)
 
   // ================= SEQUENCER (MIDI generator) =================
-  function Sequencer(o){o=o||{};
+  function Sequencer(o){o=o||{};var STEP=RSTEP,calm={maxJ:0,steps:0,hats:0,rolls:0,birds:0,breathMax:0,plucks:0};
     var rnd=o.random||Math.random,clock=o.clock||{wall:function(){return Date.now()/1000;},mono:function(){return (W.performance?performance.now():Date.now())/1000;},hour:function(){var d=new Date();return d.getHours()+d.getMinutes()/60;}};
     var REG=o.registry||(W.PhiPumps&&W.PhiPumps.subscribe&&!o.local?W.PhiPumps:stub(clock)),node=REG.node||stubNode;
     var subs={};(o.subscribe||DEF_SUBS).forEach(function(n){subs[n]=REG.subscribe(n);});
@@ -118,16 +144,16 @@
     var pageN=REG.page||{out:function(t){var v=feed('pump:page');return v==null?1:v;}},sd=0;
     function N(name,n,k0,d,par){sd+=1;return node(name,n,k0,d,par,sd);}
     var logo=(REG.logo&&o.logo)?REG.logo(o.logo):N('logo',8,3,0.09,pageN),L={},Pm={},D={};
-    ['808','hats','plucks','pad','organic','shimmer'].forEach(function(k){L[k]=N(k,5,2,0.09,logo);});
-    [['blend','plucks'],['density','hats'],['low','808'],['filter','plucks'],['swing','hats'],['colour','pad'],['reverb','organic'],['shimmer','shimmer']].forEach(function(p){Pm[p[0]]=N(p[0],3,1.5,0.056,L[p[1]]);});
-    [['subDecay','low'],['jitter','swing'],['cutoff','filter'],['res','filter'],['pluckDecay','filter'],['breath','reverb'],['glassDecay','shimmer']].forEach(function(p){D[p[0]]=N(p[0],2,1,0.034,Pm[p[1]]);});
+    ['808','hats','plucks','pad','organic','shimmer'].forEach(function(k){L[k]=N(k,5,2,k==='hats'?0.09*0.382:0.09,logo);});   // CALM: hats layer depth x0.382
+    [['blend','plucks'],['density','hats'],['low','808'],['filter','plucks'],['swing','hats'],['colour','pad'],['reverb','organic'],['shimmer','shimmer']].forEach(function(p){Pm[p[0]]=N(p[0],3,1.5,(p[0]==='density'||p[0]==='swing')?0.056*0.382:0.056,L[p[1]]);});
+    [['subDecay','low'],['jitter','swing'],['cutoff','filter'],['res','filter'],['pluckDecay','filter'],['breath','reverb'],['glassDecay','shimmer']].forEach(function(p){D[p[0]]=N(p[0],2,1,p[0]==='jitter'?0.034*0.382:0.034,Pm[p[1]]);});
     var PORD=['blend','density','low','filter','swing','colour','reverb','shimmer'];
     var ev=o.events||{'star-drop':0.236,'shimmer':0.236},nudges=[],aff=o.logo?'phi-adapt:'+o.logo:null;if(aff&&!subs[aff])subs[aff]=REG.subscribe(aff);
     var y=[0,0,0,0,0,0,0,0],v=[0,0,0,0,0,0,0,0],tg=[0,0,0,0,0,0,0,0],fall=[0,0,0,0,0,0,0,0],lu=[0,0,0,0,0,0,0,0],first=true;
-    var root={x:0,v:0,tg:0,off:0},step=0,pIdx=0,pLen=PHR[0],pPos=0,deg=0,lastCC={},padOn=[],padRoot=0,breathOn=false,prog=80,loud=1,feedsNow={};
+    var padPrev=[],root={x:0,v:0,tg:0,off:0},step=0,pIdx=0,pLen=PHR[0],pPos=0,deg=0,lastCC={},padOn=[],padRoot=0,breathOn=false,prog=80,loud=1,feedsNow={};
     function mNow(){var t=clock.wall(),n=0;nudges=nudges.filter(function(q){var a=(t-q.t)/2.618;if(a>=1)return false;n+=q.a*(1-a)*(1-a);return true;});
-      var a=aff?feed(aff):null;return clamp((o.forceM!=null?o.forceM:wave(t))+n+0.09*(a||0));}
-    function ladder(m,phrase,tm){for(var i=0;i<8;i++){var tau=STEP*Math.pow(PHI,i),w=1/tau,u=i?clamp((y[i-1]+m)/2+0.236*tau*v[i-1]):m;
+      var a=aff?feed(aff):null;var raw=clamp((o.forceM!=null?o.forceM:wave(t))+n+0.09*(a||0));return CALM.blendFloor+(1-CALM.blendFloor)*raw;}   // CALM: trap end weight lowered (m never below 0.382)
+    function ladder(m,phrase,tm){for(var i=0;i<8;i++){var tau=0.2360679775*Math.pow(PHI,i),w=1/tau,u=i?clamp((y[i-1]+m)/2+0.236*tau*v[i-1]):m;
         u=clamp(u*Pm[PORD[i]].out(tm));var d=u-lu[i];lu[i]=u;fall[i]+=((d<0?1:d>0?0:fall[i])-fall[i])*0.382;
         if(i<5||phrase||first){var e=Math.max(0,E[i]-HYS*fall[i]);tg[i]=i===7?0.618*Math.pow(u,PHI):sstep((u-e)/(1-e));}
         if(first){y[i]=tg[i];v[i]=0;continue;}
@@ -136,9 +162,8 @@
     function readFeeds(){var f={};['daytime','tide','moon','ratio-pump','clock'].forEach(function(n){f[n]=feed(n);});f.theme=feed('component:theme');feedsNow=f;
       var z=function(x){return x==null?0:x;};
       var S=0.382*z(f.daytime)+0.236*z(f.tide)+0.146*z(f.moon)+0.146*z(f['ratio-pump'])+0.09*z(f.clock);
-      root.tg=clamp(Math.round(3*S),-2,3);root.S=S;
-      var h=clock.hour?clock.hour():(new Date(clock.wall()*1000).getHours());
-      loud=(0.40+0.60*dayCurve(h))*(1+0.146*(0.382*z(f.tide)+0.236*z(f.moon)+0.236*z(f['ratio-pump'])+0.146*z(f.clock)))/1.146;}
+      var K=12*Math.log(PHI)/Math.LN2*Math.pow(PHI,-2);root.tg=Math.max(-Math.round(K),Math.min(Math.round(K),Math.round(K*S)));root.S=S;   // unit: 12 semitones per octave; phi: range PHI^-2 of a phi step
+      loud=Math.pow(PHI,-nightRung()*restNow(new Date(clock.wall()*1000)))*(1+0.146*(0.382*z(f.tide)+0.236*z(f.moon)+0.236*z(f['ratio-pump'])+0.146*z(f.clock)))/1.146;}
     function rootStep(){var w=1/0.618,c=0.236*0.618*v[5];for(var s=0;s<4;s++){var h=STEP/4,a=w*w*(root.tg+c-root.x)-2*w*root.v;root.v+=a*h;root.x+=root.v*h;}}
     function rn(){return ROOT+Math.round(root.x);}
     function noteN(base,dg,colour){var p=clamp(colour)*3,lo=Math.floor(Math.min(2.999,p)),md=MODES[rnd()<p-lo?lo+1:lo],k=((dg%md.length)+md.length)%md.length,o2=Math.floor(dg/md.length);return base+12*o2+md[k];}
@@ -149,45 +174,48 @@
       var lay={};for(var k in L)lay[k]=L[k].out(tm);var det={};for(var k2 in D)det[k2]=D[k2].out(tm);
       if(feedsNow.theme===1)det.cutoff+=0.056;
       var r=1+(PHI-1)*sw,t0=T+(step%2?(2*STEP*r/(1+r)-STEP):0),acc=0.82+0.18*((step*G)%1);
-      function J(){return clamp((rnd()*2-1)*0.009*det.jitter,-0.018,0.018);}
+      function J(x){var j=clamp((rnd()*2-1)*0.009*det.jitter+(x||0),-CALM.jitter,CALM.jitter);if(Math.abs(j)>calm.maxJ)calm.maxJ=Math.abs(j);return j;}   // CALM: total offset capped +-0.02 s
       function cc(c,val,ch){ch=ch==null?CH.macro:ch;var key=ch+':'+c;if(lastCC[key]===val)return;lastCC[key]=val;E_({t:T,type:'cc',ch:ch,cc:c,val:val});}
       if(step===0){E_({t:T,type:'cc',ch:CH.pad,cc:101,val:0});E_({t:T,type:'cc',ch:CH.pad,cc:100,val:0});E_({t:T,type:'cc',ch:CH.pad,cc:6,val:12});
-        [[CH.wood,108],[CH.glass,98],[CH.pad,89],[CH.breath,121],[CH.bird,123],[CH.sub,38]].forEach(function(q){E_({t:T,type:'pc',ch:q[0],prog:q[1]});});}
+        [[CH.wood,108],[CH.glass,98],[CH.pad,89],[CH.breath,121],[CH.bird,123],[CH.sub,38],[CH.cel,9]].forEach(function(q){E_({t:T,type:'pc',ch:q[0],prog:q[1]});});}
       cc(CC.blend,v7(b));cc(CC.density,v7(d));cc(CC.low,v7(lo));cc(CC.filter,v7(clamp(fl*det.cutoff)));cc(CC.res,v7(clamp((1-fl)*det.res)));cc(CC.swing,v7(sw));
       cc(CC.colour,v7(col));cc(CC.reverb,v7(sp));cc(CC.shimmer,v7(sh));cc(CC.vol,v7(loud));cc(CC.root,64+root.tg);
-      cc(CC.breath,v7(clamp((0.5*b+0.6*sh)*det.breath*lay.organic)),CH.breath);
+      var bl=Math.min(CALM.noise*0.6,0.236*clamp((0.5*b+0.6*sh)*det.breath*lay.organic));if(bl>calm.breathMax)calm.breathMax=bl;cc(CC.breath,v7(bl),CH.breath);   // CALM: breath x0.236, ceiling
       if(!breathOn){breathOn=true;E_({t:T,type:'on',ch:CH.breath,n:64,v:100});}
       // pad: chord per phrase, root glide by pitch bend
       if(phrase){prog=prog===80?81:80;E_({t:T,type:'pc',ch:CH.synth,prog:prog});
         padOn.forEach(function(n){E_({t:T,type:'off',ch:CH.pad,n:n});});padOn=[];padRoot=rn();
-        var ch=[0,3,4,5][pIdx%4],pv=v7(clamp(0.62*b*lay.pad*acc));
-        if(pv>0)[ch,ch+2,ch+4].forEach(function(dg){var n=noteN(padRoot+36,dg,col);padOn.push(n);E_({t:T+0.01,type:'on',ch:CH.pad,n:n,v:pv});});}
+        var ch=[0,3,5,4][pIdx%4],pv=v7(clamp(0.62*b*lay.pad*acc));   // CALM: I-IV-vi-V, upper-mid, nearest-voice leading
+        if(pv>0)[ch,ch+2,ch+4].forEach(function(dg,k){var n=noteN(padRoot+48,dg,col);if(padPrev[k]!=null){while(n-padPrev[k]>6)n-=12;while(padPrev[k]-n>6)n+=12;}padPrev[k]=n;padOn.push(n);E_({t:T+0.01,type:'on',ch:CH.pad,n:n,v:pv});});}
       var bend=Math.round(clamp((root.x-(padRoot-ROOT))/12,-1,1)*8191);if(lastCC['pb']!==bend){lastCC['pb']=bend;E_({t:T,type:'bend',ch:CH.pad,bend:bend});}
       // hats (ch10 note 42)
       var hv=lay.hats*acc;
-      if(rnd()<lerp(0.92,0.14,d)){var t=t0+J();if(rnd()<0.38*(1-d)*(1-d)){for(var k3=0;k3<3;k3++){E_({t:t+k3*STEP/3,type:'on',ch:CH.drums,n:42,v:v7(clamp(0.62*hv*(1-0.2*k3)))});E_({t:t+k3*STEP/3+0.03,type:'off',ch:CH.drums,n:42});}}
-        else{E_({t:t,type:'on',ch:CH.drums,n:42,v:v7(clamp(0.55*hv*(1-0.5*b)))});E_({t:t+0.03,type:'off',ch:CH.drums,n:42});}}
+      // CALM: hats on even steps only (2:1 under the pulse), chance capped at CALM.hat, rolls capped at CALM.roll (2 hits = simple 2:1), velocity x0.236
+      if(step%2===0&&rnd()<Math.min(CALM.hat,lerp(0.382,0.09,d))){var t=t0+J();calm.hats++;if(rnd()<Math.min(CALM.roll,0.146*(1-d)*(1-d))){calm.rolls++;for(var k3=0;k3<2;k3++){E_({t:t+k3*STEP/2,type:'on',ch:CH.drums,n:42,v:v7(clamp(0.236*0.62*hv*(1-0.2*k3)))});E_({t:t+k3*STEP/2+0.03,type:'off',ch:CH.drums,n:42});}}
+        else{E_({t:t,type:'on',ch:CH.drums,n:42,v:v7(clamp(0.236*0.55*hv*(1-0.5*b)))});E_({t:t+0.03,type:'off',ch:CH.drums,n:42});}}
       // 808 on the root (ch7)
-      var pos=pPos%8;if(pos===0||pos===3||(pos===6&&rnd()<0.5)){var sv=v7(clamp(0.9*lerp(1,0.03,lo)*lay['808']*acc)),sdur=lerp(0.62,0.24,lo)*det.subDecay,t1=t0+J()*0.5;
+      var pos=pPos%6;if(pos===0||(pos===3&&rnd()<0.5)){var sv=v7(clamp(0.382*0.9*lerp(1,0.03,lo)*lay['808']*acc)),sdur=lerp(0.62,0.24,lo)*det.subDecay,t1=t0+J()*0.5;   // CALM: soft low warmth x0.382, 2:3 placement
         if(sv>0){E_({t:t1,type:'on',ch:CH.sub,n:rn(),v:sv});E_({t:t1+sdur,type:'off',ch:CH.sub,n:rn()});}}
       // plucks
-      if(rnd()<lerp(0.5,0.22,d)){deg+=[-2,-1,1,2,0,3][Math.floor(rnd()*6)];deg=Math.max(-3,Math.min(9,deg));
+      if(rnd()<Math.min(CALM.pluck,lerp(0.382,0.18,d))){calm.plucks++;deg+=[-1,1,-1,1,0,2,-2][Math.floor(rnd()*7)];deg=Math.max(0,Math.min(9,deg));   // CALM: fewer notes, stepwise
         var pd=lerp(0.18,0.9,fl)*det.pluckDecay,t2=t0+J();
-        var n1=noteN(rn()+(b>0.5?36:24),deg,col),s1=v7(clamp(0.8*(1-b)*lay.plucks*acc));
+        var n1=noteN(rn()+36,deg,col),s1=v7(clamp(0.382*0.8*(1-b)*lay.plucks*acc));   // CALM: upper-mid register, trap pluck x0.382
         if(s1>0){E_({t:t2,type:'on',ch:CH.synth,n:n1,v:s1});E_({t:t2+pd,type:'off',ch:CH.synth,n:n1});}
-        var n2=n1+12,w1=v7(clamp(0.9*b*lay.organic*acc)),t3=t2+(rnd()*2-1)*Math.pow(PHI,-6);
+        var n2=n1+12,w1=v7(clamp(0.9*b*lay.organic*acc)),t3=t0+J((rnd()*2-1)*Math.pow(PHI,-6)*0.5);   // kalimba stagger kept, inside the +-0.02 s cap
         if(w1>0){E_({t:t3,type:'on',ch:CH.wood,n:n2,v:w1});E_({t:t3+pd,type:'off',ch:CH.wood,n:n2});}
         var g1=v7(clamp(1.3*sh*lay.shimmer*acc));
-        if(g1>0&&sh>0.02){var gd=lerp(0.6,1.6,sh/0.618)*det.glassDecay;E_({t:t3+0.002,type:'on',ch:CH.glass,n:n1+24,v:g1});E_({t:t3+gd,type:'off',ch:CH.glass,n:n1+24});}}
+        if(g1>0&&sh>0.02){var gd=lerp(0.6,1.6,sh/0.618)*det.glassDecay;E_({t:t3+0.002,type:'on',ch:CH.glass,n:n1+24,v:g1});E_({t:t3+gd,type:'off',ch:CH.glass,n:n1+24});}
+        // CALM: a celesta-like voice doubles some organic notes an octave up (soft lead)
+        if(b>0.5&&rnd()<0.382){var cv2=v7(clamp(0.45*b*lay.shimmer*acc));if(cv2>0){E_({t:t3+0.004,type:'on',ch:CH.cel,n:n2+12,v:cv2});E_({t:t3+0.9,type:'off',ch:CH.cel,n:n2+12});}}}
       // birdsong (ch6)
-      if(rnd()<0.035*b+0.05*sh){var t4=t0+rnd()*STEP,bv=v7(clamp(0.5*(b+sh)*lay.organic)),cn=3+(rnd()<0.5?0:1);
+      if(rnd()<Math.min(CALM.bird,0.236*(0.035*b+0.05*sh))){calm.birds++;var t4=t0+J(),bv=v7(clamp(0.5*(b+sh)*lay.organic)),cn=3+(rnd()<0.5?0:1);
         for(var c2=0;c2<cn;c2++){var nn=96+Math.floor(rnd()*6);E_({t:t4+c2*0.09,type:'on',ch:CH.bird,n:nn,v:bv});E_({t:t4+c2*0.09+0.06,type:'off',ch:CH.bird,n:nn});}}
-      step++;pPos++;if(pPos>=pLen){pPos=0;pIdx++;pLen=PHR[pIdx%3];}
+      step++;calm.steps++;pPos++;if(pPos>=pLen){pPos=0;pIdx++;pLen=PHR[pIdx%3];}
       return out;}
     function allOff(T){var out=[];padOn.forEach(function(n){out.push({t:T,type:'off',ch:CH.pad,n:n});});padOn=[];if(breathOn)out.push({t:T,type:'off',ch:CH.breath,n:64});breathOn=false;return out;}
     return {step:stepEvents,allOff:allOff,event:function(name){var a=ev[name];if(a)nudges.push({t:clock.wall(),a:a});},nudge:function(a){nudges.push({t:clock.wall(),a:+a||0});},
       state:function(){return {m:mNow(),y:y.slice(),root:{offset:root.tg,pos:+root.x.toFixed(3),S:root.S,midi:rn()},loud:loud,feeds:feedsNow,step:step,phrase:[pIdx,pLen],
-        pumps:{page:pageN.out(clock.mono()),logo:logo.out(clock.mono())}};}};}
+        pumps:{page:pageN.out(clock.mono()),logo:logo.out(clock.mono())},calm:calm,stepLen:STEP};},stepLen:STEP};}
 
   // ================= RENDERER (Tone.js, Rebella Playground approach) =================
   function hz(n){return 440*Math.pow(2,(n-69)/12);}
@@ -200,15 +228,17 @@
     var sendS=K(new T.Gain(0.03)).connect(revS),sendL=K(new T.Gain(0)).connect(revL),shim=K(new T.Gain(0)).connect(revL);
     function chan(vol){var g=K(new T.Gain(vol));g.connect(bus);g.connect(sendS);g.connect(sendL);return g;}
     var C={};
-    C[0]=chan(0.5);var synth=K(new T.PolySynth(T.MonoSynth,{oscillator:{type:'square'},filter:{Q:6,type:'lowpass'},envelope:{attack:0.002,decay:0.236,sustain:0,release:0.146},filterEnvelope:{attack:0.003,decay:0.236,sustain:0.1,baseFrequency:600,octaves:2.6}}));synth.maxPolyphony=8;synth.connect(C[0]);
-    C[1]=chan(0.9);var wood=[0,1].map(function(){return K(new T.PluckSynth({attackNoise:1.2,dampening:3800,resonance:0.92})).connect(C[1]);}),wi=0;
-    C[2]=chan(0.35);var glass=K(new T.PolySynth(T.FMSynth,{harmonicity:5.07,modulationIndex:9,oscillator:{type:'sine'},envelope:{attack:0.002,decay:1.618,sustain:0,release:0.618},modulation:{type:'sine'},modulationEnvelope:{attack:0.002,decay:0.382,sustain:0,release:0.236}}));glass.maxPolyphony=6;glass.connect(C[2]);glass.connect(shim);
+    C[0]=chan(0.5);var synth=K(new T.PolySynth(T.MonoSynth,{oscillator:{type:'square'},filter:{Q:6,type:'lowpass'},envelope:{attack:0.012,decay:0.236,sustain:0,release:0.146},filterEnvelope:{attack:0.003,decay:0.236,sustain:0.1,baseFrequency:600,octaves:2.6}}));synth.maxPolyphony=8;synth.connect(C[0]);
+    C[1]=chan(0.9);var wood=[0,1].map(function(){return K(new T.PluckSynth({attackNoise:0.5,dampening:3800,resonance:0.92})).connect(C[1]);}),wi=0;
+    C[2]=chan(0.35);var glass=K(new T.PolySynth(T.FMSynth,{harmonicity:5.07,modulationIndex:CALM.fm,oscillator:{type:'sine'},envelope:{attack:0.006,decay:1.618,sustain:0,release:0.618},modulation:{type:'sine'},modulationEnvelope:{attack:0.002,decay:0.382,sustain:0,release:0.236}}));glass.maxPolyphony=6;glass.connect(C[2]);glass.connect(shim);
     C[3]=chan(0.5);var padF=K(new T.Filter(1800,'lowpass')).connect(C[3]),pad=K(new T.PolySynth(T.AMSynth,{envelope:{attack:1.618,decay:0.618,sustain:0.8,release:2.618}}));pad.maxPolyphony=6;pad.connect(padF);
-    C[4]=chan(0);var brF=K(new T.Filter({type:'bandpass',frequency:2600,Q:0.7})).connect(C[4]),breath=K(new T.NoiseSynth({noise:{type:'pink'},envelope:{attack:0.618,decay:0.1,sustain:1,release:1.618}})).connect(brF);
+    C[4]=chan(0);var brLP=K(new T.Filter({type:'lowpass',frequency:900,rolloff:-24})).connect(C[4]),brF=K(new T.Filter({type:'bandpass',frequency:700,Q:0.7})).connect(brLP),   // CALM: no hiss: breath low-passed at 900 Hz
+    breath=K(new T.NoiseSynth({noise:{type:'pink'},envelope:{attack:0.618,decay:0.1,sustain:1,release:1.618}})).connect(brF);
     C[5]=chan(0.25);var bird=K(new T.Synth({oscillator:{type:'sine'},envelope:{attack:0.006,decay:0.07,sustain:0,release:0.03}})).connect(C[5]);
-    C[6]=chan(0.9);var sub=K(new T.MembraneSynth({pitchDecay:0.045,octaves:2.5,envelope:{attack:0.003,decay:0.62,sustain:0,release:0.1}})).connect(C[6]),
-      sub2=K(new T.MembraneSynth({pitchDecay:0.045,octaves:2.5,envelope:{attack:0.003,decay:0.37,sustain:0,release:0.1}}));sub2.volume.value=-9;sub2.connect(C[6]);
-    C[9]=chan(0.5);var hat=K(new T.MetalSynth({envelope:{attack:0.001,decay:0.056,release:0.01},harmonicity:5.1,modulationIndex:32,resonance:4000,octaves:1.5}));hat.volume.value=-14;hat.connect(C[9]);
+    C[6]=chan(0.9);var sub=K(new T.MembraneSynth({pitchDecay:0.02,octaves:1.2,envelope:{attack:0.02,decay:0.62,sustain:0,release:0.2}})).connect(C[6]),   // CALM: no click (slow attack, small pitch drop)
+      sub2=K(new T.MembraneSynth({pitchDecay:0.02,octaves:1.2,envelope:{attack:0.02,decay:0.37,sustain:0,release:0.2}}));sub2.volume.value=-9;sub2.connect(C[6]);
+    C[9]=chan(0.5);var hat=K(new T.MetalSynth({envelope:{attack:0.001,decay:0.056,release:0.01},harmonicity:5.1,modulationIndex:32,resonance:4000,octaves:1.5}));hat.volume.value=-14;var hatLP=K(new T.Filter({type:'lowpass',frequency:5200,rolloff:-24})).connect(C[9]);hat.connect(hatLP);   // CALM: hats low-passed
+    C[7]=chan(0.3);var cel=K(new T.PolySynth(T.FMSynth,{harmonicity:4,modulationIndex:Math.min(2.5,CALM.fm),oscillator:{type:'sine'},envelope:{attack:0.005,decay:1.2,sustain:0,release:0.618},modulation:{type:'sine'},modulationEnvelope:{attack:0.005,decay:0.3,sustain:0,release:0.2}}));cel.maxPolyphony=6;cel.connect(C[7]);cel.connect(shim);   // CALM: celesta-like soft lead
     var st={filter:0.5,res:0.5,blend:0,reverb:0,shimmer:0,low:0};
     function tgt(p,v,t,tc){try{p.setTargetAtTime(v,t,tc||0.06);}catch(e){}}
     function applyMacro(t){var fl=st.filter,cut=lerp(1200,5200,fl);
@@ -233,6 +263,7 @@
         case 4:if(e.type==='on')breath.triggerAttack(t,1);else breath.triggerRelease(t);break;
         case 5:if(e.type==='on'){var f=hz(e.n)*(0.9+0.1*Math.random());bird.triggerAttack(f,t,vel);bird.frequency.setValueAtTime(f,t);bird.frequency.exponentialRampToValueAtTime(f*1.4,t+0.055);}break;
         case 6:if(e.type==='on'){sub.triggerAttack(hz(e.n),t,vel);sub2.triggerAttack(hz(e.n+12),t,vel);}break;
+        case 7:if(e.type==='on')cel.triggerAttack(hz(e.n),t,vel);else cel.triggerRelease(hz(e.n),t);break;
         case 9:if(e.type==='on'&&e.n===42)hat.triggerAttackRelease(hz(84),0.03,t,vel*0.5);break;}
     }catch(err){}}
     return {midi:midi,ready:Promise.all([revS.ready,revL.ready]).catch(function(){}),
@@ -243,11 +274,12 @@
   var toneP=null;
   function base(){var s=document.querySelector('script[src*="logo-sound.js"]');return s?s.src.replace(/js\/logo-sound\.js.*$/,''):'';}
   function loadTone(){if(W.Tone)return Promise.resolve(W.Tone);if(toneP)return toneP;
-    toneP=new Promise(function(res,rej){var s=document.createElement('script');s.src=base()+'vendor/tone/Tone.js?v=15.1.22';s.async=true;s.onload=function(){W.Tone?res(W.Tone):rej(0);};s.onerror=function(){toneP=null;rej(0);};document.head.appendChild(s);});return toneP;}
+    toneP=new Promise(function(res,rej){var s=document.createElement('script');s.src=(W.KidLogoCfg&&W.KidLogoCfg.tone)||base()+'vendor/tone/Tone.js?v=15.1.22';s.async=true;s.onload=function(){W.Tone?res(W.Tone):rej(0);};s.onerror=function(){toneP=null;rej(0);};document.head.appendChild(s);});return toneP;}
   var tideP=null;
+  function pt(){return (W.SeasonPumps&&W.SeasonPumps.POINT)||{lat:-32.0,lon:115.9};}   // anchor: shared layer's one coarse city point (Perth, 0.1 deg)
   function feedTide(){if(tideP)return tideP;var have=false;try{have=!!localStorage.getItem('dadQuizTide')||!!sessionStorage.getItem('logoSound.tide');}catch(e){}
     if(have||!W.fetch)return tideP=Promise.resolve();
-    tideP=fetch('https://marine-api.open-meteo.com/v1/marine?latitude=-32.05&longitude=115.74&hourly=sea_level_height_msl&timezone=Australia%2FPerth&forecast_days=2',{credentials:'omit',referrerPolicy:'no-referrer',mode:'cors'})
+    tideP=fetch('https://marine-api.open-meteo.com/v1/marine?latitude='+pt().lat+'&longitude='+pt().lon+'&hourly=sea_level_height_msl&timezone=Australia%2FPerth&forecast_days=2',{credentials:'omit',referrerPolicy:'no-referrer',mode:'cors'})
       .then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){if(j&&j.hourly&&j.hourly.sea_level_height_msl){try{sessionStorage.setItem('logoSound.tide',JSON.stringify({at:Date.now(),d:j}));}catch(e){}}}).catch(function(){});
     return tideP;}
 
@@ -269,11 +301,11 @@
       R.ready.then(function(){if(!alive)return;next=ac.currentTime+0.1;R.fadeIn(ac.currentTime);tick();});
     }).catch(function(){});
     function tick(){if(!alive)return;if(next<ac.currentTime)next=ac.currentTime+0.05;
-      while(next<ac.currentTime+0.3){var evs=seq.step(next);for(var i=0;i<evs.length;i++){R.midi(evs[i]);if(log){log.push(evs[i]);if(log.length>4000)log.splice(0,1000);}}next+=STEP;}
+      while(next<ac.currentTime+0.3){var evs=seq.step(next);for(var i=0;i<evs.length;i++){R.midi(evs[i]);if(log){log.push(evs[i]);if(log.length>4000)log.splice(0,1000);}}next+=(seq.stepLen||STEP);}
       if(o.logo){try{var q=seq.state();live[o.logo]={at:Date.now(),m:q.m,D:q.D,midi:q.root&&q.root.midi,loud:q.loud,day:q.day};}catch(e){}}
       timer=setTimeout(tick,100);}
     return api;}
-  W.LogoSound={create:create,Sequencer:Sequencer,wave:wave,feedTide:feedTide,dayCurve:dayCurve,THRESHOLDS:E.slice(),CH:CH,CC:CC,STEP:STEP,
+  W.LogoSound={create:create,Sequencer:Sequencer,wave:wave,feedTide:feedTide,dayCurve:dayCurve,THRESHOLDS:E.slice(),CH:CH,CC:CC,STEP:STEP,RSTEP:RSTEP,CALM:CALM,
     voices:voices,live:live,current:function(){return current;},
     util:{PHI:PHI,G:G,STEP:STEP,E:E,HYS:HYS,ZETA:ZETA,lerp:lerp,clamp:clamp,sstep:sstep,wave:wave,v7:v7,hz:hz,dayCurve:dayCurve,stub:stub,stubNode:stubNode}};
 })(this);

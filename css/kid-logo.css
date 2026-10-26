@@ -1,0 +1,60 @@
+/* Kid logo view + editor (js/kid-logo.js, js/kid-logo-view.js). Shared: the SAME file is rebella css/kid-logo.css and simmie-chat
+   css/kid-logo.css. Loaded on the first logo tap only. Timings are the page's B rungs (--b-m10 .. --b-p8 from js/phi-b.js); sizes come
+   from the tap target (--kl-tap = S x PHI^-4, Rule phi build C) and phi steps of it; colours are her palette and the view's neon.
+   Reduced motion / Pause motion: no transitions. Header and footer silhouettes are never touched: the small logo only gains a pointer. */
+.kl-tap{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.kl-tap:focus-visible{outline:2px solid #E58AA6;outline-offset:3px}
+.dmz.kl{--kl-tap:max(44px,calc(min(100vw,100vh) / 6.854101966));--kl-t:var(--b-m8,.236s);
+  position:fixed;inset:0;z-index:1200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--kl-tap) * .382);
+  padding:calc(var(--kl-tap) * 1.618) calc(var(--kl-tap) * .382) calc(var(--kl-tap) * 2.618);box-sizing:border-box;overflow:auto;
+  background:rgba(0,0,0,.854);opacity:0;transition:opacity var(--kl-t) ease;font:400 16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;color:#F8CFDB}
+.dmz.kl[hidden]{display:none}
+.dmz.kl.is-open{opacity:1}
+.kl .kl-btns{position:fixed;top:max(calc(var(--kl-tap) * .236),env(safe-area-inset-top));right:max(calc(var(--kl-tap) * .236),env(safe-area-inset-right));display:flex;gap:calc(var(--kl-tap) * .236);z-index:3}
+.kl .kl-btns button{height:var(--kl-tap);min-width:var(--kl-tap);margin:0;border:1px solid #5A1F38;border-radius:calc(var(--kl-tap) / 2);background:rgba(0,0,0,.618);color:#F8CFDB;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.kl .dmz-x{width:var(--kl-tap);padding:0;font:400 calc(var(--kl-tap) * .472)/1 system-ui,sans-serif}
+.kl .kl-edit{padding:0 calc(var(--kl-tap) * .382);font:600 calc(var(--kl-tap) * .292)/1 system-ui,sans-serif;letter-spacing:.02em}
+.kl .kl-btns button:hover{border-color:#E58AA6;color:#fff}
+.kl button:focus{outline:none}.kl button:focus-visible{outline:2px solid #E58AA6;outline-offset:2px}
+.kl .dmz-fig{position:relative;flex:none;margin:0;width:min(88vw,900px,110vh);height:calc(min(88vw,900px,110vh) * .635);box-sizing:border-box;padding:6%;
+  background:#000;border:1px solid #5A1F38;border-radius:9%;box-shadow:0 0 28px rgba(229,138,166,.30),0 0 72px rgba(229,138,166,.16);cursor:pointer;
+  transform:scale(.854);transition:transform var(--kl-t) cubic-bezier(.2,.8,.2,1),width var(--kl-t) ease,height var(--kl-t) ease}
+.kl.is-open .dmz-fig{transform:none}
+.kl .dmz-art{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform var(--kl-t) ease}
+.kl .dmz-art svg{display:block;width:100%;height:100%;overflow:visible;transform:rotate(-5.5deg);transition:color var(--kl-t) ease}
+.kl.kl-editing{justify-content:flex-start}
+.kl.kl-editing .dmz-fig{width:min(76vw,560px,68vh);height:calc(min(76vw,560px,68vh) * .635);cursor:default}
+/* editor: the questionnaire's shape (count line, question, two tiles, Back / Roll / Skip) in the view's own colours */
+.kl .kl-ed{width:min(92vw,560px);box-sizing:border-box;padding:calc(var(--kl-tap) * .382);border:1px solid #5A1F38;border-radius:calc(var(--kl-tap) * .382);background:#120810;color:#F8CFDB}
+.kl .kl-ed[hidden]{display:none}
+.kl .kl-ed .kl-count{margin:0 0 .382em;font-size:.854em;color:#E58AA6;letter-spacing:.04em}
+.kl .kl-ed .kl-q{margin:0 0 .618em;font:600 1.236em/1.3 system-ui,sans-serif;color:#fff;text-transform:none;letter-spacing:normal}
+.kl .kl-ed .kl-yay{margin:0 0 .618em}
+.kl .kl-ed .kl-choices{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--kl-tap) * .236)}
+.kl .kl-ed .kl-tile{width:100%;min-height:calc(var(--kl-tap) * 1.618);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.236em;padding:.382em;
+  border:2px solid #5A1F38;border-radius:calc(var(--kl-tap) * .236);background:#1E0E19;color:#fff;font:600 1em/1.25 system-ui,sans-serif;cursor:pointer;transition:border-color var(--kl-t) ease,transform var(--kl-t) ease}
+.kl .kl-ed .kl-tile:hover,.kl .kl-ed .kl-tile:focus-visible{border-color:#E58AA6}
+.kl .kl-ed .kl-tile:active{transform:scale(.944)}
+.kl .kl-ed .kl-emo{font-size:1.618em;line-height:1}
+.kl .kl-ed .kl-sw{width:1.618em;height:.618em;border-radius:.309em;border:1px solid rgba(255,255,255,.382)}
+.kl .kl-row{display:flex;flex-wrap:wrap;gap:calc(var(--kl-tap) * .236);margin-top:calc(var(--kl-tap) * .382)}
+.kl .kl-foot{border-top:1px dashed #5A1F38;padding-top:calc(var(--kl-tap) * .382)}
+.kl .kl-ed *{box-sizing:border-box}
+.kl .kl-ed p{text-transform:none}
+.kl .kl-btn{position:static;display:inline-flex;align-items:center;justify-content:center;min-height:var(--kl-tap);min-width:var(--kl-tap);padding:0 .854em;border:1px solid #5A1F38;border-radius:calc(var(--kl-tap) / 2);background:#1E0E19;color:#F8CFDB;font:600 .944em/1 system-ui,sans-serif;cursor:pointer}
+.kl .kl-btn.kl-big{background:#B0275A;border-color:#B0275A;color:#fff}
+.kl .kl-btn.kl-done{margin-left:auto}
+.kl .kl-heart{margin:.618em 0 0;padding:.618em .854em;border-radius:calc(var(--kl-tap) * .236);background:#2A1220;border:1px solid #5A1F38;color:#FCE4EC;font-size:.944em}
+.kl .kl-msg{margin:.382em 0 0;color:#FBE7B0;min-height:1em}
+.kl .kl-pad{display:block;width:100%;aspect-ratio:2.618/1;background:#000;border:1px dashed #E58AA6;border-radius:calc(var(--kl-tap) * .236);touch-action:none;cursor:crosshair}
+.kl .kl-type{display:flex;flex-direction:column;gap:.382em}
+.kl .kl-type input{min-height:var(--kl-tap);padding:0 .618em;border:1px solid #E58AA6;border-radius:calc(var(--kl-tap) * .236);background:#000;color:#fff;font:400 16px/1 system-ui,sans-serif}
+.kl input[type=file]{color:#F8CFDB;max-width:100%}
+.kl-hint{position:fixed;z-index:1150;max-width:min(76vw,360px);padding:.618em .854em;border-radius:.618em;background:#1E0E19;border:1px solid #E58AA6;color:#FCE4EC;
+  font:500 15px/1.4 system-ui,sans-serif;box-shadow:0 0 16px rgba(229,138,166,.382);opacity:0;transform:translateY(-.382em);transition:opacity var(--b-m8,.236s) ease,transform var(--b-m8,.236s) ease;pointer-events:none}
+.kl-hint.on{opacity:1;transform:none}
+.kl-hint[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.dmz.kl,.kl .dmz-fig,.kl .dmz-art,.kl .dmz-art svg,.kl .kl-ed .kl-tile,.kl-hint{transition:none}.kl .dmz-fig{transform:none}}
+html.phi-paused .dmz.kl,html.phi-paused .kl .dmz-fig,html.phi-paused .kl .dmz-art,html.phi-paused .kl-hint{transition:none}
+html.phi-paused .kl .dmz-fig{transform:none}
