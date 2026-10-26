@@ -46,7 +46,10 @@
   var PHI=1.6180339887,G=0.6180339887,NS='http://www.w3.org/2000/svg',VB=[413,534,1810,893],
       NOTES=[1318.5,1480,1661.2,1976,2217.5,2637];   // E6 F#6 G#6 B6 C#7 E7: bright E-major pentatonic, nothing minor, nothing low
   var RM=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false};
-  function P(n){var s=0;try{s=window.PhiTiming?PhiTiming.sweep():0;}catch(e){}return Math.pow(PHI,n+s)*1000;}
+  function P(n){var s=0;try{s=window.PhiTiming?PhiTiming.sweep():0;}catch(e){}return Math.pow(PHI,n+s+drift())*1000;}
+  // SWEET (Danny 14:01 AWST): her motion tile; 'Slow, dreamy drift' (the default) stretches every timing by one PHI step
+  function drift(){try{var k=window.KidLogo&&KidLogo.read();return k&&k.drift===0?0:1;}catch(e){return 1;}}
+  function mood(){try{var k=window.KidLogo&&KidLogo.read();return (k&&k.mood)||'dreamy';}catch(e){return 'dreamy';}}
   var CSS='.dmz--rebella .dmz-art{position:relative;z-index:1}'+
     '.rbz-bg,.rbz-fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;border-radius:inherit}'+
     '.rbz-bg{z-index:0}.rbz-fx{z-index:2;overflow:hidden}'+
@@ -68,15 +71,19 @@
   // one glass sparkle: a bright sine plus two quiet inharmonic partials (x2.76, x5.4: glass, not a music-box tine), 4 ms attack, short decay
   function pan(x){var o=out();if(!o)return null;try{if(st.ac.createStereoPanner){var p=st.ac.createStereoPanner();p.pan.value=Math.max(-1,Math.min(1,x||0));p.connect(o);return p;}}catch(e){}return o;}
   function sparkle(f,gain,delay,px){var o=out();if(!o)return;var ac=st.ac,t=ac.currentTime+(delay||0)+0.01,d=pan(px)||o;
-    f*=Math.pow(2,(Math.random()*24-12)/1200);var dec=0.22+Math.random()*0.16;
-    [[1,1,dec],[2.76,0.28,dec*0.55],[5.4,0.1,dec*0.3]].forEach(function(q){var os=ac.createOscillator(),g=ac.createGain();os.type='sine';os.frequency.value=f*q[0];
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain*q[1],t+0.004);g.gain.exponentialRampToValueAtTime(0.0001,t+q[2]);
+    var dec=0.22+Math.random()*0.16;
+    [[1,1,dec],[2,0.28,dec*0.55],[2*2,0.1,dec*0.3]].forEach(function(q){var os=ac.createOscillator(),g=ac.createGain();os.type='sine';os.frequency.value=f*q[0];
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain*q[1],t+Math.pow(PHI,-8));g.gain.exponentialRampToValueAtTime(0.0001,t+q[2]);
       os.connect(g);g.connect(d);os.start(t);os.stop(t+q[2]+0.05);});}
-  function note(i){return NOTES[((i%NOTES.length)+NOTES.length)%NOTES.length];}
+  // SWEET: sparkle notes are the engine's current chord tones (+9th), two octaves above the pad, so nothing clashes; NOTES only before it starts
+  function note(i){var L=window.LogoSound,q=L&&L.live&&L.live['rebella-logo'],c=q&&q.chord;
+    if(c&&c.rel&&c.rel.length&&L.util){var R=c.rel.slice(0,c.rel.length-1),k=((i%R.length)+R.length)%R.length;var U=L.util;return U.hz(c.root+U.RG.pad+U.OCT+R[k]+U.OCT*Math.floor(i/R.length));}
+    return NOTES[((i%NOTES.length)+NOTES.length)%NOTES.length];}
   var noise=null;
   function nbuf(ac){if(!noise||noise.sampleRate!==ac.sampleRate){var n=Math.floor(ac.sampleRate*2.2);noise=ac.createBuffer(1,n,ac.sampleRate);var c=noise.getChannelData(0);for(var i=0;i<n;i++)c[i]=Math.random()*2-1;}return noise;}
   // breathy air: white noise -> high-pass -> soft band sweep; optional wing flutter (gain wobble) and a pan glide
-  function air(dur,o){var out0=out();if(!out0)return;o=o||{};var ac=st.ac,t=ac.currentTime+(o.delay||0)+0.01;
+  function air(dur,o){return;   // SWEET (Danny 14:01 AWST): no noise hiss (wing and swish air removed)
+    var out0=out();if(!out0)return;o=o||{};var ac=st.ac,t=ac.currentTime+(o.delay||0)+0.01;
     var s=ac.createBufferSource(),hp=ac.createBiquadFilter(),bp=ac.createBiquadFilter(),g=ac.createGain(),d=out0;s.buffer=nbuf(ac);s.loop=true;
     hp.type='highpass';hp.frequency.value=2200;bp.type='bandpass';bp.Q.value=o.q||1.1;
     bp.frequency.setValueAtTime(o.f0||3000,t);bp.frequency.exponentialRampToValueAtTime(o.f1||8000,t+dur);
@@ -94,7 +101,7 @@
   function snd(name){try{st&&st.snd&&st.snd.event(name);}catch(e){}}
   var SND=DIR+'logo-sound.js'+VQ,sndLoading=null;
   function music(){if(!st||!st.ac||!st.out)return;var me=st;
-    function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{logo:'rebella-logo',events:{'star-drop':0.236,'shimmer':0.236},
+    function go(){if(me!==st||me.snd||!window.LogoSound)return;try{me.snd=LogoSound.create(me.ac,me.out,{logo:'rebella-logo',mood:mood(),events:{'star-drop':0.236,'shimmer':0.236},
       subscribe:['pump:page','daytime','tide','moon','ratio-pump','clock','component:theme','phi-adapt:rebella-logo']});/* rule 10: the logo listens to the page */}catch(e){}}
     if(window.LogoSound)return go();if(!sndLoading)sndLoading=new Promise(function(res){var sc=document.createElement('script');sc.src=SND;sc.async=true;sc.onload=sc.onerror=res;document.head.appendChild(sc);});sndLoading.then(go);}
   function shimmer(){if(!st.sheen)return;snd('shimmer');var dur=P(1);anim(st.sheen,[{transform:'translateX(0px)'},{transform:'translateX('+(VB[2]+900)+'px)'}],{duration:dur,easing:'cubic-bezier(.45,.05,.35,1)'});
@@ -142,7 +149,7 @@
     if(carry){x.save();x.translate(14.6,-2.4);x.rotate((flap||0)*0.08);x.globalCompositeOperation='lighter';star4(x,'rgba(10,242,255,.5)',4.4);star4(x,'#E9FDFF',2.7);x.restore();}
     x.restore();x.globalAlpha=1;}
   function chirp(delay,px,hi){var o=out();if(!o)return;var ac=st.ac,t=ac.currentTime+(delay||0)+0.01,d=pan(px)||o;
-    [0,0.11].forEach(function(dt,i){var os=ac.createOscillator(),g=ac.createGain(),f=(hi?3400:3000)*Math.pow(2,(Math.random()*30-15)/1200);os.type='sine';
+    [0,0.11].forEach(function(dt,i){var os=ac.createOscillator(),g=ac.createGain(),f=note((hi?2:0)+Math.floor(Math.random()*2))*2;os.type='sine';
       os.frequency.setValueAtTime(f,t+dt);os.frequency.exponentialRampToValueAtTime(f*(i?1.27:1.5),t+dt+0.06);
       g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(0.008,t+dt+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dt+0.085);
       os.connect(g);g.connect(d);os.start(t+dt);os.stop(t+dt+0.12);});}

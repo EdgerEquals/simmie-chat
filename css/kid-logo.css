@@ -56,6 +56,11 @@
 .kl .kl-ed .kl-tile{width:var(--kl-pc);min-height:calc(var(--kl-tap) * var(--kl-phi));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--kl-i3) * 1em);padding:calc(var(--kl-i2) * 1em);
   border:2px solid #5A1F38;border-radius:calc(var(--kl-tap) * var(--kl-i3));background:#1E0E19;color:#fff;font-weight:var(--kl-w6);font-size:1em;line-height:calc(2 * var(--kl-i1));font-family:system-ui,sans-serif;cursor:pointer;transition:border-color var(--kl-t) ease,transform var(--kl-t) ease}
 .kl .kl-ed .kl-tile:hover,.kl .kl-ed .kl-tile:focus-visible{border-color:var(--kl-neon)}
+/* SWEET (Danny 14:01 AWST): sound and motion tiles in soft pastel from her palette (--kl-tint, set per tile), a gentle glow, and the
+   deep plum text so contrast stays above PHI^4 on every tint (lavender, blush, aqua, mint: 11.9 to 13.5 : 1) */
+.kl .kl-ed .kl-tile.kl-soft{background:linear-gradient(to bottom right,var(--kl-tint),color-mix(in srgb,var(--kl-tint) calc(var(--kl-i1) * var(--kl-pc)),#fff));
+  border-color:var(--kl-tint);color:#2A1220;box-shadow:0 0 calc(var(--kl-tap) * var(--kl-i2)) color-mix(in srgb,var(--kl-tint) calc(var(--kl-i1) * var(--kl-pc)),transparent)}
+.kl .kl-ed .kl-tile.kl-soft:hover,.kl .kl-ed .kl-tile.kl-soft:focus-visible{border-color:#fff}
 .kl .kl-ed .kl-tile:active{transform:scale(calc(1 - var(--kl-i6)))}
 .kl .kl-ed .kl-emo{font-size:calc(var(--kl-phi) * 1em);line-height:1}
 .kl .kl-ed .kl-sw{width:calc(var(--kl-phi) * 1em);height:calc(var(--kl-i1) * 1em);border-radius:calc(var(--kl-i1) / 2 * 1em);border:1px solid color-mix(in srgb,#fff calc(var(--kl-i2) * var(--kl-pc)),transparent)}

@@ -115,7 +115,7 @@
       Promise.all([root.PhiPumps ? 0 : inj(cfg.dir + 'phi-pumps.js' + V)]).then(function () { return root.RebellaZoomLife ? 0 : inj(cfg.dir + 'rebella-zoom-life.js' + V); }).then(go);
     } else if (sound) {
       var go2 = function () { if (!cur || eng || !root.LogoSound) return;
-        try { eng = LogoSound.create(AC, AC.destination, { logo: 'kid-logo:' + KL.site, events: { 'star-drop': Math.pow(PHI, -3), shimmer: Math.pow(PHI, -3) } }); } catch (e) { eng = null; } };
+        try { eng = LogoSound.create(AC, AC.destination, { logo: 'kid-logo:' + KL.site, mood: s.mood || 'dreamy', events: { 'star-drop': Math.pow(PHI, -3), shimmer: Math.pow(PHI, -3) } }); } catch (e) { eng = null; } };
       if (root.LogoSound) return go2();
       (root.PhiPumps ? Promise.resolve() : inj(cfg.dir + 'phi-pumps.js' + V)).then(function () { return root.LogoSound ? 0 : inj(cfg.dir + 'logo-sound.js' + V); }).then(go2);
     }
@@ -149,7 +149,8 @@
   }
 
   // ---- editor: the questionnaire shape ----
-  function opt(id, label, emo, set, now, sw) { return { id: id, label: label, emo: emo, set: set, now: now || function () { return false; }, sw: sw }; }
+  function opt(id, label, emo, set, now, sw, tint) { return { id: id, label: label, emo: emo, set: set, now: now || function () { return false; }, sw: sw, tint: tint }; }
+  var TINT = {}; PAL.forEach(function (p) { TINT[p[0]] = p[2]; });   // her palette's pastels, by name
   var TOPICS = {
     colour: { name: 'Colour', opts: PAL.map(function (p) { return opt('c-' + p[0], p[1], p[3], function (s) { s.colour = p[2]; }, function (s) { return (s.colour || '') === p[2]; }, p[2]); }) },
     glow: { name: 'Glow', opts: [opt('g-neon', 'Neon glow', '\u2728', function (s) { s.glow = 'neon'; }, function (s) { return !s.glow || s.glow === 'neon'; }),
@@ -157,10 +158,16 @@
       opt('g-off', 'No glow, crisp', '\u270F\uFE0F', function (s) { s.glow = 'off'; }, function (s) { return s.glow === 'off'; })] },
     size: { name: 'Size', opts: [opt('s-up', 'A step bigger', '\uD83D\uDD0D', function (s) { s.size = Math.min(0, (s.size || 0) + 1); }, function (s) { return !(s.size < 0); }),
       opt('s-down', 'A step smaller', '\uD83E\uDD0F', function (s) { s.size = Math.max(-2, (s.size || 0) - 1); }, function (s) { return (s.size || 0) <= -2; })] },   // phi: two whole steps down at most
-    motion: { name: 'Motion', opts: [opt('m-on', 'Lively and moving', '\uD83E\uDD8B', function (s) { s.motion = true; }, function (s) { return s.motion !== false; }),
-      opt('m-off', 'Still and calm', '\uD83E\uDEA8', function (s) { s.motion = false; }, function (s) { return s.motion === false; })] },
-    sound: { name: 'Sound', opts: [opt('a-on', 'With its music', '\uD83C\uDFB6', function (s) { s.sound = true; }, function (s) { return s.sound !== false; }),
-      opt('a-off', 'Quiet', '\uD83E\uDD2B', function (s) { s.sound = false; }, function (s) { return s.sound === false; })] },
+    // SWEET (Danny 14:01 AWST): gentle motion and sweet, ethereal sound moods, on soft pastel tiles from her palette
+    motion: { name: 'Motion', opts: [
+      opt('m-drift', 'Slow, dreamy drift', '\u2601\uFE0F', function (s) { s.motion = true; s.drift = 1; }, function (s) { return s.motion !== false && s.drift !== 0; }, null, TINT.lavender),
+      opt('m-float', 'Floaty sparkles', '\uD83E\uDD8B', function (s) { s.motion = true; s.drift = 0; }, function (s) { return s.motion !== false && s.drift === 0; }, null, TINT.blush),
+      opt('m-still', 'Still as moonlight', '\uD83C\uDF19', function (s) { s.motion = false; }, function (s) { return s.motion === false; }, null, TINT.aqua)] },
+    sound: { name: 'Sound', opts: [
+      opt('a-dreamy', 'Dreamy', '\uD83E\uDDDA', function (s) { s.sound = true; s.mood = 'dreamy'; }, function (s) { return s.sound !== false && (!s.mood || s.mood === 'dreamy'); }, null, TINT.lavender),
+      opt('a-sparkle', 'Sparkle', '\u2728', function (s) { s.sound = true; s.mood = 'sparkle'; }, function (s) { return s.sound !== false && s.mood === 'sparkle'; }, null, TINT.blush),
+      opt('a-moon', 'Moonlight', '\uD83C\uDF19', function (s) { s.sound = true; s.mood = 'moonlight'; }, function (s) { return s.sound !== false && s.mood === 'moonlight'; }, null, TINT.aqua),
+      opt('a-hush', 'Soft hush', '\uD83E\uDD2B', function (s) { s.sound = false; }, function (s) { return s.sound === false; }, null, TINT.mint)] },
     start: { name: 'A new way to make it', opts: [opt('w-draw', 'Draw it by hand', '\u270D\uFE0F', null), opt('w-type', 'Type it in', '\u2328\uFE0F', null),
       opt('w-file', 'Use a vector file', '\uD83D\uDCC1', null), opt('w-chat', 'Make it with Simmie in chat', '\uD83D\uDCAC', null)] }
   };
@@ -197,7 +204,7 @@
     ed.appendChild(el('p', 'kl-count', 'Question ' + (q.n + 1) + ' of ' + ROUND + ' \u00B7 ' + TOPICS[q.topic].name));
     ed.appendChild(el('h2', 'kl-q', 'Which direction would you like to take it?'));
     var ch = el('div', 'kl-choices');
-    ps.forEach(function (o) { var t = btn('kl-tile', null); t.setAttribute('data-opt', o.id);
+    ps.forEach(function (o) { var t = btn('kl-tile' + (o.tint ? ' kl-soft' : ''), null); t.setAttribute('data-opt', o.id); if (o.tint) t.style.setProperty('--kl-tint', o.tint);
       var e = el('span', 'kl-emo', o.emo); e.setAttribute('aria-hidden', 'true'); t.appendChild(e);
       if (o.sw) { var w = el('span', 'kl-sw'); w.style.background = o.sw; w.setAttribute('aria-hidden', 'true'); t.appendChild(w); }
       t.appendChild(el('span', 'kl-txt', o.label)); t.addEventListener('click', function () { pick(o); }); var c = el('div', 'kl-choice'); c.appendChild(t); ch.appendChild(c); });
