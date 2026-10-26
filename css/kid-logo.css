@@ -16,8 +16,8 @@
   --kl-z-hint:1150; /* anchor: the site's existing layer just under the zoom view */
   --kl-tilt:-5.5deg; /* anchor: the logo's measured levelling tilt in css/bars.css and moderation/css/dash-foot-lock.css */
   --kl-pc:100%; /* unit: percent, the whole of one */
-  --kl-k:1; /* phi: the fit step, PHI^-n (n = 0..4), set by the view's fit() from the measured box */
-  --kl-s:min(var(--kl-bw,100vw),var(--kl-bh,100vh)); /* anchor: the measured box (js/kid-logo-view.js fit()); the viewport only before the first measure */
+  --kl-k:1; /* phi: the fit step, PHI^-n/2 (n = 0..8), set by the view's fit() from the measured box */
+  --kl-s:calc(min(var(--kl-bw,100vw),var(--kl-bh,100vh)) * var(--kl-p,1)); /* anchor: the measured box (js/kid-logo-view.js fit()); the viewport only before the first measure */
   --kl-tap:var(--tap,max(var(--kl-tap-min),calc(var(--kl-s) * var(--kl-i4))));
   --kl-t:var(--b-m8,calc(1s * var(--kl-i3)));
   --kl-w:calc(var(--kl-s) * (1 - var(--kl-i4)) * var(--kl-k));
@@ -25,7 +25,7 @@
   --kl-neon:#E58AA6}
 /* the logo itself steps down at most two rungs (PHI^-2) so it stays readable; spacing takes the rest. The measured-box values re-derive on the view itself, where fit() sets --kl-bw / --kl-bh / --kl-k (custom properties resolve where
    they are declared, so the :root copies above stay as the first-paint fallback and for the hint) */
-.dmz.kl{--kl-s:min(var(--kl-bw,100vw),var(--kl-bh,100vh));--kl-w:calc(var(--kl-s) * (1 - var(--kl-i4)) * max(var(--kl-k),var(--kl-i2)));--kl-g:calc(var(--kl-tap) * var(--kl-i3) * var(--kl-k))}
+.dmz.kl{--kl-s:calc(min(var(--kl-bw,100vw),var(--kl-bh,100vh)) * var(--kl-p,1));--kl-w:calc(var(--kl-s) * (1 - var(--kl-i4)) * max(var(--kl-k),var(--kl-i2)));--kl-g:calc(var(--kl-tap) * var(--kl-i3) * var(--kl-k))}
 .dmz.kl.kl-fitting,.dmz.kl.kl-fitting *{transition:none!important}
 .kl-tap{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .kl-tap:focus-visible{outline:2px solid var(--kl-neon);outline-offset:calc(2px * var(--kl-phi))}

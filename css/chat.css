@@ -7,6 +7,7 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%} /* shared.md 17:20: no automatic text inflation on rotate */
 body{margin:0;font-family:var(--f-body);font-size:1.15rem;line-height:1.45;color:var(--ink);
   background:var(--bg) radial-gradient(circle at 10% 0%,#FDE3EA 0,transparent 45%),radial-gradient(circle at 100% 100%,#E6F6F4 0,transparent 45%);
   background-attachment:fixed}

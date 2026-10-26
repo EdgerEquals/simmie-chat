@@ -343,7 +343,7 @@
   // Wider than tall: logo and editor sit side by side. Still too big: the sizes step down the phi ladder (--kl-k = PHI^-n) until
   // PHI^-3 of the box is left free; text never goes under the reader's 1em and taps never under the cited floor, so past the
   // floors the view scrolls from the top with the exit band kept clear. Re-fits on resize, rotation, Safari's bars and fonts loading.
-  var fitProbe = null, fitRq = 0, FREE = 1 - Math.pow(PHI, -3), STEPS = 5;               // phi: PHI^-3 left free; unit: PHI^0..PHI^-4 (5 rungs, Fibonacci)
+  var fitProbe = null, fitRq = 0, FREE = 1 - Math.pow(PHI, -3), STEPS = 9;               // phi: PHI^-3 left free; unit: PHI^0..PHI^-4 in half rungs (PHI^-1/2 each, shared.md 17:20)
   function insets() {
     if (!fitProbe) { fitProbe = el('i'); fitProbe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)'; doc.body.appendChild(fitProbe); }
     var c = getComputedStyle(fitProbe); return { t: parseFloat(c.paddingTop) || 0, r: parseFloat(c.paddingRight) || 0, b: parseFloat(c.paddingBottom) || 0, l: parseFloat(c.paddingLeft) || 0 };
@@ -365,6 +365,7 @@
     var bw = Math.max(1, W - lft - rgt), bh = Math.max(1, H - top - bot);
     st.setProperty('--kl-pt', px(top + s.t)); st.setProperty('--kl-pb', px(bot + s.b)); st.setProperty('--kl-pr', px(rgt + s.r)); st.setProperty('--kl-pl', px(lft + s.l));
     st.setProperty('--kl-bw', px(bw)); st.setProperty('--kl-bh', px(bh));
+    st.setProperty('--kl-p', String(wide ? 1 : 1 / PHI));                                 // phi: portrait sizes from the short side x PHI^-1 (shared.md 17:20); landscape keeps its own rule
     ov.classList.toggle('kl-wide', wide); if (ov.classList.contains('kl-scroll')) ov.classList.remove('kl-scroll');
     var parts = [fig].concat(ed.hidden ? [] : [ed]), n = 0;
     function fits() {
@@ -374,8 +375,8 @@
       return h <= bh * FREE && w <= bw;
     }
     ov.classList.add('kl-fitting');                                                       // measure the settled sizes, not a glide in progress
-    for (n = 0; n < STEPS; n++) { st.setProperty('--kl-k', String(Math.pow(PHI, -n))); if (fits()) break; }
-    if (n >= STEPS) { st.setProperty('--kl-k', String(Math.pow(PHI, 1 - STEPS))); ov.classList.add('kl-scroll'); }   // past the floors: scroll, top first
+    for (n = 0; n < STEPS; n++) { st.setProperty('--kl-k', String(Math.pow(PHI, -n / 2))); if (fits()) break; }   // phi: step down by PHI^-1/2
+    if (n >= STEPS) { st.setProperty('--kl-k', String(Math.pow(PHI, (1 - STEPS) / 2))); ov.classList.add('kl-scroll'); }   // past the floors: scroll, top first
     ov.setAttribute('data-fit', String(Math.min(n, STEPS - 1)));
     void ov.offsetWidth; ov.classList.remove('kl-fitting');
   }
