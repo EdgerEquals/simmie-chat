@@ -62,7 +62,7 @@
   var fig = el('figure', 'dmz-fig dmz--rebella'), art = el('div', 'dmz-art'), ed = el('section', 'kl-ed'), hint = el('div', 'kl-hint');
   ed.hidden = true; ed.setAttribute('aria-live', 'polite'); hint.setAttribute('role', 'status'); hint.hidden = true;
   fig.appendChild(art); ov.appendChild(bar); ov.appendChild(fig); ov.appendChild(ed); doc.body.appendChild(ov); doc.body.appendChild(hint);
-  var cur = null, AC = null, eng = null, svg = null, lifeOn = false, acT = null;
+  var cur = null, AC = null, eng = null, svg = null, lifeOn = false, acT = null, tail = null, tailT = 0;
 
   function S() { return KL.read(); }
   function save(s) { KL.write(s); paint(); }
@@ -121,24 +121,34 @@
       (root.PhiPumps ? Promise.resolve() : inj(cfg.dir + 'phi-pumps.js' + V)).then(function () { return root.LogoSound ? 0 : inj(cfg.dir + 'logo-sound.js' + V); }).then(go2);
     }
   }
-  function stopLife() { lifeOn = false; try { root.RebellaZoomLife && RebellaZoomLife.stop(); } catch (e) {} if (eng) { try { eng.stop(Math.pow(PHI, -2)); } catch (e) {} eng = null; } }
+  // Close glide (Danny 16:42 AWST 26 Oct): on close the logo's engine keeps playing while its level glides down to the radio level
+  // (js/rhythm-continuity.js trim, time constant B x PHI^-5), and stops only after PHI^3 of those constants, when the glide is
+  // within PHI^-3-ish of the radio level; then the usual PHI^-2 s release. Reopening or editing stops a held tail at once.
+  function holdMs() { var t = NaN; try { t = root.RhythmContinuity ? RhythmContinuity.loud.glideTau() * Math.pow(PHI, 3) * 1e3 : NaN; } catch (e) {} return t > 0 && isFinite(t) ? t : (ms(-2) || 0); }   // phi: PHI^3 glide constants; unit: ms per s
+  function zlStop() { try { root.RebellaZoomLife && RebellaZoomLife.stop(); } catch (e) {} }
+  function endTail() { if (!tailT) return; clearTimeout(tailT); tailT = 0; zlStop(); if (tail) { try { tail.stop(Math.pow(PHI, -2)); } catch (e) {} tail = null; } }
+  function stopLife(glide) {
+    lifeOn = false; endTail();
+    if (!glide) { zlStop(); if (eng) { try { eng.stop(Math.pow(PHI, -2)); } catch (e) {} eng = null; } return 0; }
+    var h = holdMs(); tail = eng; eng = null; tailT = setTimeout(endTail, h); return h;   // the life's sounds and the logo engine both carry on under the gliding trim
+  }
 
   // ---- open / close ----
   function open(el0, o) {
     o = o || {}; if (cur) { if (o.edit) editor(); return; }
-    cur = el0; AC = o.ac || AC; var s = S();
+    cur = el0; AC = o.ac || AC; var s = S(); endTail(); clearTimeout(acT);
     build(); ov.hidden = false; ed.hidden = true; ov.classList.remove('is-open', 'kl-editing');
     requestAnimationFrame(function () { ov.classList.add('is-open'); });
     settle(s); startLife();
     if (o.edit) editor(); else x.focus({ preventScroll: true });
   }
   function close() {
-    if (!cur) return; var c = cur; stopLife(); KL.apply();
+    if (!cur) return; var c = cur, held = stopLife(true); KL.apply();
     ov.classList.remove('is-open', 'kl-editing'); ed.hidden = true;
-    var done = function () { ov.hidden = true; art.innerHTML = ''; };
+    var done = function () { ov.hidden = true; if (!tailT) art.innerHTML = ''; else setTimeout(function () { if (!cur) art.innerHTML = ''; }, held); };
     if (still()) done(); else setTimeout(done, ms(-8));   // phi: B x PHI^-8
     try { if (AC && root.RhythmContinuity) RhythmContinuity.media(AC).rest('logo'); } catch (e) {}   // the media bridge rests with the view
-    clearTimeout(acT); acT = setTimeout(function () { try { if (AC && !cur && AC.state === 'running') AC.suspend(); } catch (e) {} }, ms(-5) || 0);   // phi: B x PHI^-5 after close
+    clearTimeout(acT); acT = setTimeout(function () { try { if (AC && !cur && AC.state === 'running') AC.suspend(); } catch (e) {} }, held + (ms(-5) || 0));   // phi: B x PHI^-5 after the held tail
     cur = null; if (root.location.hash === '#edit-logo') try { history.replaceState(null, '', root.location.pathname + root.location.search); } catch (e) {}
     var s = S(); if (!s.hinted) { s.hinted = Date.now(); KL.write(s); showHint(c); }
     var f = c.closest && c.closest('a') || c; try { f.focus({ preventScroll: true }); } catch (e) {}
