@@ -125,7 +125,7 @@
     reset: function () { origin = Date.now(); if (doc.getAnimations) doc.getAnimations().forEach(function (a) { if (isLoop(a)) try { a.currentTime = 0; } catch (e) {} }); } });
 
   // ---------- one gentle tap to resume (never while the passcode gate is up) ----------
-  var waits = [], GEST = ['touchend', 'click'];
+  var waits = [], GEST = ['touchstart', 'pointerdown', 'touchend', 'click'];   // a press is a resume try too: a scrolling touch ends in touchcancel with no lift (shared.md guard 17:31)
   function gated(t) {
     var b = doc.body; if (b && b.classList.contains('locked')) return true;
     if (t && t.closest && t.closest('#gate, #gate-form, #screen-login, #screen-loading')) return true;
@@ -133,6 +133,7 @@
   }
   function onTap(e) {
     if (gated(e.target)) return;
+    if (e.type === 'touchstart' || e.type === 'pointerdown') { waits.slice().forEach(function (f) { try { f(e); } catch (er) {} }); return; }   // try now, keep waiting for the lift (iOS may only unlock there)
     var w = waits.splice(0); GEST.forEach(function (n) { doc.removeEventListener(n, onTap, true); });
     doc.documentElement.removeAttribute('data-rhythm-resume');
     w.forEach(function (f) { try { f(e); } catch (er) {} });
