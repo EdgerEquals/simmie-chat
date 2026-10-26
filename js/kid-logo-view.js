@@ -138,7 +138,7 @@
     var done = function () { ov.hidden = true; art.innerHTML = ''; };
     if (still()) done(); else setTimeout(done, ms(-8));   // phi: B x PHI^-8
     try { if (AC && root.RhythmContinuity) RhythmContinuity.media(AC).rest('logo'); } catch (e) {}   // the media bridge rests with the view
-    clearTimeout(acT); acT = setTimeout(function () { try { if (AC && !cur && AC.state === 'running') AC.suspend(); } catch (e) {} }, ms(-2) || 0);   // phi: B x PHI^-2 after close = PHI^3 glide constants (B x PHI^-5), so the logo's level has glided down to the radio level before its context rests (16:42 rule)
+    clearTimeout(acT); acT = setTimeout(function () { try { if (AC && !cur && AC.state === 'running') AC.suspend(); } catch (e) {} }, ms(-5) || 0);   // phi: B x PHI^-5 after close
     cur = null; if (root.location.hash === '#edit-logo') try { history.replaceState(null, '', root.location.pathname + root.location.search); } catch (e) {}
     var s = S(); if (!s.hinted) { s.hinted = Date.now(); KL.write(s); showHint(c); }
     var f = c.closest && c.closest('a') || c; try { f.focus({ preventScroll: true }); } catch (e) {}
