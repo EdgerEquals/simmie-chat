@@ -9,7 +9,7 @@
    places; jobs marked first/last stay put; nothing changes until the total score reaches PHI^3 = 4.236), and the gap after each job is
    quantised to golden steps: PHI^-3 0.236 s (top third of use), PHI^-2 0.382 s (default), PHI^-1 0.618 s (rarely used).
    COST: loaded as the FIRST tier-2 job (idle, after load); no first-load work. API: window.PhiAdapt.signal(id,kind) / score(id) / rank(ids) /
-   gap(id) / snapshot() / clear().
+   gap(id) / snapshot() / clear() / reset().
    v2 (25 Oct 2026, Kids Club core standard 'golden-ratio dials, one closed feedback loop', Danny's go t816u): the SAME record now also
    carries the dials (js/phi-dials.js) in an extension slot (x), so there is still ONE store. Live events are never stored: each event
    goes into an in-memory session tally, and only a share of it passes up into the long-term profile (pass hook = the information
@@ -25,12 +25,12 @@
     // Bonnie's pages (component ids only; never the text, value or position of anything)
     'nav':'#burger,#drawer','search':'#search-btn,#searchbar','help':'.help-orb','brand':'.brand','agedial':'#agedial','ask-dad':'#ask-dad,#dad-panel',
     'queue':'#queue','log':'#log','lock':'#lock,#lock-btn'};
-  var d=load(),dirty=0,saveT=0,sess={},passFn=null;
+  var d=load(),dirty=0,saveT=0,sess={},passFn=null,dead=0;   // dead: set by reset(), nothing is written again on this page
   function blank(){return {v:1,n:0,c:{},p:{}};}
   function load(){try{var x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&x.v===1&&x.c&&typeof x.c==='object')return x;}catch(e){}return blank();}
   function r3(v){return Math.round(v*1000)/1000;}
-  function save(){dirty=0;clearTimeout(saveT);try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
-  function soon(){dirty=1;clearTimeout(saveT);saveT=setTimeout(save,4236);}            // PHI^3 s debounce
+  function save(){dirty=0;clearTimeout(saveT);if(dead)return;try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+  function soon(){if(dead)return;dirty=1;clearTimeout(saveT);saveT=setTimeout(save,4236);}            // PHI^3 s debounce
   // new session: decay by 1/PHI, drop dust, count the session
   (function(){var fresh=true;try{fresh=!sessionStorage.getItem(SKEY);sessionStorage.setItem(SKEY,'1');}catch(e){fresh=false;}
     if(!fresh)return;var c=d.c;for(var k in c){if(!ID.test(k)){delete c[k];continue;}var e=c[k],s=0;['o','t','l'].forEach(function(f){e[f]=r3((+e[f]||0)/PHI);s+=e[f];});if(s<0.01)delete c[k];}
@@ -59,6 +59,9 @@
     return d.x[name]?JSON.parse(JSON.stringify(d.x[name])):null;}
   window.PhiAdapt={signal:signal,score:score,rank:rank,gap:gap,page:page,ext:ext,save:save,onPass:function(fn){passFn=typeof fn==='function'?fn:null;},
     session:function(){return JSON.parse(JSON.stringify(sess));},sessions:function(){return d.n|0;},
-    snapshot:function(){return JSON.parse(JSON.stringify(d));},clear:function(){d=blank();try{localStorage.removeItem(KEY);}catch(e){}}};
+    snapshot:function(){return JSON.parse(JSON.stringify(d));},clear:function(){d=blank();try{localStorage.removeItem(KEY);}catch(e){}},
+    // reset (Rule phi pending item 'usage ladder reset', Danny 10:06 AWST 26 Oct 2026): the record (dials and their move log live in its
+    // x slot) AND the session flag go, and this page stops writing so nothing is saved back on pagehide; js/phi-reset.js then reloads.
+    reset:function(){dead=1;dirty=0;clearTimeout(saveT);d=blank();sess={};try{localStorage.removeItem(KEY);}catch(e){}try{sessionStorage.removeItem(SKEY);}catch(e){}return true;}};
   if(window.LoadTiers&&LoadTiers.adapt)LoadTiers.adapt({rank:rank,gap:gap});
 })();

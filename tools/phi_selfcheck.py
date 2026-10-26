@@ -6,12 +6,26 @@ that is not one of:
   - on a line tagged in its trailing comment with  cite:  (cited clock or physical constant),  anchor:  (measured anchor,
     e.g. the city point),  unit:  (a unit definition, e.g. ms per second) or  phi:  (the golden ratio itself).
 Comments are not scanned for numbers. Exit 1 if anything is listed (the alert blocks the draft until it is a ratio or anchor).
+Skipped on purpose (Danny 10:06 AWST 26 Oct 2026, Rule phi build A): security and policy code is never tuned to phi, so it is not
+scanned: the passcode gate, the crypto, the gate's hashing config and the age-dial policy (files and blocks listed in SKIP_FILES and
+SKIP_BLOCKS below; a skipped file or block is reported as skipped, never silently).
 Usage: phi_selfcheck.py FILE.js [FILE.js ...]"""
 import re, sys
 NUM = re.compile(r'(?<![\w.$#])(\d+\.\d*(?:e[+-]?\d+)?|\.\d+(?:e[+-]?\d+)?|\d+(?:e[+-]?\d+)?)(?![\w.])', re.I)
 TAG = re.compile(r'\b(cite|anchor|unit|phi):', re.I)
 STEP = re.compile(r'Math\.pow\(\s*(?:PHI|IP)\s*,\s*-?$')
 OK = {0.0, 1.0, 2.0}
+import os
+SKIP_FILES = {   # basename -> reason (whole file is security or policy, not tuning)
+    'crypto.js': 'crypto (PBKDF2 / AES-GCM sizes)',
+    'config.js': 'gate hashing config (PBKDF2 iterations, salt)',
+    'agedial.js': 'age-dial policy (10-16 range, cited height table)',
+    'agedial-btn.js': 'age-dial policy control',
+}
+SKIP_BLOCKS = [   # (basename, first line regex, line regex that ends the block (not skipped), reason)
+    ('app.js', re.compile(r'//\s*-+\s*gate\s*-+'), re.compile(r'\$\("#lock"\)'), 'passcode gate (retry back-off)'),
+    ('app.js', re.compile(r"\$\('login-form'\)\.addEventListener"), re.compile(r'^\s*\}\);\s*$'), 'chat password gate'),
+]
 def split(line, in_block):
     code, com, i = '', '', 0
     while i < len(line):
@@ -24,8 +38,16 @@ def split(line, in_block):
         code += line[i]; i += 1
     return code, com, in_block
 def check(path):
-    hits, blk = [], False
+    hits, blk, base, skip = [], False, os.path.basename(path), None
+    if base in SKIP_FILES:
+        print(f'{path}: skipped ({SKIP_FILES[base]})'); return []
+    blocks = [b for b in SKIP_BLOCKS if b[0] == base]
     for n, line in enumerate(open(path, encoding='utf-8'), 1):
+        if skip is None:
+            for b in blocks:
+                if b[1].search(line): skip = b; print(f'{path}: line {n}: block skipped ({b[3]})'); break
+        elif skip[2].search(line): skip = None
+        if skip is not None: blk = split(line.rstrip('\n'), blk)[2]; continue
         code, com, blk = split(line.rstrip('\n'), blk)
         code = re.sub(r'/(?:\\.|[^/\n])+/[gimsuy]*(?=[.,);\s])', '/re/', code)   # regex literals hold no parameters
         if TAG.search(com): continue

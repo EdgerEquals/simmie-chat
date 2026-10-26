@@ -50,10 +50,10 @@
   var wxKey = null, msgKey = null, master = 1, masterFeed = null, rate = SITE_FREQ;
   var userK = 1;   // Kids Club dial 2 (kid-pace retune, js/phi-dials.js): a phi-rung factor inside Danny's range; 1 without dials
 
-  function perthHour() { try { var s = new Date().toLocaleString("en-AU", { timeZone: "Australia/Perth", hour: "2-digit", minute: "2-digit", hour12: false }).split(":");
-    return (+s[0] % 24) + (+s[1] || 0) / 60; } catch (e) { var d = new Date(); return d.getHours() + d.getMinutes() / 60; } }
-  function moonIllum() { var days = (Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5, age = ((days % 29.530588853) + 29.530588853) % 29.530588853;
-    return (1 - Math.cos(2 * Math.PI * age / 29.530588853)) / 2; }
+  function perthHour() { try { var s = new Date().toLocaleString("en-AU", { timeZone: "Australia/Perth", hour: "2-digit", minute: "2-digit", hour12: false }).split(":");   // unit: 24 h per day, 60 min per hour (clock units, not tuning values)
+    return (+s[0] % 24) + (+s[1] || 0) / 60; } catch (e) { var d = new Date(); return d.getHours() + d.getMinutes() / 60; } }   // unit: 24 h per day, 60 min per hour
+  function moonIllum() { var days = (Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5, age = ((days % 29.530588853) + 29.530588853) % 29.530588853;   // cite: reference new moon 2000-01-06 18:14 UTC and mean synodic month 29.530588853 d (Meeus, Astronomical Algorithms, 2nd ed., ch. 49; NASA Lunar Fact Sheet); unit: 864e5 ms per day
+    return (1 - Math.cos(2 * Math.PI * age / 29.530588853)) / 2; }   // cite: mean synodic month 29.530588853 d (Meeus ch. 49); illuminated fraction (1 - cos(phase angle)) / 2 (Meeus ch. 48)
   function feeds() {
     var h = perthHour(), o = { moon: moonIllum(), day: (1 - Math.cos(2 * Math.PI * (h - 3) / 24)) / 2 };
     if (wxKey && wxKey in WX) o.weather = (h < 5 && wxKey !== "storm") ? WX.deep : WX[wxKey];
@@ -143,7 +143,7 @@
     var base = SCRIPT.src.replace(/[^\/]*$/, ""), ric2 = root.requestIdleCallback || function (f) { return setTimeout(f, 618); };
     var add = function (src, then) { var s = doc.createElement("script"); s.src = base + src; s.async = true; if (then) s.onload = then; doc.head.appendChild(s); };
     var rest = function () { add("season-pumps.js?v=1", function () { add("phi-dials.js?v=2"); }); };   // Season pumps standard: sky clocks for Dial 3, then the dials
-    var dials = function () { ric2(function () { if (root.PhiAdapt) rest(); else add("phi-adapt.js?v=2", rest); }, { timeout: 4236 }); };
+    var dials = function () { ric2(function () { if (root.PhiAdapt) rest(); else add("phi-adapt.js?v=3", rest); }, { timeout: 4236 }); };
     if (doc.readyState === "complete") dials(); else root.addEventListener("load", dials);
   }
   if (typeof module !== "undefined") module.exports = api;

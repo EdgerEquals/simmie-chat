@@ -82,3 +82,8 @@ input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(
 .msg.dad .ask-box textarea{border-color:var(--dad-ocean,#0F5C6E)}
 /* tappable web addresses in chat messages (Danny t670u 24 Oct): same colour as the bubble text, underlined; palette unchanged */
 .msg a.msg-link{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;overflow-wrap:anywhere;word-break:break-all;-webkit-tap-highlight-color:rgba(0,0,0,.08)}
+
+/* Reset what this page learned (js/phi-reset.js, Danny 10:06 AWST 26 Oct 2026): a quiet link at the left of the footer line;
+   the line keeps its height. */
+html #app #app-foot .pr-btn{margin-right:auto;background:none;border:0;padding:0 .4rem;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;white-space:nowrap;flex:0 0 auto}
+html #app #app-foot .pr-btn+span{margin-left:.6rem}

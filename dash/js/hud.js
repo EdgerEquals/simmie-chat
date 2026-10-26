@@ -9,7 +9,8 @@
   "use strict";
   var WX_URL = "https://api.open-meteo.com/v1/forecast?latitude=-31.95&longitude=115.86&current=weather_code,temperature_2m,is_day&timezone=Australia%2FPerth";
   var CHAT = "./";
-  var CKEY = "rebella-mod-weather-v1", TTL = 30*60*1000;
+  var CKEY = "rebella-mod-weather-v1", SEC = 1000;   // unit: ms per second. Cache life = the feed's own update period U (current.interval,
+  // stored with the cache as u; a reply without it keeps the last known u; none known = refetch). Rule phi row "weather cache" = U x PHI^0.
   var STALE_H = 24;   // FRESH light: queue older than a day turns amber (scans/top-ups run on demand, not on a timer)
   var RM = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : {matches:false};
   var $ = function(s){ return document.querySelector(s); };
@@ -70,7 +71,8 @@
 
   // ---------- weather ----------
   var wx = {state:"idle", key:forced, temp:null, at:null};
-  function readCache(){ try{ var c = JSON.parse(localStorage.getItem(CKEY)); if(c && Date.now() - c.t < TTL) return c; }catch(e){} return null; }
+  function rawCache(){ try{ return JSON.parse(localStorage.getItem(CKEY)); }catch(e){ return null; } }
+  function readCache(){ var c = rawCache(); return c && c.u > 0 && Date.now() - c.t < c.u * SEC ? c : null; }
   function applyData(c){ wx.state = "ok"; wx.temp = Math.round(c.temp); wx.at = c.t; wx.key = forced || mood(c.code, c.isDay, c.temp); PT.setWeather(wx.key); paintWeather();
     }
   function loadWeather(){
@@ -79,7 +81,7 @@
     fetch(WX_URL, {cache:"no-store", credentials:"omit", referrerPolicy:"no-referrer"}).then(function(r){ if(!r.ok) throw 0; return r.json(); })
       .then(function(j){
         var cur = j && j.current; if(!cur || cur.weather_code == null || cur.temperature_2m == null) throw 0;
-        var d = {t:Date.now(), code:cur.weather_code, temp:cur.temperature_2m, isDay:cur.is_day};
+        var old = rawCache(), d = {t:Date.now(), u:+cur.interval || (old && +old.u) || 0, code:cur.weather_code, temp:cur.temperature_2m, isDay:cur.is_day};
         try{ localStorage.setItem(CKEY, JSON.stringify(d)); }catch(e){}
         applyData(d);
       }).catch(function(){ wx.state = "fail"; PT.setWeather(forced); paintWeather(); });

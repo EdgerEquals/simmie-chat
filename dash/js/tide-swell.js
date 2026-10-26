@@ -18,7 +18,9 @@
   // ratio pump + site frequency dial (js/ratio-pump.js, Danny 12:15 AWST 24 Oct): the dolphins are data-phi-js (skipped by the
   // CSS pass), so their period is divided by RatioPump.rate() here; a new rate lands at the next repaint / cycle boundary.
   function rpRate() { var r = window.RatioPump && window.RatioPump.rate && window.RatioPump.rate(); return r > 0 ? r : 1; }
-  var PHI = 1.6180339887, G = 0.6180339887, TTL = 60 * 60 * 1000, STALE_OK = 6 * 60 * 60 * 1000;
+  var PHI = 1.6180339887, G = 0.6180339887;   // phi
+  // Cache (Rule phi): U = the feed's own step, read from the reply (hourly.time[1] - hourly.time[0]) and stored with the cache as u.
+  // Fresh for U x PHI^0; if a request fails, a stale copy is still used up to U x PHI^4. No u known: refetch.
   var URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=-32.05&longitude=115.74' +
             '&hourly=sea_level_height_msl,swell_wave_height,swell_wave_period&timezone=Australia%2FPerth&forecast_days=2';
   var CREDIT = 'Data: Open-Meteo.com marine model, CC BY 4.0';
@@ -41,13 +43,15 @@
     var h = j && j.hourly; if (!h || !h.time || !h.sea_level_height_msl || !h.swell_wave_height) return false;
     return h.time.length > 24 && h.time.length === h.sea_level_height_msl.length && h.time.length === h.swell_wave_height.length;
   }
+  function stepOf(j) { var t = j && j.hourly && j.hourly.time; var u = t && t.length > 1 ? Date.parse(t[1]) - Date.parse(t[0]) : 0; return u > 0 ? u : 0; }
   function load(key, cb) {
     var c = null; try { c = JSON.parse(get(key) || 'null'); } catch (e) { c = null; }
-    if (c && valid(c.d) && Date.now() - c.at < TTL) { cb(c.d); return; }
+    var U = (c && +c.u) || stepOf(c && c.d);
+    if (c && valid(c.d) && U > 0 && Date.now() - c.at < U) { cb(c.d); return; }
     fetch(URL, { credentials: 'omit', referrerPolicy: 'no-referrer', mode: 'cors' })
       .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (j) { if (!valid(j)) throw 0; set(key, JSON.stringify({ at: Date.now(), d: j })); cb(j); })
-      .catch(function () { cb(c && valid(c.d) && Date.now() - c.at < STALE_OK ? c.d : null); });
+      .then(function (j) { if (!valid(j)) throw 0; set(key, JSON.stringify({ at: Date.now(), u: stepOf(j) || U, d: j })); cb(j); })
+      .catch(function () { cb(c && valid(c.d) && U > 0 && Date.now() - c.at < U * Math.pow(PHI, 4) ? c.d : null); });
   }
   /* today's curve: 00:00 .. 24:00 Perth (25 hourly points), plus swell at the current hour */
   function pick(j, now) {
