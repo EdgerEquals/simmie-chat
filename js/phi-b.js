@@ -14,9 +14,18 @@
                 Sky + weather:  Bs = B0 x PHI^(1/2 - mean(pump shares))  -> livelier (shorter) when the Moon is at springs and it is warm,
                 calmer when it's neap and cool; always within half a phi step of B0. (The 1/2 is the halving: the centre of a 0..1 share.)
      pump 3     Bonnie's own rhythm R: the typical gap between her taps, scroll starts and lingers (median per visit, kept in the one usage
-                record phiAdapt.v1, slot x.rhythm; never what she taps, where, or any text). Br = R x PHI^round(log_phi(Bs / R)), i.e. her
-                rhythm on the phi rung nearest Bs. It takes over in phi steps per visit with her rhythm: w = 1 - PHI^-visits
-                (0, 0.382, 0.618, 0.764, ...);  B = Bs^(1 - w) x Br^w.
+                record phiAdapt.v1, slot x.rhythm; never what she taps, where, or any text). r = her recent rhythm (each visit moves it
+                PHI^-1 of the way), rl = her long-term rhythm (each visit moves it only PHI^-8 of the way, the deep rung).
+                Mirror within sky limits (Rule phi update, Danny 14:27 AWST 26 Oct 2026, from Steve's review): she moves B by whole rungs,
+                as far as she is quicker or slower than her own usual, and only between sky-B x PHI^-n and sky-B x PHI^n:
+                  k = round(log_phi(r / rl)) held to -n..n,   Br = Bs x PHI^k
+                so an excited kid is mirrored (the page speeds up with her) up to the limit, a slow kid is held at the slow limit.
+                n = REACH, Danny's floor and ceiling as rungs (the pace dial's own range in js/phi-dials.js: one rung either side).
+                (Before: Br = R x PHI^round(log_phi(Bs / R)) always landed within half a step of Bs, so her rhythm never really moved B.)
+                It takes over in phi steps per visit with her rhythm: w = 1 - PHI^-visits (0, 0.382, 0.618, 0.764, ...);
+                B = Bs^(1 - w) x Br^w.
+     pause      the longest gap that still counts as rhythm (B0 x PHI^4) is taken from the sky reference, never from the kid-moved B,
+                so a long pause never counts as rhythm.
    B is set once per page view (in <head>, before anything moves) so nothing jumps mid-visit; the next visit glides on.
    Every timing is then B x PHI^k with k whole: rung(k) / ms(k), and CSS custom properties --b-m10 .. --b-p8 (seconds) for CSS.
    data-dials="off" on the ratio-pump script: no rhythm pump. Reduced motion, Pause motion and the WCAG floors act after this formula.
@@ -69,10 +78,14 @@
 
   // ---- pump 3: Bonnie's own rhythm ----
   function dialsOff() { return !!(doc && doc.querySelector('script[src*="ratio-pump.js"][data-dials="off"]')); }
+  var REACH = 1;                                                                             // anchor: Danny's floor and ceiling, as rungs (phi-dials SPEC.pace: def 2, ceil 1, floor 3)
+  var DEEP = Math.pow(PHI, -8);                                                              // phi: the deep rung, weight of her long-term rhythm
   var rec = get(KEY), rh = rec && rec.v === 1 && rec.x && rec.x.rhythm, R = rh && +rh.r > 0 ? +rh.r : null, visits = rh ? (+rh.s || 0) : 0;
-  var w = 0, Br = null, B = Bs;
+  var RL = rh && +rh.rl > 0 ? +rh.rl : R;
+  var w = 0, Br = null, B = Bs, kMirror = 0;
   if (Bs && R && !dialsOff()) {
-    Br = R * Math.pow(PHI, Math.round(logPhi(Bs / R)));
+    kMirror = Math.max(-REACH, Math.min(REACH, Math.round(logPhi(R / RL))));
+    Br = Bs * Math.pow(PHI, kMirror);
     w = 1 - Math.pow(PHI, -visits);
     B = Math.exp((1 - w) * Math.log(Bs) + w * Math.log(Br));
   }
@@ -82,7 +95,7 @@
     PHI: PHI, value: B, B0: B0,
     rung: rung,
     ms: function (k) { var s = rung(k); return s == null ? null : s * SEC; },
-    parts: function () { return { how: how, U: U || null, B0: B0, moon: moon, temp: temp, tempReadings: ring.length, Bs: Bs, rhythm: R, visits: visits, w: w, Br: Br, B: B }; }
+    parts: function () { return { how: how, U: U || null, B0: B0, moon: moon, temp: temp, tempReadings: ring.length, Bs: Bs, rhythm: R, longRhythm: RL, mirror: kMirror, reach: REACH, visits: visits, w: w, Br: Br, B: B }; }
   };
   root.PhiB = api;
 
@@ -115,7 +128,9 @@
     var s = gaps.slice().sort(function (a, b) { return a - b; }), med = s[Math.floor(s.length / 2)];
     var cur = null; try { cur = root.PhiAdapt ? root.PhiAdapt.ext('rhythm') : (get(KEY) && get(KEY).x && get(KEY).x.rhythm); } catch (e) { cur = null; }
     var r = cur && +cur.r > 0 ? Math.exp(Math.log(cur.r) * (1 - 1 / PHI) + Math.log(med) / PHI) : med;   // phi: each visit moves it PHI^-1 of the way
-    var next = { r: r, s: (cur ? +cur.s || 0 : 0) + 1 };
+    var rl0 = cur && +cur.rl > 0 ? +cur.rl : (cur && +cur.r > 0 ? +cur.r : med);
+    var rl = Math.exp(Math.log(rl0) * (1 - DEEP) + Math.log(med) * DEEP);                    // phi: each visit moves it only PHI^-8 of the way
+    var next = { r: r, rl: rl, s: (cur ? +cur.s || 0 : 0) + 1 };
     saved = true;
     try {
       if (root.PhiAdapt && root.PhiAdapt.ext) { root.PhiAdapt.ext('rhythm', next); if (root.PhiAdapt.save) root.PhiAdapt.save(); }

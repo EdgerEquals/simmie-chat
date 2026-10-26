@@ -21,7 +21,8 @@
                    up when the summary predicted the next visit well (hit share >= PHI^-1), down when it didn't (< PHI^-2).
    Dial 2  pace    kid-pace retune range. Speed factor = 1 + v - v(default rung) on the page's existing timing (js/ratio-pump.js
                    RatioPump.setUser), so the steps are phi powers too. The visit's own interaction rate vs her long-term rate
-                   (a PHI^-2 moving average kept in the record, a ratio only): >= PHI x -> one rung quicker, <= PHI^-1 x -> one rung
+                   (a PHI^-8 moving average kept in the record, a ratio only;
+                   was PHI^-2, which followed each visit so closely the dial never moved: Rule phi update 14:29 AWST 26 Oct): >= PHI x -> one rung quicker, <= PHI^-1 x -> one rung
                    gentler. Pages here have no tier list, so only animation speed follows it. Reduced motion: factor 1.
    Dial 3  season  season pump: follows the Season pumps standard in the shared layer (js/season-pumps.js; Danny 21:47 AWST 25 Oct).
                    Sky clocks worked out on the device from the date, the time and the one coarse city point (-32.0, 115.9): sun's
@@ -40,6 +41,7 @@
   var root = window, doc = document;
   if (root.PhiDials || !root.PhiAdapt) return;
   var PA = root.PhiAdapt, PHI = 1.6180339887, IP = 1 / PHI, CLOSED = 8;   // phi: the golden ratio; anchor: Danny's ladder, 8 rungs then closed (t816u)
+  var DEEP = CLOSED;                                                       // phi: the deepest rung of that ladder (PHI^-8), weight of the long-term pace average
   var RUNGS = []; for (var k = 0; k < CLOSED; k++) RUNGS.push(val(k)); RUNGS.push(0);
   function val(r) { return r >= CLOSED ? 0 : Math.pow(IP, r); }
   // Danny's floor and ceiling per dial, as rungs (ceiling = the highest value allowed = the smaller rung index). Only Danny changes these.
@@ -144,7 +146,7 @@
         checked = true; var rate = n / V;
         if (X.pace == null) X.pace = rate;
         else { var q = rate / X.pace; if (q >= PHI) move("pace", 1, "quicker than usual"); else if (q <= IP) move("pace", -1, "gentler than usual");
-               X.pace = X.pace + (rate - X.pace) * IP * IP; }
+               X.pace = X.pace + (rate - X.pace) * Math.pow(IP, DEEP); }   // long memory: the deep rung PHI^-8 (Rule phi 14:29 AWST 26 Oct, Steve's review), so the dial can move
       }
     }
     if (!final) { persist(); return; }
