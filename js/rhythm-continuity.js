@@ -144,6 +144,21 @@
     doc.documentElement.setAttribute('data-rhythm-resume', '');
   }
 
+  // ---------- sound-back ladder timing + the one gentle button ----------
+  var TOP = 5;                                                                     // phi: ladder exponents PHI^0 .. PHI^5 (dad-page df8d082)
+  function beat() { try { var B = root.PhiB, r = B && B.rung ? +B.rung(-10) : NaN; if (r > 0 && isFinite(r)) return r; } catch (e) {} return Math.pow(PHI, -5); }   // phi: one tap-rung beat, B x PHI^-10
+  var sbBtn = null;
+  function showBack() {
+    if (sbBtn || gated(null) || !doc.body) return;
+    var b = doc.createElement('button'); b.type = 'button'; b.className = 'sound-back'; b.textContent = 'tap to bring the sound back';
+    b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top, 0px) + 1rem * ' + PHI + ');z-index:60;font:inherit;font-size:1rem;' +
+      'color:CanvasText;background:Canvas;border:1px solid currentColor;border-radius:1rem;padding:calc(1rem / ' + PHI + ') 1rem;min-height:44px;' +   // unit: 44 px minimum tap target (Apple HIG, cited)
+      'cursor:pointer;white-space:nowrap;max-width:calc(100vw - 2rem);overflow:hidden;text-overflow:ellipsis';
+    b.addEventListener('click', function () { hideBack(); });                       // the tap itself resumes through tap() (touchend / click)
+    doc.body.appendChild(b); sbBtn = b;
+  }
+  function hideBack() { if (!sbBtn) return; try { sbBtn.remove(); } catch (e) {} sbBtn = null; }
+
   // ---------- keep alive while sound plays: WebAudio -> MediaStream -> hidden <audio>, with a Media Session ----------
   var hubs = [];
   function media(ctx) {
@@ -185,10 +200,29 @@
       if (!busy()) return;
       var p = null; try { p = ctx.resume && ctx.resume(); } catch (e) {}
       elPlay();
-      var check = function () { if (busy() && ctx.state !== 'running') tap(function () { try { ctx.resume(); } catch (e) {} elPlay(); session('playing'); }); };
+      var check = function () { if (busy() && ctx.state !== 'running') { tap(function () { try { ctx.resume(); } catch (e) {} elPlay(); session('playing'); }); later('wake refused'); } };
       if (p && p.then) p.then(check, check); else check();
     }
-    H.api = { input: inp, play: play, rest: rest, wake: wake,
+    // Sound comes back after another app borrows it (shared.md, Danny 15:51 + 16:16 AWST 26 Oct; dad-page df8d082 is the model).
+    // iPhone dictation, a call or Siri can interrupt the context while the page stays in view, so no visibilitychange arrives. The
+    // context's statechange and the bridge's pause start a ladder: one tap-rung beat first (B x PHI^-10), then tries at beat x PHI^k,
+    // k = 0 .. 5 (repeating at the top), each calling ctx.resume() and the bridge's play(), until the context runs and the bridge plays.
+    // A refused try shows the one gentle 'tap to bring the sound back' button (and any tap resumes, via tap()). Never undoes her own pause.
+    var L = { t: 0, k: 0, n: 0 };
+    function ok() { return ctx.state === 'running' && (!H.el || H.direct || !H.el.paused); }
+    function later(why) { if (L.t || !busy()) return; L.t = setTimeout(function () { L.t = 0; tryNow(why); }, beat() * MS * Math.pow(PHI, Math.min(L.k, TOP))); }
+    function tryNow(why) {
+      if (!busy() || doc.hidden) { L.k = 0; return; }
+      if (ok()) { L.k = 0; hideBack(); return; }
+      L.n++; try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+      var p = null; try { p = ctx.resume(); } catch (e) {} elPlay();
+      var after = function () { if (ok()) { L.k = 0; hideBack(); session('playing'); return; }
+        tap(function () { try { ctx.resume(); } catch (e) {} elPlay(); session('playing'); hideBack(); }); showBack(); L.k++; later(why); };
+      if (p && p.then) p.then(after, after); else setTimeout(after, 0);
+    }
+    try { ctx.addEventListener('statechange', function () { if (ctx.state !== 'running' && busy()) { L.k = 0; later('state ' + ctx.state); } }); } catch (e) {}
+    if (H.el) H.el.addEventListener('pause', function () { if (busy()) { L.k = 0; later('bridge pause'); } });
+    H.api = { input: inp, play: play, rest: rest, wake: wake, retry: function () { L.k = 0; tryNow('manual'); }, tries: function () { return L.n; },
       info: function () { return { state: ctx.state, owners: Object.keys(H.owners), bridged: !H.direct, el: !!H.el, paused: H.el ? H.el.paused : null }; } };
     hubs.push(H); return H.api;
   }
