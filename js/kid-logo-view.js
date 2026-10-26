@@ -113,7 +113,7 @@
       lifeOn = true;
       var go = function () { if (!cur || !root.RebellaZoomLife) return; try { RebellaZoomLife.start(fig, sound ? AC : null); } catch (e) {} };
       if (root.RebellaZoomLife) return go();
-      Promise.all([root.PhiPumps ? 0 : inj(cfg.dir + 'phi-pumps.js' + V)]).then(function () { return root.RebellaZoomLife ? 0 : inj(cfg.dir + 'rebella-zoom-life.js' + V); }).then(go);
+      Promise.all([root.PhiPumps ? 0 : inj(cfg.dir + 'phi-pumps.js' + V)]).then(function () { return root.PhiAxes ? 0 : inj(cfg.dir + 'phi-axes.js' + V); }).then(function () { return root.RebellaZoomLife ? 0 : inj(cfg.dir + 'rebella-zoom-life.js' + V); }).then(go);   // diagmotion: the two-axes frame loads with the view's life
     } else if (sound) {
       var go2 = function () { if (!cur || eng || !root.LogoSound) return;
         try { eng = LogoSound.create(AC, outOf(AC), { logo: 'kid-logo:' + KL.site, mood: s.mood || 'dreamy', events: { 'star-drop': Math.pow(PHI, -3), shimmer: Math.pow(PHI, -3) } }); } catch (e) { eng = null; } };
