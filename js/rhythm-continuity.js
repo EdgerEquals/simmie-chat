@@ -196,33 +196,50 @@
       if (H.el) try { H.el.pause(); } catch (e) {}
       session('paused');
     }
+    function onTap() { try { ctx.resume(); } catch (e) {} elPlay(); session('playing'); hideBack(); }   // inside a real tap: the context and the helper player
     function wake() {                                                              // back on the page: resume what was playing, never reset
       if (!busy()) return;
       var p = null; try { p = ctx.resume && ctx.resume(); } catch (e) {}
-      elPlay();
-      var check = function () { if (busy() && ctx.state !== 'running') { tap(function () { try { ctx.resume(); } catch (e) {} elPlay(); session('playing'); }); later('wake refused'); } };
+      if (H.el && H.el.paused && !H.direct) { try { inp.connect(ctx.destination); } catch (e) {} H.direct = true; }   // sound goes out directly meanwhile
+      if (H.el && H.el.paused) tap(onTap);                                         // a paused helper restarts only on the next real tap (guard 18:47)
+      var check = function () { if (busy() && ctx.state !== 'running') { tap(onTap); later('wake refused'); } };
       if (p && p.then) p.then(check, check); else check();
     }
     // Sound comes back after another app borrows it (shared.md, Danny 15:51 + 16:16 AWST 26 Oct; dad-page df8d082 is the model).
     // iPhone dictation, a call or Siri can interrupt the context while the page stays in view, so no visibilitychange arrives. The
     // context's statechange and the bridge's pause start a ladder: one tap-rung beat first (B x PHI^-10), then tries at beat x PHI^k,
-    // k = 0 .. 5 (repeating at the top), each calling ctx.resume() and the bridge's play(), until the context runs and the bridge plays.
+    // k = 0 .. 5, each calling ctx.resume() only. Guard 18:47: the ladder stops as soon as sound is confirmed reaching the output (the
+    // context is running AND its clock advanced over one beat), and gives up after the top rung, because endless retries reset the
+    // iOS audio session and take it from the mic. The helper <audio> is never restarted by a timer, only inside the next real tap.
     // A refused try shows the one gentle 'tap to bring the sound back' button (and any tap resumes, via tap()). Never undoes her own pause.
-    var L = { t: 0, k: 0, n: 0 };
-    function ok() { return ctx.state === 'running' && (!H.el || H.direct || !H.el.paused); }
-    function later(why) { if (L.t || !busy()) return; L.t = setTimeout(function () { L.t = 0; tryNow(why); }, beat() * MS * Math.pow(PHI, Math.min(L.k, TOP))); }
-    function tryNow(why) {
-      if (!busy() || doc.hidden) { L.k = 0; return; }
-      if (ok()) { L.k = 0; hideBack(); return; }
-      L.n++; try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
-      var p = null; try { p = ctx.resume(); } catch (e) {} elPlay();
-      var after = function () { if (ok()) { L.k = 0; hideBack(); session('playing'); return; }
-        tap(function () { try { ctx.resume(); } catch (e) {} elPlay(); session('playing'); hideBack(); }); showBack(); L.k++; later(why); };
-      if (p && p.then) p.then(after, after); else setTimeout(after, 0);
+    var L = { t: 0, k: 0, n: 0, live: false };
+    function stopLadder() { clearTimeout(L.t); L.t = 0; L.k = 0; }
+    function heard(cb) {                                                           // output confirmed: running, and the audio clock moves over one beat
+      if (ctx.state !== 'running') { cb(false); return; }
+      var t0 = ctx.currentTime; setTimeout(function () { cb(ctx.state === 'running' && ctx.currentTime > t0); }, beat() * MS);
     }
-    try { ctx.addEventListener('statechange', function () { if (ctx.state !== 'running' && busy()) { L.k = 0; later('state ' + ctx.state); } }); } catch (e) {}
-    if (H.el) H.el.addEventListener('pause', function () { if (busy()) { L.k = 0; later('bridge pause'); } });
-    H.api = { input: inp, play: play, rest: rest, wake: wake, retry: function () { L.k = 0; tryNow('manual'); }, tries: function () { return L.n; },
+    function later(why) {
+      if (L.t || !busy()) return;
+      if (L.k > TOP) { showBack(); tap(onTap); return; }                           // past the top rung: no more timers, the next tap does it
+      L.t = setTimeout(function () { L.t = 0; tryNow(why); }, beat() * MS * Math.pow(PHI, L.k));
+    }
+    function tryNow(why) {
+      if (!busy() || doc.hidden) { stopLadder(); return; }
+      heard(function (yes) {
+        if (yes) { L.live = true; stopLadder(); hideBack(); return; }
+        L.live = false; L.n++; try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+        var p = null; try { p = ctx.resume(); } catch (e) {}
+        var after = function () { heard(function (ok2) {
+          if (ok2) { L.live = true; stopLadder(); hideBack(); session('playing'); return; }
+          tap(onTap); showBack(); L.k++; later(why); }); };
+        if (p && p.then) p.then(after, after); else setTimeout(after, 0);
+      });
+    }
+    try { ctx.addEventListener('statechange', function () {
+      if (ctx.state === 'running') { heard(function (yes) { if (yes) { L.live = true; stopLadder(); hideBack(); } }); return; }
+      L.live = false; if (busy()) { L.k = 0; later('state ' + ctx.state); } }); } catch (e) {}
+    if (H.el) H.el.addEventListener('pause', function () { if (busy()) { tap(onTap); if (ctx.state !== 'running') { L.k = 0; later('bridge pause'); } } });   // the helper waits for a tap
+    H.api = { input: inp, play: play, rest: rest, wake: wake, retry: function () { L.k = 0; tryNow('manual'); }, tries: function () { return L.n; }, ladder: function () { return { pending: !!L.t, rung: L.k, live: L.live }; }, helper: function () { return H.el; },
       info: function () { return { state: ctx.state, owners: Object.keys(H.owners), bridged: !H.direct, el: !!H.el, paused: H.el ? H.el.paused : null }; } };
     hubs.push(H); return H.api;
   }
