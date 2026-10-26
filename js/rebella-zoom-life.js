@@ -229,7 +229,7 @@
         var al=(1-P0.l/P0.m);al=al*al*(rm?Math.sin(Math.PI*P0.l/P0.m):1);
         if(P0.s){x.save();x.translate(P0.x,P0.y);x.rotate(P0.l*3);star4(x,'rgba('+P0.c+','+(al*0.95).toFixed(3)+')',P0.r*2.2);x.restore();}
         else{x.fillStyle='rgba('+P0.c+','+(al*0.85).toFixed(3)+')';x.beginPath();x.arc(P0.x,P0.y,P0.r,0,6.2832);x.fill();}}
-      if(gift){var gt=(now-gift.t)/1000;if(gt<1){var gx=gift.x+(T[0]-gift.x)*Math.min(1,gt*2.6),gy=gift.y+(T[1]-gift.y)*Math.min(1,gt*2.6);
+      if(gift){var gt=Math.max(0,(now-gift.t)/1000);if(gt<1){var gx=gift.x+(T[0]-gift.x)*Math.min(1,gt*2.6),gy=gift.y+(T[1]-gift.y)*Math.min(1,gt*2.6);
           var rr=4+gt*36*sz/1.6,g2=x.createRadialGradient(gx,gy,0,gx,gy,rr);g2.addColorStop(0,'rgba(235,252,255,'+(0.8*(1-gt)).toFixed(3)+')');g2.addColorStop(0.4,'rgba(10,242,255,'+(0.35*(1-gt)).toFixed(3)+')');g2.addColorStop(1,'rgba(10,242,255,0)');
           x.fillStyle=g2;x.beginPath();x.arc(gx,gy,rr,0,6.2832);x.fill();x.save();x.translate(gx,gy);x.rotate(gt*2);star4(x,'rgba(233,253,255,'+(1-gt).toFixed(3)+')',3+5*(1-gt)*sz/1.6);x.restore();}else gift=null;}
       x.globalCompositeOperation='source-over';
