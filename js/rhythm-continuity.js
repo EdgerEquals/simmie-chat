@@ -7,7 +7,7 @@
    the catch-up and the daily restart, so a reload, an iOS tab discard or a trip to another app never resets anything.
 
    Script tag (sync, in <head>, right after js/ratio-pump.js, before anything that registers):
-     <script src=".../js/rhythm-continuity.js?v=1" data-site="rebella|dashboard|chat" data-title="what the lock screen shows"></script>
+     <script src=".../js/rhythm-continuity.js?v=2" data-site="rebella|dashboard|chat" data-title="what the lock screen shows"></script>
    API  RhythmContinuity.register(name, { save(), catchUp(elapsedSec, state, mode), reset() })   mode 'cold' (page load with today's
           snapshot) | 'return' (back from hidden / bfcache) | 'restart' (first load of a new solar day: yesterday's state, carry choices only)
         .phase(name, get, set)  a scalar clock in seconds: set(saved + elapsed)
