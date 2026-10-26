@@ -7,6 +7,7 @@
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%} /* shared.md 17:20: no automatic text inflation on rotate */
 body{margin:0;font-family:var(--f-body);font-size:1.15rem;line-height:1.45;color:var(--ink);
   background:var(--bg) radial-gradient(circle at 10% 0%,#FDE3EA 0,transparent 45%),radial-gradient(circle at 100% 100%,#E6F6F4 0,transparent 45%);
   background-attachment:fixed}
@@ -89,3 +90,9 @@ html #app #app-foot .pr-btn{pointer-events:auto;margin-right:auto;background:non
 html #app #app-foot .pr-btn+span{margin-left:.6rem}
 html #app #app-foot .pp-btn{pointer-events:auto;background:none;border:0;padding:0 .4rem;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer;white-space:nowrap;flex:0 0 auto}
 html.phi-paused *,html.phi-paused *::before,html.phi-paused *::after{animation-play-state:paused!important}   /* Pause motion, page-wide (js/phi-pause.js, WCAG 2.2.2) */
+
+/* smallfit (Kids Club 'every screen fits the smallest phone, in its measured space', 15:53 AWST 26 Oct 2026): Pause motion, Reset and the
+   fact ticker keep their look and their locked line heights, and gain an invisible tap area at least 1rem x PHI tall
+   (1rem = the browser's measured reader anchor; 1.6180339887 = phi; WCAG 2.5.8 floor is 24px). */
+html #app #app-foot .pp-btn,html #app #app-foot .pr-btn,html #app #tty-open{position:relative}
+html #app #app-foot .pp-btn::after,html #app #app-foot .pr-btn::after,html #app #tty-open::after{content:"";position:absolute;left:0;right:0;top:50%;height:max(100%,calc(1rem * 1.6180339887));transform:translateY(-50%)}
