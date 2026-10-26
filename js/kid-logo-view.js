@@ -130,7 +130,7 @@
     build(); ov.hidden = false; ed.hidden = true; ov.classList.remove('is-open', 'kl-editing');
     requestAnimationFrame(function () { ov.classList.add('is-open'); });
     settle(s); startLife();
-    if (o.edit) editor(); else x.focus({ preventScroll: true });
+    fit(); if (o.edit) editor(); else x.focus({ preventScroll: true });
   }
   function close() {
     if (!cur) return; var c = cur; stopLife(); KL.apply();
@@ -337,5 +337,54 @@
   doc.addEventListener('keydown', function (e) { if (!cur) return;
     if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); e.stopPropagation(); close(); } }, true);
   doc.addEventListener('focusin', function (e) { if (cur && !ov.contains(e.target)) x.focus({ preventScroll: true }); });
+  // ---- FIT (Kids Club 'every screen fits the smallest phone, in its measured space', Danny 15:41 AWST 26 Oct 2026) ----
+  // The view sizes itself from the measured box: the visual viewport after the safe areas, below the Edit / X row, and clear of
+  // Rebella's Get me out button (the safety exit never moves; the view keeps out of its way: under it when tall, beside it when wide).
+  // Wider than tall: logo and editor sit side by side. Still too big: the sizes step down the phi ladder (--kl-k = PHI^-n) until
+  // PHI^-3 of the box is left free; text never goes under the reader's 1em and taps never under the cited floor, so past the
+  // floors the view scrolls from the top with the exit band kept clear. Re-fits on resize, rotation, Safari's bars and fonts loading.
+  var fitProbe = null, fitRq = 0, FREE = 1 - Math.pow(PHI, -3), STEPS = 5;               // phi: PHI^-3 left free; unit: PHI^0..PHI^-4 (5 rungs, Fibonacci)
+  function insets() {
+    if (!fitProbe) { fitProbe = el('i'); fitProbe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)'; doc.body.appendChild(fitProbe); }
+    var c = getComputedStyle(fitProbe); return { t: parseFloat(c.paddingTop) || 0, r: parseFloat(c.paddingRight) || 0, b: parseFloat(c.paddingBottom) || 0, l: parseFloat(c.paddingLeft) || 0 };
+  }
+  function px(v) { return v + 'px'; }                                                     // unit: CSS pixels
+  function fit() {
+    fitRq = 0; if (!cur || ov.hidden) return;
+    var v = root.visualViewport, s = insets(), st = ov.style;
+    var x0 = (v ? v.offsetLeft : 0) + s.l, y0 = (v ? v.offsetTop : 0) + s.t;
+    var W = (v ? v.width : root.innerWidth) - s.l - s.r, H = (v ? v.height : root.innerHeight) - s.t - s.b;   // anchor: measured viewport after the safe areas
+    var g = (bar.getBoundingClientRect().height || 1) * Math.pow(PHI, -3);              // phi: one gap = the button row's height x PHI^-3
+    var top = bar.getBoundingClientRect().bottom - y0 + g, bot = g, rgt = g, lft = g;
+    var wide = W > H, esc = doc.querySelector('.escape[data-escape], a.escape');
+    if (esc && esc.getClientRects().length) {
+      var e = esc.getBoundingClientRect();
+      if (wide && e.left > x0 + W / 2) rgt = Math.max(rgt, x0 + W - e.left + g);         // wide: keep beside it
+      else bot = Math.max(bot, y0 + H - e.top + g);                                       // tall: keep above it
+    }
+    var bw = Math.max(1, W - lft - rgt), bh = Math.max(1, H - top - bot);
+    st.setProperty('--kl-pt', px(top + s.t)); st.setProperty('--kl-pb', px(bot + s.b)); st.setProperty('--kl-pr', px(rgt + s.r)); st.setProperty('--kl-pl', px(lft + s.l));
+    st.setProperty('--kl-bw', px(bw)); st.setProperty('--kl-bh', px(bh));
+    ov.classList.toggle('kl-wide', wide); if (ov.classList.contains('kl-scroll')) ov.classList.remove('kl-scroll');
+    var parts = [fig].concat(ed.hidden ? [] : [ed]), n = 0;
+    function fits() {
+      var a = parts.map(function (p) { return { width: p.offsetWidth, height: p.offsetHeight }; });   // unit: layout boxes (the open glide's scale is not counted)
+      var w = wide ? a.reduce(function (t, r) { return t + r.width; }, 0) : Math.max.apply(null, a.map(function (r) { return r.width; }));
+      var h = wide ? Math.max.apply(null, a.map(function (r) { return r.height; })) : a.reduce(function (t, r) { return t + r.height; }, 0);
+      return h <= bh * FREE && w <= bw;
+    }
+    ov.classList.add('kl-fitting');                                                       // measure the settled sizes, not a glide in progress
+    for (n = 0; n < STEPS; n++) { st.setProperty('--kl-k', String(Math.pow(PHI, -n))); if (fits()) break; }
+    if (n >= STEPS) { st.setProperty('--kl-k', String(Math.pow(PHI, 1 - STEPS))); ov.classList.add('kl-scroll'); }   // past the floors: scroll, top first
+    ov.setAttribute('data-fit', String(Math.min(n, STEPS - 1)));
+    void ov.offsetWidth; ov.classList.remove('kl-fitting');
+  }
+  function refit() { if (cur && !fitRq) fitRq = requestAnimationFrame(fit); }
+  root.addEventListener('resize', refit); root.addEventListener('orientationchange', refit);
+  if (root.visualViewport) { visualViewport.addEventListener('resize', refit); visualViewport.addEventListener('scroll', refit); }
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(refit);
+  if (root.MutationObserver) new MutationObserver(refit).observe(ed, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+  new MutationObserver(refit).observe(ov, { attributes: true, attributeFilter: ['hidden'] });
+
   root.KidLogoView = { open: open, close: close, isOpen: function () { return !!cur; }, editing: function () { return ov.classList.contains('kl-editing'); } };
 })(window);
