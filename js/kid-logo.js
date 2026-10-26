@@ -21,6 +21,10 @@
   var KEY = 'kidlogo.v1.' + SITE, PHI = (1 + Math.sqrt(5)) / 2;                       // phi: the golden ratio, the only scaling factor
   var V = (/[?&]v=([^&#]+)/.exec(SRC) || [])[1] || '';
   var cfg = { site: SITE, base: BASE, dir: DIR, v: V, tone: BASE + (me.getAttribute('data-tone') || 'vendor/tone/Tone.js') };
+  // name check on logo words: a SEPARATE switch, OFF unless the tag says data-name-check-logo="on" (Danny 13:27 AWST 26 Oct 2026: the logo
+  // editor has no name filter, only the gentle heart note; the 14:51 "name check on every word" standard would cover logo words, so this
+  // waits for Danny to choose). data-name-list = where the salted hash list lives (relative to the page).
+  cfg.nameLogo = me.getAttribute('data-name-check-logo') === 'on'; cfg.nameList = me.getAttribute('data-name-list') || '';
   root.KidLogoCfg = cfg;
 
   // the colour of each spot's original logo, read once from the page before anything is applied (the safe-side reference)
