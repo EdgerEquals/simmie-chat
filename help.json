@@ -1,0 +1,128 @@
+{
+ "v": 1,
+ "entries": {
+  "_miss": {
+   "title": "Drop me on something",
+   "text": "Drag me onto anything you're curious about, like a button, a light or a message."
+  },
+  "_tuning": {
+   "title": "Still being tuned",
+   "text": "This one is still being tuned. Its proper help words are on the way. You can still try it, or ask Simmie what it does."
+  },
+  "help-orb": {
+   "title": "Your helper",
+   "text": "That's me. Drag me onto anything and I'll explain it in plain words. Or tap me, then tap the thing you're curious about. Tap 'Change how I look' in any help box to make me an owl, a car, a moon or any emoji you like."
+  },
+  "pw": {
+   "title": "Your password",
+   "text": "Type your chat password here to open your private chat with Simmie. Keep it secret, and I never look at what you type."
+  },
+  "pw-toggle": {
+   "title": "Show or hide",
+   "text": "Shows the password you typed so you can check it, then hides it again. Only use it when nobody is looking over your shoulder."
+  },
+  "login": {
+   "title": "Open chat",
+   "text": "Opens your chat once the password is typed in. If it says no, check for a typo and try again."
+  },
+  "kid-logo": {
+   "title": "Your logo",
+   "text": "Tap it to see it big, with its own music and little birds. Tap it again, or tap Edit, to change it. Changes go straight onto your page.",
+   "try": "Tap it and listen."
+  },
+  "lock": {
+   "title": "Lock",
+   "text": "Closes your chat and asks for the password again. Use it when you walk away from the screen."
+  },
+  "ask-dad": {
+   "title": "Ask Dad",
+   "text": "Starts a message to Dad in the message box. His phone buzzes so he knows you want him. Nobody else sees it."
+  },
+  "log": {
+   "title": "Your messages",
+   "text": "Your chat with Simmie. Only you and Simmie can read it, and it's locked with your password."
+  },
+  "tty": {
+   "title": "Simmie's terminal",
+   "text": "Fun facts scroll past here. Tap it to type a message to Simmie, then press send."
+  },
+  "lights": {
+   "title": "Status lights",
+   "text": "SENT lights up when your message went, FRESH when the chat is up to date, LINK when the page can reach Simmie, and DAD when Dad has something for you."
+  },
+  "phi-reset": {
+   "title": "Reset what this page learned",
+   "text": "The page learns your pace on this device only, like how quickly you tap. This wipes it and reloads the page. Nothing was ever sent anywhere."
+  },
+  "phi-pause": {
+   "title": "Pause motion",
+   "text": "Stops things moving all over the page. Press it again to start them. Your device remembers your choice."
+  },
+  "weather": {
+   "title": "The weather",
+   "text": "The weather outside in Perth right now, as a little picture."
+  },
+  "typing": {
+   "title": "Waiting for Simmie",
+   "text": "Simmie is writing back. It can take a little while, so you can keep doing other things."
+  }
+ },
+ "targets": [
+  [
+   "#pw",
+   "pw"
+  ],
+  [
+   "#pw-toggle",
+   "pw-toggle"
+  ],
+  [
+   "#login-btn",
+   "login"
+  ],
+  [
+   "#dash-head .tb-logo, #dash-head .tb-logo-svg",
+   "kid-logo"
+  ],
+  [
+   "#lock-btn",
+   "lock"
+  ],
+  [
+   "#ask-dad",
+   "ask-dad"
+  ],
+  [
+   "#log",
+   "log"
+  ],
+  [
+   "#tty, #tty-open",
+   "tty"
+  ],
+  [
+   ".wx-strip, #ft-row",
+   "lights"
+  ],
+  [
+   "[data-phi-reset]",
+   "phi-reset"
+  ],
+  [
+   "[data-phi-pause]",
+   "phi-pause"
+  ],
+  [
+   "#wx-chip",
+   "weather"
+  ],
+  [
+   "#typing",
+   "typing"
+  ],
+  [
+   "#help-orb",
+   "help-orb"
+  ]
+ ]
+}
