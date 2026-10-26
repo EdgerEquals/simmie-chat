@@ -96,6 +96,7 @@
   var AC = null, loading = null;
   function audio() {                                                                     // only ever called inside a tap
     if (read().sound === false) return AC;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}   // Safari 16.4+: the silent switch doesn't mute the logo
     try { var C = root.AudioContext || root.webkitAudioContext; if (!C) return null; if (!AC) AC = new C(); if (AC.state !== 'running') AC.resume(); } catch (e) { AC = null; }
     try { if (AC && root.RhythmContinuity) RhythmContinuity.media(AC).play('logo', { pause: function () { root.KidLogoView && root.KidLogoView.close(); } }); } catch (e) {}   // keep alive: the media bridge starts inside this tap (iOS)
     return AC;
