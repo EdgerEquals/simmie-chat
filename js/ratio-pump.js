@@ -148,7 +148,7 @@
   if (doc && SCRIPT && SCRIPT.getAttribute("data-dials") !== "off" && SCRIPT.src) {
     var base = SCRIPT.src.replace(/[^\/]*$/, ""), ric2 = root.requestIdleCallback || function (f) { return setTimeout(f, bms(-6)); };   // phi: B x PHI^-6
     var add = function (src, then) { var s = doc.createElement("script"); s.src = base + src; s.async = true; if (then) s.onload = then; doc.head.appendChild(s); };
-    var rest2 = function () { if (root.SeasonPumps) add("phi-dials.js?v=3"); else add("season-pumps.js?v=2", function () { add("phi-dials.js?v=3"); }); };   // Season pumps standard: sky clocks for Dial 3 (already in <head> with B), then the dials (anchor: ?v= are file version tags, not values)
+    var rest2 = function () { if (root.SeasonPumps) add("phi-dials.js?v=4"); else add("season-pumps.js?v=2", function () { add("phi-dials.js?v=4"); }); };   // Season pumps standard: sky clocks for Dial 3 (already in <head> with B), then the dials (anchor: ?v= are file version tags, not values)
     var dials = function () { ric2(function () { if (root.PhiAdapt) rest2(); else add("phi-adapt.js?v=3", rest2); }, { timeout: bms(-2) }); };   // phi: B x PHI^-2
     if (doc.readyState === "complete") dials(); else root.addEventListener("load", dials);
   }
