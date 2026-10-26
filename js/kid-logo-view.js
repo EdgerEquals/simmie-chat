@@ -126,11 +126,14 @@
   // within PHI^-3-ish of the radio level; then the usual PHI^-2 s release. Reopening or editing stops a held tail at once.
   function holdMs() { var t = NaN; try { t = root.RhythmContinuity ? RhythmContinuity.loud.glideTau() * Math.pow(PHI, 3) * 1e3 : NaN; } catch (e) {} return t > 0 && isFinite(t) ? t : (ms(-2) || 0); }   // phi: PHI^3 glide constants; unit: ms per s
   function zlStop() { try { root.RebellaZoomLife && RebellaZoomLife.stop(); } catch (e) {} }
-  function endTail() { if (!tailT) return; clearTimeout(tailT); tailT = 0; zlStop(); if (tail) { try { tail.stop(Math.pow(PHI, -2)); } catch (e) {} tail = null; } }
+  function endTail() { if (!tailT) return; if (tailT > 0) clearTimeout(tailT); tailT = 0; zlStop(); if (tail) { try { tail.stop(Math.pow(PHI, -2)); } catch (e) {} tail = null; } }
   function stopLife(glide) {
     lifeOn = false; endTail();
     if (!glide) { zlStop(); if (eng) { try { eng.stop(Math.pow(PHI, -2)); } catch (e) {} eng = null; } return 0; }
-    var h = holdMs(); tail = eng; eng = null; tailT = setTimeout(endTail, h); return h;   // the life's sounds and the logo engine both carry on under the gliding trim
+    var h = holdMs(), t0 = AC ? AC.currentTime : 0; tail = eng; eng = null;
+    var due = function () { tailT = 0; var left = AC && AC.state === 'running' ? h - (AC.currentTime - t0) * 1e3 : 0;   // unit: ms per s; the glide runs on the audio clock, so the tail ends by it
+      if (left > 0) tailT = setTimeout(due, left); else { tailT = -1; endTail(); } };
+    tailT = setTimeout(due, h); return h;   // the life's sounds and the logo engine both carry on under the gliding trim
   }
 
   // ---- open / close ----
