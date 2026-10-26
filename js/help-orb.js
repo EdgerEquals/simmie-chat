@@ -101,6 +101,12 @@
     if (getComputedStyle(el).position === 'static') el.classList.add('help-grow-rel');
     el.classList.remove('help-settle'); void el.offsetWidth; el.classList.add('help-grow'); st.grown = el;
   }
+  // smallfit (15:53 AWST 26 Oct 2026): the rect a grown control settles at (its scale and its PHI^-3 step toward the centre, from grow())
+  function grownRect(el) {
+    var r = el.getBoundingClientRect(), k = parseFloat(el.style.getPropertyValue('--hg-s')) || 1, dx = parseFloat(el.style.getPropertyValue('--hg-x')) || 0, dy = parseFloat(el.style.getPropertyValue('--hg-y')) || 0;
+    var w = r.width * k, h = r.height * k, cx = r.left + r.width / 2 + dx, cy = r.top + r.height / 2 + dy;
+    return { left: cx - w / 2, right: cx + w / 2, top: cy - h / 2, bottom: cy + h / 2, width: w, height: h };
+  }
   function settle() {
     var el = st && st.grown; if (!el) return; st.grown = null;
     el.classList.add('help-settle'); el.classList.remove('help-grow');
@@ -210,11 +216,26 @@
     var c = document.createElement('button'); c.type = 'button'; c.className = 'hp-close'; c.textContent = 'Close'; c.setAttribute('aria-label', 'Close help'); c.addEventListener('click', function () { close(); });
     p.appendChild(c); grow(el); document.body.appendChild(p); st.pop = p; st.returnTo = st.orb;
     // anchor: below the element if it fits, else above, kept inside the window between the bars
-    var r = el.getBoundingClientRect(), ph = p.offsetHeight, pw = p.offsetWidth;
+    var r = grownRect(el), ph = p.offsetHeight, pw = p.offsetWidth;   // smallfit: where the control will be once it has grown, not where it starts
     var hb = 0, fb = innerHeight; try { hb = document.getElementById('app-head').getBoundingClientRect().bottom; fb = document.getElementById('app-foot').getBoundingClientRect().top; } catch (x) {}
     if (hb > innerHeight * 0.6) hb = 0; if (fb < innerHeight * 0.4) fb = innerHeight;
     var top = r.bottom + 8; if (top + ph > fb - 4) top = r.top - ph - 8; top = Math.max(4, Math.min(innerHeight - ph - 4, top));
-    p.style.top = top + 'px'; p.style.left = Math.max(12, Math.min(innerWidth - pw - 12, r.left)) + 'px';
+    var left = Math.max(12, Math.min(innerWidth - pw - 12, r.left));
+    // smallfit (15:53 AWST 26 Oct 2026): if it fits neither below nor above its control (short landscape phones), it sits beside it,
+    // narrowed to the wider side; if no side is at least PHI^-1 of its width, it takes the taller of above / below and scrolls inside.
+    // Gap = the control's own height x PHI^-3; heights are capped to the measured space between the bars.
+    if (top < r.bottom && top + ph > r.top) {
+      var g = r.height * Math.pow(IP, 3), sr = innerWidth - r.right - g * 2, sl = r.left - g * 2, sw = Math.max(sr, sl), band = fb - hb - g * 2;
+      p.style.overflowY = 'auto'; p.style.maxHeight = band + 'px';
+      if (sw >= pw * IP) {
+        p.style.width = Math.min(pw, sw) + 'px'; pw = p.offsetWidth; ph = p.offsetHeight;
+        left = sr >= sl ? r.right + g : r.left - pw - g; top = Math.max(hb + g, Math.min(fb - ph - g, r.top + r.height / 2 - ph / 2));
+      } else {
+        var below = fb - r.bottom - g * 2, above = r.top - hb - g * 2;
+        if (below >= above) { p.style.maxHeight = below + 'px'; top = r.bottom + g; } else { p.style.maxHeight = above + 'px'; ph = p.offsetHeight; top = r.top - ph - g; }
+      }
+    }
+    p.style.top = top + 'px'; p.style.left = left + 'px';
     setTimeout(function () { document.addEventListener('pointerdown', outside, true); }, 0);
     document.addEventListener('keydown', popKeys, true);
     try { c.focus({ preventScroll: true }); } catch (x) { c.focus(); }
@@ -248,6 +269,22 @@
       var p = f.getBoundingClientRect();
       if (left < p.right && right > p.left && top < p.bottom && top + h > p.top) { top = Math.round(p.bottom + 12); o.style.top = top + 'px'; }
     });
+    clear(o);
+  }
+  // smallfit (Kids Club 'every screen fits the smallest phone', 15:53 AWST 26 Oct 2026): at home the orb never sits on another control.
+  // It drops just below a header / section-bar control it would cover, and steps left of the Get me out button (the safety exit never
+  // moves, so the orb does). Gap = the orb's own height x PHI^-3; at most a Fibonacci 3 passes.
+  function clear(o) {
+    o.style.right = '';
+    var sel = '.escape, #app-head button, #app-head a[href], .mainnav button, .mainnav a[href], #dash-head button, #search-btn';
+    for (var pass = 0; pass < 3; pass++) {                                               // unit: a Fibonacci 3 passes (a count)
+      var r = o.getBoundingClientRect(), g = r.height * Math.pow(IP, 3), hit = null;
+      document.querySelectorAll(sel).forEach(function (c) { if (hit || c === o || !visible(c)) return; var q = c.getBoundingClientRect();
+        if (r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top) hit = { c: c, q: q }; });
+      if (!hit) return;
+      if (hit.c.classList.contains('escape') || r.bottom + g + (hit.q.bottom - r.top) > innerHeight) o.style.right = Math.round(innerWidth - hit.q.left + g) + 'px';
+      else o.style.top = Math.round(hit.q.bottom + g) + 'px';
+    }
   }
   function pick(on) { st.picking = on; st.orb.setAttribute('aria-pressed', on ? 'true' : 'false'); seek(on); if (!on) st.kb = false; }
 
