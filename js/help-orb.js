@@ -278,7 +278,8 @@
     o.style.right = '';
     var sel = '.escape, #app-head button, #app-head a[href], .mainnav button, .mainnav a[href], #dash-head button, #search-btn';
     for (var pass = 0; pass < 3; pass++) {                                               // unit: a Fibonacci 3 passes (a count)
-      var r = o.getBoundingClientRect(), g = r.height * Math.pow(IP, 3), hit = null;
+      var b0 = o.getBoundingClientRect(), w = o.offsetWidth, h = o.offsetHeight, t = parseFloat(o.style.top) || b0.top, rr = o.style.right ? innerWidth - parseFloat(o.style.right) : b0.right;
+      var r = { top: t, bottom: t + h, left: rr - w, right: rr, height: h }, g = h * Math.pow(IP, 3), hit = null;   // where it is going, not where its top glide is now
       document.querySelectorAll(sel).forEach(function (c) { if (hit || c === o || !visible(c)) return; var q = c.getBoundingClientRect();
         if (r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top) hit = { c: c, q: q }; });
       if (!hit) return;
