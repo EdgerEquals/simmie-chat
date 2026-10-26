@@ -1,7 +1,7 @@
 /* Simmie chat: soft pastels, loosely borrowed from Rebella. */
 :root{
   --blush:#F8CFDB; --butter:#FBE7B0; --mint:#C8EBD5; --aqua:#B5E3E0; --lavender:#DCD0F2;
-  --bg:#FFF8F4; --ink:#3A2B35; --heading:#5B3A50; --accent:#B4436C; --muted:#6E5A66; --line:#EBCFC2;
+  --bg:#FFF8F4; --ink:#3A2B35; --heading:#5B3A50; --accent:#B4436C; --muted:#4F4049; --line:#EBCFC2;
   --me:#F8CFDB; --them:#FFFFFF;
   --f-body:"Alegreya Sans",Helvetica,Arial,sans-serif; --f-hand:"Gochi Hand",cursive; --f-script:"Kaushan Script",cursive;
 }

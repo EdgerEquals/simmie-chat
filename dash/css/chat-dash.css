@@ -66,3 +66,20 @@ html #app .topbar .tb-logo.tb-logo-svg,#screen-chat .tb-logo-svg{height:40px;wid
    !important on caret-color only, to beat the inline caret-color on #tty-in. */
 html #app #screen-chat .tty-form:not([data-mode="key"]) .tty-in{color:#26693F;caret-color:#26693F!important}
 html #app #screen-chat .tty-form:not([data-mode="key"]) .tty-in::placeholder{color:#26693F}
+
+/* Rule phi contrast (Danny, build C, 26 Oct 2026): every text colour at least PHI^4 = 6.85:1 on what it sits on. On the chat page's
+   LIGHT simmie> bar the amber prompt was 1.7:1 and the grey code 5.2:1, so here they take a deep amber-brown and plum-grey (the
+   dashboard's dark tty keeps its bright amber). Dad's name on sand 6.4 -> 7.0:1; muted grey (times, day lines) via --muted in chat.css. */
+html #app #wx-foot .tty-p,html #app #wx-foot .tk-n{color:#68471C}
+html #app #wx-foot .tk-p{color:#4F4049}
+html #app .msg.dad .sender{color:#0E5667}
+html #app .msg .meta,html #app .day{color:#4F4049}
+/* Rule phi tap target: --tap = S x PHI^-4, never below WCAG 2.5.5's 44 px, touch screens only. The shared header (#dash-head), the
+   footer line (#app-foot) and the simmie> bar (#wx-foot) keep their silhouette and the password screen is untouched. */
+:root{--tap:max(44px, calc(min(100vw, 100vh) / (1.6180339887 * 1.6180339887 * 1.6180339887 * 1.6180339887)))}   /* phi: PHI^-4; cite: WCAG 2.5.5 */
+@media (any-pointer:coarse){
+  html #app #log button,html #app #log a.btn{min-height:var(--tap);min-width:var(--tap)}
+}
+@media (max-width:301.9px),(max-height:301.9px){   /* S < 302 px: the light reduced view (decorative loops off; no content hidden) */
+  *{animation-iteration-count:1!important}
+}

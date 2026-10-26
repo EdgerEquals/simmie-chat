@@ -23,7 +23,7 @@
    The base is Dial 3's live rung (Danny's strength, a phi rung between floor and ceiling); it is the output's PEAK, so the product
    is read as a share of its own peak: out = base x PRODUCT S ^ (w x (cos - 1) / 2). Nothing ever exceeds the rung.
    After the formula the WCAG safe-side floor applies (wcagFloor): the tint steps down by PHI until the page's own text/background pair
-   keeps the contrast it had, up to the WCAG 2.2 AA 4.5:1 line (SC 1.4.3).
+   keeps the contrast it had, up to the Rule phi line PHI^4 = 6.85:1 (Danny, build C, 26 Oct 2026; above WCAG 2.2 AA 4.5:1, SC 1.4.3).
 
    OUTPUTS (Dial 3 scope only: palette on background layers)
      warmth  timescale = the year (it is the season pump). Sepia on the background layer.
@@ -151,7 +151,8 @@
   // CSS Filter Effects 1 matrices for sepia() and saturate(); WCAG 2.2 relative luminance and contrast ratio.
   var SEPIA = [[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]]; // cite: W3C Filter Effects Level 1, sepia() matrix at amount 1
   var LUMA = [0.2126, 0.7152, 0.0722];                                             // cite: WCAG 2.2 relative luminance (sRGB / Rec. 709)
-  var SRGB = [0.04045, 12.92, 0.055, 1.055, 2.4], FLARE = 0.05, AA = 4.5;          // cite: WCAG 2.2 / IEC 61966-2-1 sRGB transfer; contrast-ratio flare term; SC 1.4.3 AA
+  var SRGB = [0.04045, 12.92, 0.055, 1.055, 2.4], FLARE = 0.05;                   // cite: WCAG 2.2 / IEC 61966-2-1 sRGB transfer; contrast-ratio flare term
+  var AA = Math.pow(PHI, 4);                                                       // Rule phi contrast line PHI^4 = 6.85:1 (was WCAG AA 4.5)
   var CH = 255;                                                                    // unit: 8-bit colour channel full scale
   function mat(m, c) { return [0, 1, 2].map(function (i) { return m[i][0] * c[0] + m[i][1] * c[1] + m[i][2] * c[2]; }); }
   function sepiaM(a) {                                                             // Filter Effects: identity blended toward SEPIA by a
@@ -166,7 +167,7 @@
   }
   function contrast(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + FLARE) / (Math.min(x, y) + FLARE); }
   function tinted(bg, warm, calm) { return mat(satM(1 - calm), mat(sepiaM(warm), bg)); }
-  // steps warm and calm down together by PHI until the pair keeps min(its own contrast, AA); closed after the last rung
+  // steps warm and calm down together by PHI until the pair keeps min(its own contrast, PHI^4); closed after the last rung
   function wcagFloor(bg, fg, warm, calm, rungs) {
     if (!bg || !fg) return { warm: warm, calm: calm, k: 0 };
     var need = Math.min(contrast(bg, fg), AA);
