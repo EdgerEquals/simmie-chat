@@ -61,7 +61,7 @@ with sync_playwright() as pw:
             ok(pg.evaluate("__plays.filter(t=>t==='timer').length") == 0 and pg.evaluate('__h.info().paused'), f'{name}: no timer restarts a paused helper player', pg.evaluate('JSON.stringify(__plays)'))
             ok(pg.evaluate("__c.state") == 'running', f'{name}: sound still reaches the output while the helper waits (direct path)')
             pg.touchscreen.tap(20, 300); pg.wait_for_timeout(800)
-            ok(pg.evaluate("__plays.some(t=>t!=='timer')") and pg.evaluate('!__h.info().paused'), f'{name}: the next real tap restarts the helper', pg.evaluate('JSON.stringify(__plays)'))
+            ok(pg.evaluate("__plays.some(t=>t!=='timer')") and pg.evaluate(f"!__h.info().paused || !__h.info().owners.includes('{OWNER}')"), f'{name}: the next real tap restarts the helper (unless that tap ended the sound itself)', pg.evaluate('JSON.stringify([__plays,__h.info()])'))
         ok(not errs, f'{name}: no page errors', errs[:2]); ctx.close()
         # 3
         ctx, pg = page(); pg.evaluate(HUB); bt = beat(pg)
