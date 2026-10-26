@@ -151,7 +151,7 @@
   function showBack() {
     if (sbBtn || gated(null) || !doc.body) return;
     var b = doc.createElement('button'); b.type = 'button'; b.className = 'sound-back'; b.textContent = 'tap to bring the sound back';
-    b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top, 0px) + 1rem * ' + PHI + ');z-index:60;font:inherit;font-size:1rem;' +
+    b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top, 0px) + 1rem * ' + PHI + ');z-index:60;font:inherit;font-size:1rem;' +   // unit: 50% = centring (half the width); anchor: z 60 = dad-page's sound-back layer (df8d082)
       'color:CanvasText;background:Canvas;border:1px solid currentColor;border-radius:1rem;padding:calc(1rem / ' + PHI + ') 1rem;min-height:44px;' +   // unit: 44 px minimum tap target (Apple HIG, cited)
       'cursor:pointer;white-space:nowrap;max-width:calc(100vw - 2rem);overflow:hidden;text-overflow:ellipsis';
     b.addEventListener('click', function () { hideBack(); });                       // the tap itself resumes through tap() (touchend / click)
