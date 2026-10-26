@@ -374,9 +374,16 @@
       var h = wide ? Math.max.apply(null, a.map(function (r) { return r.height; })) : a.reduce(function (t, r) { return t + r.height; }, 0);
       return h <= bh * FREE && w <= bw;
     }
+    function first() {                                                                    // the first screen: the logo plus the editor's whole first row (shared.md 17:20)
+      if (ed.hidden) return fits();
+      var b = [].filter.call(ed.querySelectorAll('button'), function (x) { return x.getClientRects().length; })[0]; if (!b) return fits();
+      var er = ed.getBoundingClientRect(), rh = (b.getBoundingClientRect().bottom - er.top) * ed.offsetHeight / (er.height || 1), fh = fig.offsetHeight;   // row bottom inside the editor, in layout px (the open glide's scale divided out)
+      return (wide ? Math.max(fh, rh) : fh + rh) <= bh * FREE && (wide ? fig.offsetWidth + ed.offsetWidth : Math.max(fig.offsetWidth, ed.offsetWidth)) <= bw;
+    }
     ov.classList.add('kl-fitting');                                                       // measure the settled sizes, not a glide in progress
-    for (n = 0; n < STEPS; n++) { st.setProperty('--kl-k', String(Math.pow(PHI, -n / 2))); if (fits()) break; }   // phi: step down by PHI^-1/2
-    if (n >= STEPS) { st.setProperty('--kl-k', String(Math.pow(PHI, (1 - STEPS) / 2))); ov.classList.add('kl-scroll'); }   // past the floors: scroll, top first
+    var lone = -1;
+    for (n = 0; n < STEPS; n++) { st.setProperty('--kl-k', String(Math.pow(PHI, -n / 2))); if (fits()) break; if (lone < 0 && first()) lone = n; }   // phi: step down by PHI^-1/2
+    if (n >= STEPS) { n = lone < 0 ? STEPS - 1 : lone; st.setProperty('--kl-k', String(Math.pow(PHI, -n / 2))); ov.classList.add('kl-scroll'); }   // never fits whole (reader text and taps hold their floors): the largest step that still shows the logo and first row, the rest scrolls
     ov.setAttribute('data-fit', String(Math.min(n, STEPS - 1)));
     void ov.offsetWidth; ov.classList.remove('kl-fitting');
   }
