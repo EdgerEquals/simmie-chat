@@ -283,10 +283,24 @@
     inp.type = 'text'; inp.maxLength = MAXLEN; inp.autocomplete = 'off'; inp.id = 'kl-type-in'; lab.htmlFor = inp.id; msg.setAttribute('role', 'alert');
     f.appendChild(lab); f.appendChild(inp); ed.appendChild(f); ed.appendChild(heart()); ed.appendChild(msg);
     var use = btn('kl-btn kl-big', 'Use these words');
-    function go(e) { if (e) e.preventDefault(); var n = inp.value.replace(/\s+/g, ' ').trim(), why = check(n);
+    function go(e) { e = e || {}; if (e.preventDefault) e.preventDefault(); var n = inp.value.replace(/\s+/g, ' ').trim(), why = check(n);
       if (why === 'empty') return; if (why) { msg.textContent = why; return; }
+      if (cfg.nameLogo && cfg.nameList && !e.nameChecked) return nameStep(n);
       var H = (svg && (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number)[3]) || PHI, fs = H * Math.pow(PHI, -1);   // phi: letters PHI^-1 of her logo's height
       useArt({ kind: 'type', text: n, fs: fs, vb: '0 0 ' + (fs * n.length * Math.pow(PHI, -1) + fs).toFixed(1) + ' ' + H.toFixed(1) }); }   // phi: a cursive letter is about PHI^-1 em wide
+    // name check on every word (only when the separate logo switch is on): a kind line with Surprise me or Leave it out, never a no
+    function nameStep(n) {
+      var NC = function () { return root.NameCheck; };
+      (NC() ? Promise.resolve() : inj(cfg.base + 'js/name-check.js' + V)).then(function () { return NC() && (NC().ready() || NC().load(new URL(cfg.nameList, location.href).href)); })
+        .then(function () { return NC() ? NC().check(n) : { hit: false }; }).then(function (r) {
+          if (!r.hit) return go({ preventDefault: function () {}, nameChecked: true });
+          msg.textContent = ''; msg.appendChild(el('span', 'kl-heart', NC().LINE));
+          var sb = btn('kl-btn', 'Surprise me'), lb = btn('kl-btn', 'Leave the name out');
+          sb.addEventListener('click', function () { inp.value = NC().surprise(); msg.textContent = ''; });
+          lb.addEventListener('click', function () { NC().omit(n).then(function (t) { inp.value = t; msg.textContent = ''; if (t) go({ preventDefault: function () {}, nameChecked: true }); }); });
+          msg.appendChild(sb); msg.appendChild(lb);
+        });
+    }
     f.addEventListener('submit', go); use.addEventListener('click', go);
     foot([backBtn(), use]); inp.focus({ preventScroll: true });
   }
