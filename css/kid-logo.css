@@ -24,7 +24,7 @@
 .kl .dmz-art{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform var(--kl-t) ease}
 .kl .dmz-art svg{display:block;width:100%;height:100%;overflow:visible;transform:rotate(-5.5deg);transition:color var(--kl-t) ease}
 .kl.kl-editing{justify-content:flex-start}
-.kl.kl-editing .dmz-fig{width:min(76vw,560px,68vh);height:calc(min(76vw,560px,68vh) * .635);cursor:default}
+.kl.kl-editing .dmz-fig{width:calc(min(88vw,900px,110vh) * .618);height:calc(min(88vw,900px,110vh) * .618 * .635);cursor:default} /* phi: one step down while editing so the controls clear the fixed Get me out button */
 /* editor: the questionnaire's shape (count line, question, two tiles, Back / Roll / Skip) in the view's own colours */
 .kl .kl-ed{width:min(92vw,560px);box-sizing:border-box;padding:calc(var(--kl-tap) * .382);border:1px solid #5A1F38;border-radius:calc(var(--kl-tap) * .382);background:#120810;color:#F8CFDB}
 .kl .kl-ed[hidden]{display:none}
