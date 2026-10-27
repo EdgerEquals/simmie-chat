@@ -1,3 +1,4 @@
+/* Less pink (2026-10-27, Bonnie asked, Danny approved): pink-family colours here are derived from the previous palette by lesspink.py: OKLCH lightness and hue kept, chroma × φ⁻³ on light surfaces, × φ⁻¹ on accents and text; any text colour that then fell under φ⁴ : 1 is darkened along its own hue just enough to reach it. */
 /* The simmie> bar (live chat footer), Danny 12:23 + 12:24 AWST 24 Oct 2026 (t596u/t597u). Chat palette only.
    - Header: the fun-fact ticker moved out; the weather chip keeps its place on the right; row height unchanged.
    - Bar: ticker scrolls in the gap beside "simmie>" (speed in px/s from dash/js/hud.js via the ratio pump);
@@ -12,25 +13,25 @@
 #tty-open .wx-ticker[hidden],#tty-open .tty-pend[hidden],#tty-open .tty-reply[hidden]{display:none}
 #tty-open .wx-tick-track{white-space:nowrap}
 #tty-open .tk-k{color:#2F7F86}
-#tty-open .tk-n{color:#B4436C}
-#tty-open .tk-s{color:#5B3A50}
-#tty-open .tk-p{color:#9C7E8E}
+#tty-open .tk-n{color:#9D596E}
+#tty-open .tk-s{color:#543F4C}
+#tty-open .tk-p{color:#95828C}
 
-#tty-open .tty-pend{flex:1 1 auto;min-width:0;font:700 11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:1.5px;color:#5B3A50;
+#tty-open .tty-pend{flex:1 1 auto;min-width:0;font:700 11px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:1.5px;color:#543F4C;
   animation:bar-pend var(--phi-tty-hold,3.33s) ease-in-out var(--phi-tty-hold-d,0s) infinite}
 @keyframes bar-pend{0%,40%{opacity:1}55%,90%{opacity:.12}100%{opacity:1}}
 
-#tty-open .tty-reply{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px;color:#B4436C}
-#tty-open .tty-heart{flex:none;display:inline-block;font-size:12px;line-height:1;color:#B4436C;transform-origin:50% 60%;
+#tty-open .tty-reply{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px;color:#9D596E}
+#tty-open .tty-heart{flex:none;display:inline-block;font-size:12px;line-height:1;color:#9D596E;transform-origin:50% 60%;
   animation:bar-heart var(--phi-cursor,1.27s) ease-out infinite}
 #tty-open .tty-reply-win{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 3%,#000 95%,transparent)}
-#tty-open .tty-reply-track{display:inline-block;font:700 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#B4436C;will-change:transform;
+#tty-open .tty-reply-track{display:inline-block;font:700 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#9D596E;will-change:transform;
   animation:bar-glow var(--phi-cursor,1.27s) ease-out infinite}
 /* lub-dub: two quick beats, then rest */
 @keyframes bar-heart{0%{transform:scale(1)}10%{transform:scale(1.35)}20%{transform:scale(1)}30%{transform:scale(1.22)}42%,100%{transform:scale(1)}}
-@keyframes bar-glow{0%{text-shadow:0 0 0 rgba(180,67,108,0)}10%{text-shadow:0 0 6px rgba(180,67,108,.55)}20%{text-shadow:0 0 1px rgba(180,67,108,.15)}
-  30%{text-shadow:0 0 5px rgba(180,67,108,.45)}42%,100%{text-shadow:0 0 0 rgba(180,67,108,0)}}
+@keyframes bar-glow{0%{text-shadow:0 0 0 rgba(157,89,110,0)}10%{text-shadow:0 0 6px rgba(157,89,110,.55)}20%{text-shadow:0 0 1px rgba(157,89,110,.15)}
+  30%{text-shadow:0 0 5px rgba(157,89,110,.45)}42%,100%{text-shadow:0 0 0 rgba(157,89,110,0)}}
 
 @media (prefers-reduced-motion:reduce){
   #tty-open .tty-pend,#tty-open .tty-heart,#tty-open .tty-reply-track{animation:none!important;opacity:1}

@@ -1,3 +1,4 @@
+/* Less pink (2026-10-27, Bonnie asked, Danny approved): pink-family colours here are derived from the previous palette by lesspink.py: OKLCH lightness and hue kept, chroma × φ⁻³ on light surfaces, × φ⁻¹ on accents and text; any text colour that then fell under φ⁴ : 1 is darkened along its own hue just enough to reach it. */
 /* Live chat page (ported from previews/chat-held/, Danny 12:01 AWST 24 Oct): travelling glow on the four footer dots left of / above the Simmie avatar
    (.tty-bar title-bar dots: three window dots + the .msg-led message-status LED). Danny 24 Oct 2026 10:42 AWST: a soft light walks dot 1->2->3->4, then back 4->3->2->1, looping
    (ping-pong, like a signal bouncing). It sits on a ::after halo, so each dot's own colour/animation underneath is untouched.
@@ -7,7 +8,7 @@
    golden-angle start (-8.723 x frac(k x 0.618), k = 61 -> -6.24 s); each dot's keyframe peaks at its own step (dot1 0, dot2 1/6 + 5/6,
    dot3 2/6 + 4/6, dot4 3/6 of the cycle). Fixed period (not weather-swept: that needs the shared phi-timing.js, left untouched).
    prefers-reduced-motion: no animation, halo hidden (dots static). */
-#tty{--dg-c:var(--accent,#B4436C);--dg-max:.9;--dg-t:8.723s;--dg-d:-6.24s}
+#tty{--dg-c:var(--accent,#9D596E);--dg-max:.9;--dg-t:8.723s;--dg-d:-6.24s}
 #tty .tty-bar > i:nth-of-type(1),#tty .tty-bar > i:nth-of-type(2),#tty .tty-bar > i:nth-of-type(3),#tty .tty-bar > .msg-led{position:relative}
 #tty .tty-bar > i:nth-of-type(1)::after,#tty .tty-bar > i:nth-of-type(2)::after,#tty .tty-bar > i:nth-of-type(3)::after,#tty .tty-bar > .msg-led::after{content:"";position:absolute;inset:-1px;border-radius:50%;pointer-events:none;opacity:0;
   background:color-mix(in srgb,var(--dg-c) 75%,transparent);

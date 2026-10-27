@@ -1,10 +1,11 @@
+/* Less pink (2026-10-27, Bonnie asked, Danny approved): pink-family colours here are derived from the previous palette by lesspink.py: OKLCH lightness and hue kept, chroma × φ⁻³ on light surfaces, × φ⁻¹ on accents and text; any text colour that then fell under φ⁴ : 1 is darkened along its own hue just enough to reach it. */
 /* Chat page fit for the SHARED header/footer (dash/css/dash-shared.css): positions only, no colour values of its own except
    the logo tint (the chat page's raspberry #B4436C) and the footer-light rainbow (Danny 03:19, see below).
    The dashboard pins its footer with position:fixed over a scrolling page; the chat page is a full-height column where only
    the messages scroll, so the same footer stack sits at the bottom of that column instead (same rows, same order). */
 html #app{padding-bottom:0}
 #screen-chat .dash-head{position:relative;top:auto;flex:none}
-#screen-chat .tb-logo-svg{display:block;flex:none;height:32px;width:auto;max-width:40vw;color:#B4436C;fill:currentColor}
+#screen-chat .tb-logo-svg{display:block;flex:none;height:32px;width:auto;max-width:40vw;color:#9D596E;fill:currentColor}
 @media (max-width:575px){ #screen-chat .tb-logo-svg{height:26px} }
 #screen-chat .chat-foot{flex:none;position:relative;z-index:30;background:none;border:0;padding:0}
 html #app #screen-chat .il-foot{position:relative;bottom:auto;left:auto;right:auto}
@@ -17,7 +18,7 @@ html #app #screen-chat .wx-foot{position:relative;bottom:auto;left:auto;right:au
 /* chat page colour roles for the shared header (Danny 03:10: the chat page's colours must not change): the header keeps the
    chat header's blush bar + dotted pink edge, Lock keeps its plum-on-line look, the sub-line keeps its muted colour */
 html #app #screen-chat .dash-head,html #app #screen-chat .dash-head .topbar,html #app #screen-chat .dash-head .wx-hud,html #app #screen-chat .dash-head .masthead{background:var(--blush)}
-html #app #screen-chat .dash-head{border-bottom:3px dotted #E58AA6;box-shadow:none}
+html #app #screen-chat .dash-head{border-bottom:3px dotted #D097A7;box-shadow:none}
 html #app #screen-chat #lock-btn.lockbtn{color:var(--heading);background:transparent;border:2px solid var(--line)}
 html #app #screen-chat #status{color:var(--muted)}
 html #app #screen-chat #app-foot .container{color:var(--muted)}
@@ -71,9 +72,9 @@ html #app #screen-chat .tty-form:not([data-mode="key"]) .tty-in::placeholder{col
    LIGHT simmie> bar the amber prompt was 1.7:1 and the grey code 5.2:1, so here they take a deep amber-brown and plum-grey (the
    dashboard's dark tty keeps its bright amber). Dad's name on sand 6.4 -> 7.0:1; muted grey (times, day lines) via --muted in chat.css. */
 html #app #wx-foot .tty-p,html #app #wx-foot .tk-n{color:#68471C}
-html #app #wx-foot .tk-p{color:#4F4049}
+html #app #wx-foot .tk-p{color:#4B4247}
 html #app .msg.dad .sender{color:#0E5667}
-html #app .msg .meta,html #app .day{color:#4F4049}
+html #app .msg .meta,html #app .day{color:#4B4247}
 /* Rule phi tap target: --tap = S x PHI^-4, never below WCAG 2.5.5's 44 px, touch screens only. The shared header (#dash-head), the
    footer line (#app-foot) and the simmie> bar (#wx-foot) keep their silhouette and the password screen is untouched. */
 :root{--tap:max(44px, calc(min(100vw, 100vh) / (1.6180339887 * 1.6180339887 * 1.6180339887 * 1.6180339887)))}   /* phi: PHI^-4; cite: WCAG 2.5.5 */
